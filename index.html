@@ -14,7 +14,6 @@
 <!-- LOGIN -->
 <div class="lbg" id="loginBg">
   <div class="lbox">
-    <!-- LOGO: D-portapapeles -->
     <svg width="52" height="52" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-bottom:16px">
       <rect width="52" height="52" rx="12" fill="#1F3A2A"/>
       <rect x="14" y="9" width="24" height="34" rx="3" fill="#DCE3D2" opacity="0.15" stroke="#DCE3D2" stroke-width="1.5"/>
@@ -38,8 +37,8 @@
 
 <!-- APP -->
 <div class="topbar">
-  <div class="brand">
-    <button id="menuBtn" onclick="toggleSidebar()" style="display:none;background:none;border:none;cursor:pointer;padding:4px;color:var(--text2)">
+  <div class="brand" onclick="volverInicio()" style="cursor:pointer" title="Inicio">
+    <button id="menuBtn" onclick="event.stopPropagation();toggleSidebar()" style="display:none;background:none;border:none;cursor:pointer;padding:4px;color:var(--text2)">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
     </button>
     <svg width="28" height="28" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -60,9 +59,10 @@
   <div class="sync-wrap"><div class="dot ing" id="syncDot"></div><span id="syncLabel">Conectando...</span></div>
   <div style="display:flex;gap:6px;align-items:center">
     <button class="dark-toggle" onclick="toggleDark()" id="darkBtn" title="Modo oscuro">🌙</button>
+    <button class="tbtn" onclick="toggleCalendar()" title="Calendario">📅 Calendario</button>
     <button class="tbtn" onclick="exportar()">⬇ Exportar</button>
     <button class="tbtn" onclick="document.getElementById('impFile').click()">⬆ Importar</button>
-    <input type="file" id="impFile" style="display:none" accept=".json" onchange="importar(event)">
+    <input type="file" id="impFile" style="display:none" accept=".json,.csv" onchange="importar(event)">
     <button class="tbtn" onclick="window.print()">🖨 Imprimir</button>
     <button class="tbtn" onclick="cerrarSesion()">Cerrar sesión</button>
   </div>
@@ -103,6 +103,10 @@
   <button class="bn-btn" onclick="modalNuevo()">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
     Nuevo
+  </button>
+  <button class="bn-btn" onclick="toggleCalendar()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    Calendario
   </button>
   <button class="bn-btn" onclick="exportar()">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
