@@ -27,8 +27,11 @@
     </svg>
     <h2>DocuSalud</h2>
     <p>Historias clínicas · Acceso privado</p>
-    <input type="password" id="loginPass" placeholder="Contraseña" onkeydown="if(event.key==='Enter')checkLogin()">
-    <button onclick="checkLogin()">Entrar</button>
+    <form onsubmit="event.preventDefault(); checkLogin()">
+      <input type="email" id="loginEmail" placeholder="Correo electrónico" autofocus autocomplete="username" oninput="document.getElementById('loginErr').textContent=''">
+      <input type="password" id="loginPass" placeholder="Contraseña" autocomplete="current-password" oninput="document.getElementById('loginErr').textContent=''">
+      <button type="submit" id="loginBtn">Entrar</button>
+    </form>
     <div class="lerr" id="loginErr"></div>
   </div>
 </div>
@@ -61,6 +64,7 @@
     <button class="tbtn" onclick="document.getElementById('impFile').click()">⬆ Importar</button>
     <input type="file" id="impFile" style="display:none" accept=".json" onchange="importar(event)">
     <button class="tbtn" onclick="window.print()">🖨 Imprimir</button>
+    <button class="tbtn" onclick="cerrarSesion()">Cerrar sesión</button>
   </div>
 </div>
 
