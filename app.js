@@ -1,5 +1,6 @@
 import { collection, onSnapshot, doc, setDoc, addDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import { db } from "./firebase-config.js";
+import { signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { db, auth } from "./firebase-config.js";
 
 const UPPER=[18,17,16,15,14,13,12,11,21,22,23,24,25,26,27,28];
 const LOWER=[48,47,46,45,44,43,42,41,31,32,33,34,35,36,37,38];
@@ -18,19 +19,36 @@ window.toggleDark=function(){
 const savedTheme=localStorage.getItem('ds_theme');
 if(savedTheme==='dark'){document.documentElement.setAttribute('data-theme','dark');document.getElementById('darkBtn').textContent='☀️';}
 
-// LOGIN
-window.checkLogin=function(){
-  const pass=document.getElementById('loginPass').value;
-  if(pass==='ds-temp-2026-04'){
-    document.getElementById('loginBg').style.display='none';
-    sessionStorage.setItem('ds_auth','1');
-  } else {
-    document.getElementById('loginErr').textContent='Contraseña incorrecta';
-    document.getElementById('loginPass').value='';
-    setTimeout(()=>document.getElementById('loginErr').textContent='',2000);
+// AUTH — Firebase Authentication (Tasks 3.1.1 + 3.1.2)
+// Login state is driven by onAuthStateChanged. No sessionStorage gate.
+// Accounts are provisioned manually via Firebase Console (Decision B parking-lot default).
+onAuthStateChanged(auth, user => {
+  document.getElementById('loginBg').style.display = user ? 'none' : 'flex';
+});
+
+window.checkLogin = async function(){
+  const email = document.getElementById('loginEmail').value.trim();
+  const pass = document.getElementById('loginPass').value;
+  const btn = document.getElementById('loginBtn');
+  const err = document.getElementById('loginErr');
+  err.textContent = '';
+  btn.disabled = true;
+  btn.textContent = 'Verificando…';
+  try {
+    await signInWithEmailAndPassword(auth, email, pass);
+    // onAuthStateChanged hides the login overlay; nothing else to do here.
+  } catch (e) {
+    err.textContent = 'Credenciales inválidas';
+    document.getElementById('loginPass').value = '';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Entrar';
   }
 }
-if(sessionStorage.getItem('ds_auth')==='1') document.getElementById('loginBg').style.display='none';
+
+window.cerrarSesion = async function(){
+  try { await signOut(auth); } catch (e) { toast('No se pudo cerrar sesión'); }
+}
 
 // MOBILE
 window.toggleSidebar=function(){document.getElementById('sidebar').classList.toggle('open')}
