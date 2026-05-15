@@ -1,4 +1,3 @@
-<!-- test: verificar ciclo de desarrollo - Maurizio -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -312,8 +311,9 @@ body {
   border: var(--border-default); border-radius: 6px; background: var(--surface2); color: var(--text); outline: none;
 }
 .ptbl input:focus,.otbl input:focus { border-color: var(--forest); }
-.bdel { font-size: 11px; color: var(--text3); background: none; border: none; cursor: pointer; padding: 2px 6px; border-radius: 4px; }
+.bdel { font-size: 11px; color: var(--text3); background: none; border: none; cursor: pointer; padding: 2px 6px; border-radius: 4px; transition: color 0.12s var(--ease, ease); }
 .bdel:hover { color: var(--terra); }
+.bdel.bedit:hover { color: var(--forest); }
 
 /* ── CONSULTAS ──────────────────────────────────────────────────────── */
 .cc { background: var(--surface); border: var(--border-default); border-radius: var(--r); padding: 12px 14px; margin-bottom: 8px; transition: border 0.1s; }
@@ -433,6 +433,78 @@ body {
 .cal-row { cursor: pointer; }
 .cal-row:hover { border-color: var(--border2); background: var(--surface2); }
 
+/* Calendar view toggle */
+.cal-view-toggle { display: inline-flex; background: var(--surface2); border: var(--border-default); border-radius: var(--r); padding: 2px; gap: 0; }
+.cal-view-btn { padding: 6px 14px; font-size: 12px; font-family: 'DM Sans', sans-serif; font-weight: 500; border: none; background: transparent; color: var(--text2); border-radius: 6px; cursor: pointer; transition: all 0.15s var(--ease, ease); letter-spacing: 0.02em; }
+.cal-view-btn:hover { color: var(--text); }
+.cal-view-btn.on { background: var(--surface); color: var(--forest); box-shadow: 0 1px 2px rgba(31,58,42,0.06); }
+
+/* Calendar panel keeps grid airy */
+.cal-panel { padding: 20px 24px !important; overflow: auto; }
+
+/* Month grid */
+.mes-weekrow { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 8px; }
+.mes-weekday { font-family: 'DM Sans', sans-serif; font-size: 10px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text3); text-align: center; padding: 6px 0; }
+.mes-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+.mes-cell {
+  background: var(--surface);
+  border: var(--border-default);
+  border-radius: var(--r);
+  min-height: 92px;
+  padding: 8px 9px;
+  cursor: pointer;
+  transition: border-color 0.15s var(--ease, ease), background 0.15s var(--ease, ease), transform 0.15s var(--ease, ease), box-shadow 0.15s var(--ease, ease);
+  display: flex; flex-direction: column; gap: 3px;
+  position: relative;
+  overflow: hidden;
+}
+.mes-cell:hover { border-color: var(--border2); transform: translateY(-1px); box-shadow: 0 2px 6px rgba(31,58,42,0.06); }
+.mes-cell.off { background: transparent; border: none; cursor: default; pointer-events: none; }
+.mes-cell.wknd { background: var(--bg); }
+.mes-cell.d1 { background: color-mix(in srgb, var(--mist) 35%, var(--surface) 65%); }
+.mes-cell.d2 { background: color-mix(in srgb, var(--mist) 60%, var(--surface) 40%); }
+.mes-cell.d3 { background: color-mix(in srgb, var(--mist) 85%, var(--surface) 15%); border-color: var(--accent-border); }
+.mes-cell.hoy { box-shadow: inset 0 0 0 2px var(--forest); }
+.mes-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px; }
+.mes-num { font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; color: var(--text); line-height: 1; }
+.mes-cell.hoy .mes-num { color: var(--forest); font-weight: 700; }
+.mes-badge { font-family: 'DM Sans', sans-serif; font-size: 10px; font-weight: 600; color: var(--forest); background: var(--surface); border: 0.5px solid var(--accent-border); border-radius: 20px; padding: 1px 7px; min-width: 18px; text-align: center; line-height: 1.4; }
+.mes-cell.d3 .mes-badge { background: var(--forest); color: var(--bone); border-color: var(--forest); }
+.mes-item { font-size: 10.5px; line-height: 1.3; color: var(--text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mes-item-h { color: var(--forest); font-weight: 500; font-variant-numeric: tabular-nums; }
+.mes-item-n { color: var(--text); }
+.mes-more { font-size: 10px; color: var(--text3); margin-top: auto; font-style: italic; }
+
+/* Month grid — fallback if color-mix not supported */
+@supports not (background: color-mix(in srgb, red, blue)) {
+  .mes-cell.d1 { background: #F0EFE4; }
+  .mes-cell.d2 { background: #E6E6D5; }
+  .mes-cell.d3 { background: var(--mist); }
+}
+
+/* Dark mode tints */
+[data-theme="dark"] .mes-cell { background: var(--surface); }
+[data-theme="dark"] .mes-cell.wknd { background: var(--bg); }
+[data-theme="dark"] .mes-cell.d1 { background: rgba(47,93,58,0.12); }
+[data-theme="dark"] .mes-cell.d2 { background: rgba(47,93,58,0.22); }
+[data-theme="dark"] .mes-cell.d3 { background: rgba(47,93,58,0.35); }
+[data-theme="dark"] .mes-cell.hoy { box-shadow: inset 0 0 0 2px var(--mist); }
+[data-theme="dark"] .mes-num { color: var(--text); }
+[data-theme="dark"] .mes-cell.hoy .mes-num { color: var(--mist); }
+[data-theme="dark"] .mes-badge { background: var(--surface2); color: var(--mist); border-color: var(--border2); }
+[data-theme="dark"] .mes-cell.d3 .mes-badge { background: var(--mist); color: var(--forest); border-color: var(--mist); }
+[data-theme="dark"] .cal-view-btn.on { background: var(--surface2); color: var(--mist); }
+
+/* Mobile: compact cells */
+@media (max-width: 720px) {
+  .cal-panel { padding: 12px !important; }
+  .mes-cell { min-height: 68px; padding: 6px 7px; }
+  .mes-item, .mes-more { display: none; }
+  .mes-num { font-size: 12px; }
+  .mes-badge { font-size: 9px; padding: 0 6px; }
+  .cal-view-btn { padding: 5px 10px; font-size: 11px; }
+}
+
 /* Odontograma controls (3.4.1) */
 .odonto-controls { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 14px; padding: 8px 12px; background: var(--surface2); border-radius: var(--r); font-size: 12px; }
 .ctl-lbl { font-size: 12px; color: var(--text2); display: flex; align-items: center; gap: 6px; }
@@ -497,7 +569,6 @@ mark { background: var(--mist); color: var(--forest); padding: 0 2px; border-rad
 [data-theme="dark"] .firma-canvas { background: var(--surface2); }
 [data-theme="dark"] .rec-tag-tratamiento { background: rgba(47,93,58,0.25); color: #a8d4af; }
 [data-theme="dark"] .rec-tag-acceso { background: rgba(74,107,124,0.25); color: #92b6c4; }
-[data-theme="dark"] .rec-tag-edicion { background: rgba(201,169,97,0.25); color: #d6c19a; }
 
 
 /* ── POLISH: UX & aesthetic improvements (May 14, 2026) ─────────────────── */
@@ -722,9 +793,10 @@ body:has(.dot.ing) .topbar .brand svg { animation: logoBreathe 1.5s var(--ease) 
 <div class="toast" id="toast"></div>
 
 <script type="module">
-import { collection, onSnapshot, doc, setDoc, addDoc, deleteDoc, query, where, getDocs, getFirestore } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import { signInWithEmailAndPassword, onAuthStateChanged, signOut, getAuth } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, onSnapshot, doc, setDoc, addDoc, deleteDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
 const firebaseConfig = {
   apiKey: "AIzaSyCn1ELv-CLd2-C-agYGVt7dHeYlrw7T-_M",
   authDomain: "docusalud-4b215.firebaseapp.com",
@@ -737,6 +809,11 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
+
+{ app, db, auth };
+
+
+
 
 // ─── CONSTANTS ────────────────────────────────────────────────────────────
 const UPPER=[18,17,16,15,14,13,12,11,21,22,23,24,25,26,27,28];
@@ -794,6 +871,7 @@ const SPECIALTY_SCHEMAS={
 let pacientes=[],idActual=null,tabActual='datos',estadoDiente='caries',modalFn=null;
 let viewActual='paciente';
 let calendarDate=new Date();
+let calendarView='mes';
 let consultasIndex=new Map();
 let odontoMode=null;
 let surfaceMode=false;
@@ -1159,15 +1237,113 @@ window.abrirPacienteConsultas=function(id){
 };
 
 // ─── CALENDAR (3.3.4) ─────────────────────────────────────────────────────
+const MESES_LARGO=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const WEEKDAYS_CORTO=['Lu','Ma','Mi','Ju','Vi','Sá','Do'];
+
 window.toggleCalendar=function(){
   if(viewActual==='calendario'){
     viewActual='paciente';
     if(idActual)renderPaciente();else renderEmpty();
   }else{
-    viewActual='calendario';calendarDate=new Date();renderCalendar();
+    viewActual='calendario';calendarDate=new Date();calendarView='mes';renderCalendar();
   }
 }
 function renderCalendar(){
+  if(calendarView==='dia')renderCalendarDia();
+  else renderCalendarMes();
+}
+function consultasByDayInMonth(year,month0){
+  const map=new Map();
+  for(const p of pacientes){
+    for(const c of(p.consultas||[])){
+      if(!c.fecha)continue;
+      const parts=c.fecha.split('-');
+      if(parts.length!==3)continue;
+      const cy=parseInt(parts[0]);const cm=parseInt(parts[1]);
+      if(cy===year&&cm===month0+1){
+        if(!map.has(c.fecha))map.set(c.fecha,[]);
+        map.get(c.fecha).push({...c,patientName:p.nombre,patientId:p.id});
+      }
+    }
+  }
+  // Sort each day's consultas by hour
+  for(const arr of map.values())arr.sort((a,b)=>(a.hora||'00:00').localeCompare(b.hora||'00:00'));
+  return map;
+}
+function renderCalendarMes(){
+  const year=calendarDate.getFullYear();
+  const month0=calendarDate.getMonth();
+  const mes=MESES_LARGO[month0];
+  const firstDay=new Date(year,month0,1);
+  const lastDay=new Date(year,month0+1,0);
+  const daysInMonth=lastDay.getDate();
+  // shift Sunday(0) → 6, Monday(1) → 0
+  let startWeekday=(firstDay.getDay()+6)%7;
+  const totalCells=Math.ceil((startWeekday+daysInMonth)/7)*7;
+  const byDay=consultasByDayInMonth(year,month0);
+  const today=hoy();
+
+  // Total this month for header
+  let totalMes=0;
+  for(const arr of byDay.values())totalMes+=arr.length;
+
+  let gridHtml='';
+  for(let i=0;i<totalCells;i++){
+    const dayNum=i-startWeekday+1;
+    if(dayNum<1||dayNum>daysInMonth){
+      gridHtml+=`<div class="mes-cell off"></div>`;
+      continue;
+    }
+    const ds=`${year}-${String(month0+1).padStart(2,'0')}-${String(dayNum).padStart(2,'0')}`;
+    const consultas=byDay.get(ds)||[];
+    const count=consultas.length;
+    const density=count===0?'':count<=2?'d1':count<=4?'d2':'d3';
+    const isToday=ds===today;
+    const dow=(i%7); // 0=Mon ... 5=Sat, 6=Sun
+    const weekend=dow>=5?'wknd':'';
+    const preview=consultas.slice(0,2).map(c=>{
+      const firstName=(c.patientName||'').split(' ')[0]||'';
+      const h=(c.hora||'').slice(0,5);
+      return `<div class="mes-item"><span class="mes-item-h">${e(h||'--:--')}</span> <span class="mes-item-n">${e(firstName)}</span></div>`;
+    }).join('');
+    const more=count>2?`<div class="mes-more">+${count-2} más</div>`:'';
+    gridHtml+=`<div class="mes-cell ${density} ${isToday?'hoy':''} ${weekend}" onclick="calVerDia('${ds}')" title="${count} consulta${count===1?'':'s'}">
+      <div class="mes-head">
+        <span class="mes-num">${dayNum}</span>
+        ${count>0?`<span class="mes-badge">${count}</span>`:''}
+      </div>
+      ${preview}${more}
+    </div>`;
+  }
+
+  document.getElementById('mainArea').innerHTML=`
+    <div class="phdr">
+      <div style="flex:1">
+        <div class="phn">Calendario</div>
+        <div class="phm">${mes} de ${year}${totalMes>0?` · ${totalMes} consulta${totalMes===1?'':'s'} este mes`:''}</div>
+      </div>
+      <button class="ba" onclick="toggleCalendar()">Cerrar calendario</button>
+    </div>
+    <div class="cal-nav">
+      <div class="cal-view-toggle">
+        <button class="cal-view-btn on" onclick="calVerMes()">Mes</button>
+        <button class="cal-view-btn" onclick="calVerDia('${today}')">Día</button>
+      </div>
+      <div style="flex:1"></div>
+      <button class="ba" onclick="calMesPrev()" title="Mes anterior">‹</button>
+      <button class="ba" onclick="calToday()">Hoy</button>
+      <button class="ba" onclick="calMesNext()" title="Mes siguiente">›</button>
+    </div>
+    <div class="panel cal-panel">
+      <div class="mes-weekrow">
+        ${WEEKDAYS_CORTO.map(w=>`<div class="mes-weekday">${w}</div>`).join('')}
+      </div>
+      <div class="mes-grid">
+        ${gridHtml}
+      </div>
+    </div>`;
+}
+function renderCalendarDia(){
   const dateStr=calendarDate.toISOString().split('T')[0];
   const consultas=[];
   for(const p of pacientes){
@@ -1176,43 +1352,64 @@ function renderCalendar(){
     }
   }
   consultas.sort((a,b)=>(a.hora||'00:00').localeCompare(b.hora||'00:00'));
-  const M=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
   const dia=calendarDate.getDate();
-  const mes=M[calendarDate.getMonth()];
+  const mes=MESES_LARGO[calendarDate.getMonth()];
   const anio=calendarDate.getFullYear();
   const isToday=dateStr===hoy();
   document.getElementById('mainArea').innerHTML=`
     <div class="phdr">
       <div style="flex:1">
         <div class="phn">Calendario</div>
-        <div class="phm">${dia} de ${mes} de ${anio}${isToday?' · hoy':''}</div>
+        <div class="phm">${dia} de ${mes} de ${anio}${isToday?' · hoy':''}${consultas.length>0?` · ${consultas.length} consulta${consultas.length===1?'':'s'}`:''}</div>
       </div>
       <button class="ba" onclick="toggleCalendar()">Cerrar calendario</button>
     </div>
     <div class="cal-nav">
-      <button class="ba" onclick="calPrev()">‹ Día anterior</button>
+      <div class="cal-view-toggle">
+        <button class="cal-view-btn" onclick="calVerMes()">Mes</button>
+        <button class="cal-view-btn on" onclick="calVerDia('${dateStr}')">Día</button>
+      </div>
+      <div style="flex:1"></div>
+      <button class="ba" onclick="calPrev()" title="Día anterior">‹</button>
       <button class="ba" onclick="calToday()">Hoy</button>
-      <button class="ba" onclick="calNext()">Día siguiente ›</button>
+      <button class="ba" onclick="calNext()" title="Día siguiente">›</button>
     </div>
     <div class="panel">
       ${consultas.length===0?
-        `<div class="empty"><h3>Sin consultas</h3><p>No hay consultas agendadas para este día.</p></div>`:
+        `<div class="empty"><h3>Sin consultas</h3><p>No hay consultas agendadas para este día.</p><button class="ba" style="margin-top:14px" onclick="calVerMes()">← Volver al mes</button></div>`:
         `<div>${consultas.map(c=>`
-          <div class="cc cal-row" onclick="abrirPacienteConsultas('${c.patientId}')">
+          <div class="cc cal-row">
             <div style="display:flex;justify-content:space-between;align-items:center;gap:14px">
               <div class="cal-time">${e(c.hora||'--:--')}</div>
-              <div style="flex:1;min-width:0">
+              <div style="flex:1;min-width:0;cursor:pointer" onclick="abrirPacienteConsultas('${c.patientId}')">
                 <div class="cct">${e(c.patientName)}</div>
                 <div class="ccn" style="margin-top:2px">${e(c.tratamiento||'')}</div>
               </div>
               ${c.costo?`<span class="ccc">$${parseFloat(c.costo).toLocaleString()}</span>`:''}
+              <button class="bdel bedit" onclick="event.stopPropagation();editConsFromCalendar('${c.patientId}','${c.id}')" title="Editar consulta">✎</button>
             </div>
           </div>`).join('')}
         </div>`}
     </div>`;
 }
+window.calVerMes=function(){calendarView='mes';renderCalendar();};
+window.calVerDia=function(ds){
+  if(ds){
+    const parts=ds.split('-').map(Number);
+    calendarDate=new Date(parts[0],parts[1]-1,parts[2]);
+  }
+  calendarView='dia';renderCalendar();
+};
+window.editConsFromCalendar=function(pid,cid){
+  viewActual='paciente';idActual=pid;tabActual='cons';
+  logAccess(pid);
+  renderLista();renderPaciente();
+  setTimeout(()=>window.editCons(cid),60);
+};
 window.calPrev=function(){calendarDate.setDate(calendarDate.getDate()-1);renderCalendar();};
 window.calNext=function(){calendarDate.setDate(calendarDate.getDate()+1);renderCalendar();};
+window.calMesPrev=function(){calendarDate=new Date(calendarDate.getFullYear(),calendarDate.getMonth()-1,1);renderCalendar();};
+window.calMesNext=function(){calendarDate=new Date(calendarDate.getFullYear(),calendarDate.getMonth()+1,1);renderCalendar();};
 window.calToday=function(){calendarDate=new Date();renderCalendar();};
 
 // ─── PATIENT VIEW ─────────────────────────────────────────────────────────
@@ -1908,7 +2105,8 @@ function renderCons(){
         </div>
         <div style="display:flex;gap:6px;align-items:center">
           ${c.costo?`<span class="ccc">$${parseFloat(c.costo).toLocaleString()}</span>`:''}
-          <button class="bdel" onclick="delCons('${c.id}')">✕</button>
+          <button class="bdel bedit" onclick="editCons('${c.id}')" title="Editar consulta">✎</button>
+          <button class="bdel" onclick="delCons('${c.id}')" title="Eliminar consulta">✕</button>
         </div>
       </div>
       ${c.notas?`<div class="ccn">${e(c.notas)}</div>`:''}
@@ -1944,16 +2142,54 @@ window.modalCons=function(){
       await guardar(p);cerrarModal();renderLista();renderCons();toast('Consulta registrada');
     });
 }
-window.checkConflict=function(){
+window.editCons=function(cid){
+  const p=gp();if(!p)return;
+  const c=(p.consultas||[]).find(x=>x.id===cid);if(!c){toast('Consulta no encontrada');return;}
+  const fechaVal=e(c.fecha||'');
+  const horaVal=e(c.hora||'');
+  const costoVal=e(c.costo||'');
+  const trVal=e(c.tratamiento||'');
+  const diVal=e(c.dientes||'');
+  const noVal=e(c.notas||'');
+  abrirModal('Editar consulta',
+    `<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="mf"><label>Fecha</label><input type="date" id="m_fe" value="${fechaVal}" oninput="checkConflict('${cid}')"></div>
+      <div class="mf"><label>Hora</label><input type="time" id="m_ho" value="${horaVal}" oninput="checkConflict('${cid}')"></div>
+    </div>
+    <div class="mf" id="conflict-row" style="display:none"><div style="font-size:12px;color:var(--terra);padding:8px 10px;background:var(--danger-light);border-radius:6px" id="conflict-msg"></div></div>
+    <div class="mf"><label>Costo ($)</label><input type="number" id="m_co" placeholder="0" value="${costoVal}"></div>
+    <div class="mf"><label>Tratamiento realizado *</label><input id="m_tr" placeholder="Limpieza, extracción, etc." value="${trVal}"></div>
+    <div class="mf"><label>Dientes involucrados</label><input id="m_di" placeholder="Ej: 16, 17" value="${diVal}"></div>
+    <div class="mf"><label>Notas clínicas</label><textarea id="m_no" placeholder="Observaciones…">${noVal}</textarea></div>`,
+    async()=>{
+      const tr=g('m_tr').trim();
+      if(!tr){alert('El tratamiento es obligatorio.');return;}
+      const fecha=g('m_fe');const hora=g('m_ho');
+      if(fecha&&hora){
+        const conflict=consultasIndex.get(fecha+' '+hora);
+        if(conflict&&!(conflict.patientId===idActual&&conflict.consultaId===cid)){
+          if(!confirm(`Ya hay una consulta a las ${hora} con ${conflict.patientName}. ¿Guardar de todos modos?`))return;
+        }
+      }
+      const now=gp();if(!now)return;
+      const idx=(now.consultas||[]).findIndex(x=>x.id===cid);
+      if(idx<0){toast('Consulta no encontrada');return;}
+      now.consultas[idx]={...now.consultas[idx],fecha,hora,tratamiento:tr,notas:g('m_no'),costo:g('m_co'),dientes:g('m_di')};
+      await guardar(now);cerrarModal();renderLista();renderCons();toast('Consulta actualizada');
+    });
+}
+window.checkConflict=function(currentCid){
   const fecha=g('m_fe');const hora=g('m_ho');
   const row=document.getElementById('conflict-row');
   const msg=document.getElementById('conflict-msg');
   if(fecha&&hora){
     const c=consultasIndex.get(fecha+' '+hora);
-    if(c&&c.patientId!==idActual){
-      row.style.display='block';
-      msg.textContent=`Ya hay una consulta a esa hora con ${c.patientName}.`;
-      return;
+    if(c&&!(c.patientId===idActual&&(currentCid?c.consultaId===currentCid:false))){
+      if(c.patientId!==idActual||c.consultaId!==currentCid){
+        row.style.display='block';
+        msg.textContent=`Ya hay una consulta a esa hora con ${c.patientName}.`;
+        return;
+      }
     }
   }
   row.style.display='none';
