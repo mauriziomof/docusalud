@@ -499,6 +499,109 @@ mark { background: var(--mist); color: var(--forest); padding: 0 2px; border-rad
 [data-theme="dark"] .rec-tag-acceso { background: rgba(74,107,124,0.25); color: #92b6c4; }
 [data-theme="dark"] .rec-tag-edicion { background: rgba(201,169,97,0.25); color: #d6c19a; }
 
+
+/* ── POLISH: UX & aesthetic improvements (May 14, 2026) ─────────────────── */
+
+/* Custom easing curve — gives transitions physical weight */
+:root { --ease: cubic-bezier(0.4, 0, 0.2, 1); }
+
+/* Topbar tbtn — icon + label, label hides on narrow screens */
+.tbtn { display: inline-flex; align-items: center; gap: 6px; }
+.tbtn .ico { width: 14px; height: 14px; flex-shrink: 0; }
+.tbtn .lbl { font-size: 11px; letter-spacing: 0.02em; }
+@media (max-width: 900px) {
+  .tbtn .lbl { display: none; }
+  .tbtn { padding: 6px 8px; }
+}
+
+/* Logo subtle pulse while syncing (matches the sync-dot rhythm) */
+@keyframes logoBreathe { 0%,100% { opacity: 1; } 50% { opacity: 0.78; } }
+.topbar .brand svg { transition: opacity 0.3s var(--ease); }
+.dot.ing ~ * .topbar .brand svg,
+body:has(.dot.ing) .topbar .brand svg { animation: logoBreathe 1.5s var(--ease) infinite; }
+
+/* Tab fade transition */
+.panel { transition: opacity 0.15s var(--ease); }
+.panel.changing { opacity: 0.45; }
+
+/* Tooth hover — slightly more expressive lift */
+.tooth { transition: transform 0.12s var(--ease), border-color 0.12s var(--ease), box-shadow 0.12s var(--ease); }
+.tooth:hover { transform: translateY(-2px); box-shadow: 0 2px 4px rgba(31,58,42,0.08); }
+
+/* Patient list hover — soft sage tint */
+.pi { transition: background 0.12s var(--ease), border-color 0.12s var(--ease); }
+.pi:hover { background: rgba(31,58,42,0.04); }
+.pi.on { background: var(--mist); border-color: var(--accent-border); }
+[data-theme="dark"] .pi:hover { background: rgba(220,227,210,0.05); }
+[data-theme="dark"] .pi.on { background: rgba(31,58,42,0.4); }
+
+/* Soft success flash on inputs after save */
+@keyframes savedFlash { 0% { border-color: #4CAF7D; } 100% { border-color: var(--border); } }
+.f input.just-saved, .f select.just-saved, .f textarea.just-saved { animation: savedFlash 1.2s var(--ease); }
+
+/* Empty state — breathing logo, more inviting */
+.empty { gap: 16px; }
+.empty .empty-logo { opacity: 0.30; transition: opacity 0.6s var(--ease); animation: emptyBreathe 4s var(--ease) infinite; }
+@keyframes emptyBreathe { 0%,100% { opacity: 0.30; } 50% { opacity: 0.18; } }
+.empty h3 { font-family: 'Fraunces', serif; font-size: 24px; font-weight: 300; }
+.empty p { font-family: 'Fraunces', serif; font-size: 14px; font-style: italic; color: var(--text2); }
+
+/* Patient header — Fraunces for the name (editorial moment) */
+.phn { font-family: 'Fraunces', serif; font-size: 19px; font-weight: 400; letter-spacing: -0.01em; }
+
+/* Cards — more generous padding on desktop */
+@media (min-width: 768px) {
+  .card { padding: 20px 22px; margin-bottom: 16px; }
+  .ct-row { margin-bottom: 16px; }
+}
+
+/* "Consultas de hoy" widget — stronger hierarchy */
+.today-card, .today-card-empty { border-left: 3px solid var(--forest); }
+.today-card .ct, .today-card-empty .ct { color: var(--sage); }
+
+/* Undo toast — distinct from regular toast (terra-tinted to match "destructive" semantics) */
+.undo-toast {
+  position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+  background: var(--charcoal); color: var(--cream);
+  padding: 10px 14px 10px 18px; border-radius: var(--rl);
+  font-size: 12px; letter-spacing: 0.02em;
+  display: flex; align-items: center; gap: 10px;
+  z-index: 1000; max-width: 90vw;
+  box-shadow: 0 4px 12px rgba(26,26,23,0.18);
+  animation: undoIn 0.2s var(--ease);
+}
+@keyframes undoIn { from { opacity: 0; transform: translate(-50%, 8px); } to { opacity: 1; transform: translate(-50%, 0); } }
+.undo-toast .undo-btn {
+  background: var(--brass); color: var(--charcoal);
+  border: none; padding: 5px 12px; border-radius: var(--r);
+  font-size: 11px; font-weight: 500; font-family: 'DM Sans', sans-serif;
+  cursor: pointer; letter-spacing: 0.04em; transition: opacity 0.12s var(--ease);
+}
+.undo-toast .undo-btn:hover { opacity: 0.85; }
+@media (max-width: 768px) {
+  .undo-toast { bottom: 70px; }
+}
+
+/* Form field focus glow — confirms attention */
+.f input:focus, .f select:focus, .f textarea:focus,
+.mf input:focus, .mf select:focus, .mf textarea:focus {
+  box-shadow: 0 0 0 2px rgba(31,58,42,0.10);
+}
+
+/* Save status — keep last text visible by default (don't go blank) */
+.save-status { font-style: italic; opacity: 0.85; }
+.save-status.saved { color: #4CAF7D; opacity: 1; }
+[data-theme="dark"] .save-status.saved { color: #5fc89b; }
+
+/* Mobile: scroll bottom-nav-aware padding on panel */
+@media (max-width: 768px) {
+  .topbar { gap: 4px; }
+  .sync-wrap { font-size: 10px; }
+}
+
+/* Signature canvas — slightly higher contrast in dark mode (was too dark to draw on) */
+[data-theme="dark"] .firma-canvas { background: #3a3a35; }
+
 </style>
 </head>
 <body>
@@ -550,13 +653,23 @@ mark { background: var(--mist); color: var(--forest); padding: 0 2px; border-rad
   </div>
   <div class="sync-wrap"><div class="dot ing" id="syncDot"></div><span id="syncLabel">Conectando...</span></div>
   <div style="display:flex;gap:6px;align-items:center">
-    <button class="dark-toggle" onclick="toggleDark()" id="darkBtn" title="Modo oscuro">🌙</button>
-    <button class="tbtn" onclick="toggleCalendar()" title="Calendario">📅 Calendario</button>
-    <button class="tbtn" onclick="exportar()">⬇ Exportar</button>
-    <button class="tbtn" onclick="document.getElementById('impFile').click()">⬆ Importar</button>
+    <button class="dark-toggle" onclick="toggleDark()" id="darkBtn" title="Modo oscuro" aria-label="Cambiar tema">🌙</button>
+    <button class="tbtn" onclick="toggleCalendar()" title="Calendario" aria-label="Calendario">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span class="lbl">Calendario</span>
+    </button>
+    <button class="tbtn" onclick="exportar()" title="Exportar" aria-label="Exportar">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span class="lbl">Exportar</span>
+    </button>
+    <button class="tbtn" onclick="document.getElementById('impFile').click()" title="Importar" aria-label="Importar">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg><span class="lbl">Importar</span>
+    </button>
     <input type="file" id="impFile" style="display:none" accept=".json,.csv" onchange="importar(event)">
-    <button class="tbtn" onclick="window.print()">🖨 Imprimir</button>
-    <button class="tbtn" onclick="cerrarSesion()">Cerrar sesión</button>
+    <button class="tbtn" onclick="window.print()" title="Imprimir" aria-label="Imprimir">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg><span class="lbl">Imprimir</span>
+    </button>
+    <button class="tbtn" onclick="cerrarSesion()" title="Cerrar sesión" aria-label="Cerrar sesión">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg><span class="lbl">Cerrar sesión</span>
+    </button>
   </div>
 </div>
 
@@ -702,8 +815,8 @@ if(savedTheme==='dark'){document.documentElement.setAttribute('data-theme','dark
 
 // ─── AUTH ─────────────────────────────────────────────────────────────────
 // TEMP: emergency-access bypass while Firebase Auth setup pending.
-// Remove this block + the ones in checkLogin/cerrarSesion once accounts
-// are provisioned in Firebase Console.
+// Anyone who types TEMP_BYPASS_PASS gets in; remove these three TEMP blocks
+// once accounts are provisioned in Firebase Console.
 const TEMP_BYPASS_PASS='ds-temp-2026-04';
 function isTempBypass(){return sessionStorage.getItem('ds_temp_bypass')==='1'}
 onAuthStateChanged(auth, user => {
@@ -720,8 +833,7 @@ window.checkLogin = async function(){
   const btn=document.getElementById('loginBtn');
   const err=document.getElementById('loginErr');
   err.textContent='';
-  // TEMP: emergency-access bypass — accept ds-temp-2026-04 regardless of email.
-  // Remove this block once Firebase Console accounts are set up.
+  // TEMP: bypass branch.
   if(pass===TEMP_BYPASS_PASS){
     sessionStorage.setItem('ds_temp_bypass','1');
     document.getElementById('loginBg').style.display='none';
@@ -760,6 +872,9 @@ checkMobile();
 
 // ─── UTILS ────────────────────────────────────────────────────────────────
 function ss(state,label){const d=document.getElementById('syncDot');const l=document.getElementById('syncLabel');if(d)d.className='dot '+state;if(l)l.textContent=label}
+// Returns sync indicator to resting state "Sincronizado" so transient "Guardado" doesn't stick around.
+let _ssRestTimer=null;
+function ssRest(){if(_ssRestTimer)clearTimeout(_ssRestTimer);_ssRestTimer=setTimeout(()=>ss('ok','Sincronizado'),2500);}
 function gp(){return pacientes.find(p=>p.id===idActual)}
 function g(id){const el=document.getElementById(id);return el?el.value:''}
 function e(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
@@ -832,7 +947,7 @@ function rerenderCurrent(){
 async function guardar(p){
   ss('ing','Guardando...');
   const{id,...data}=p;
-  try{await setDoc(doc(db,'pacientes',id),data);ss('ok','Guardado');}
+  try{await setDoc(doc(db,'pacientes',id),data);ss('ok','Guardado');ssRest();}
   catch(err){ss('err','Error');throw err;}
 }
 async function crear(data){
@@ -1011,9 +1126,9 @@ function renderEmpty(){
   todayConsultas.sort((a,b)=>(a.hora||'00:00').localeCompare(b.hora||'00:00'));
   let html=`<div class="panel"><div class="landing-grid">
     <div class="empty">
-      <div style="opacity:.25">${logoSVG(52)}</div>
+      <div class="empty-logo">${logoSVG(52)}</div>
       <h3>DocuSalud</h3>
-      <p>Selecciona un paciente o crea uno nuevo.</p>
+      <p>${pacientes.length===0?'Tu consultorio empieza aquí.':'Selecciona un paciente o crea uno nuevo.'}</p>
     </div>`;
   if(todayConsultas.length>0){
     html+=`<div class="card today-card">
@@ -1244,12 +1359,18 @@ window.autosaveDatos=async function(){
   },'ss-datos');
 }
 window.eliminarP=async function(){
-  if(!confirm(`¿Eliminar a "${gp().nombre}"? Esta acción no se puede deshacer.`))return;
+  const p=gp();if(!p)return;
+  if(!confirm(`¿Eliminar a "${p.nombre}"?`))return;
+  const snapshot=JSON.parse(JSON.stringify(p));
   await borrar(idActual);
   idActual=null;
   renderLista();
   renderEmpty();
-  toast('Paciente eliminado');
+  undoToast(`${p.nombre} eliminado`,async()=>{
+    const{id,...data}=snapshot;
+    await setDoc(doc(db,'pacientes',id),data);
+    idActual=id;renderLista();renderPaciente();
+  });
 }
 
 // ─── HISTORIA CLÍNICA (3.7.1 specialty templates) ─────────────────────────
@@ -1755,9 +1876,15 @@ window.modalRec=function(){
     });
 }
 window.delRec=async function(rid){
-  if(!confirm('¿Eliminar este registro?'))return;
-  const p=gp();p.records=(p.records||[]).filter(r=>r.id!==rid);
+  const p=gp();if(!p)return;
+  const r=(p.records||[]).find(r=>r.id===rid);if(!r)return;
+  p.records=(p.records||[]).filter(x=>x.id!==rid);
   await guardar(p);renderRec();
+  undoToast('Registro eliminado',async()=>{
+    const now=gp();if(!now)return;
+    now.records=[...(now.records||[]),r];
+    await guardar(now);renderRec();
+  });
 }
 
 // ─── CONSULTAS (3.3.3 double-book) ────────────────────────────────────────
@@ -1832,9 +1959,15 @@ window.checkConflict=function(){
   row.style.display='none';
 }
 window.delCons=async function(cid){
-  if(!confirm('¿Eliminar esta consulta?'))return;
-  const p=gp();p.consultas=(p.consultas||[]).filter(c=>c.id!==cid);
+  const p=gp();if(!p)return;
+  const c=(p.consultas||[]).find(c=>c.id===cid);if(!c)return;
+  p.consultas=(p.consultas||[]).filter(x=>x.id!==cid);
   await guardar(p);renderLista();renderCons();
+  undoToast('Consulta eliminada',async()=>{
+    const now=gp();if(!now)return;
+    now.consultas=[...(now.consultas||[]),c];
+    await guardar(now);renderLista();renderCons();
+  });
 }
 
 // ─── MODAL ────────────────────────────────────────────────────────────────
@@ -1844,6 +1977,7 @@ function abrirModal(titulo,body,fn){
   div.className='mbg';div.id='MB';
   div.innerHTML=`<div class="mbox"><h3>${titulo}</h3>${body}<div class="mact"><button class="bc" onclick="cerrarModal()">Cancelar</button><button class="bs" onclick="confirmarModal()">Guardar</button></div></div>`;
   document.body.appendChild(div);
+  setTimeout(()=>{const f=div.querySelector('input,textarea,select');if(f)f.focus();},50);
 }
 function cerrarModal(){const m=document.getElementById('MB');if(m)m.remove();}
 function confirmarModal(){if(modalFn)modalFn();}
@@ -1879,7 +2013,7 @@ window.modalNuevo=function(){
         teeth:{},teeth_obs:'',operatorias:[],procs:{},especialistas:[],records:[],consultas:[],firmas:{}
       };
       const newId=await crear(data);
-      if(newId){idActual=newId;cerrarModal();logAccess(newId);renderPaciente();toast('Paciente creado');}
+      if(newId){idActual=newId;cerrarModal();logAccess(newId);renderPaciente();toast(`Bienvenida, ${nombre.split(' ')[0]}`);}
     });
 }
 
@@ -1915,6 +2049,47 @@ function initSidebarResize(){
     const w=parseInt(sidebar.style.width)||252;
     localStorage.setItem('ds_sidebar_w',w.toString());
   });
+}
+
+// ─── KEYBOARD SHORTCUTS (UX polish) ───────────────────────────────────────
+document.addEventListener('keydown',ev=>{
+  // Cmd/Ctrl+K → focus búsqueda
+  if((ev.metaKey||ev.ctrlKey)&&ev.key.toLowerCase()==='k'){
+    ev.preventDefault();
+    const s=document.getElementById('search');
+    if(s){if(isMobile())document.getElementById('sidebar').classList.add('open');s.focus();s.select();}
+    return;
+  }
+  // Ignore when typing
+  const t=ev.target;
+  if(t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.isContentEditable))return;
+  // j/k navigate filtered patient list
+  if(ev.key==='j'||ev.key==='k'){
+    const list=Array.from(document.querySelectorAll('.pi'));
+    if(list.length===0)return;
+    const curIdx=list.findIndex(el=>el.classList.contains('on'));
+    let next;
+    if(ev.key==='j')next=list[Math.min(list.length-1,curIdx+1)]||list[0];
+    else next=list[Math.max(0,curIdx-1)]||list[0];
+    next?.click();
+  }
+  // Esc closes open modal
+  if(ev.key==='Escape'){
+    const mb=document.getElementById('MB');
+    if(mb)cerrarModal();
+  }
+});
+
+// ─── UNDO TOAST (UX polish) ───────────────────────────────────────────────
+function undoToast(msg,doUndo,duration=5000){
+  const old=document.getElementById('undoToast');if(old)old.remove();
+  const el=document.createElement('div');
+  el.id='undoToast';el.className='undo-toast';
+  el.innerHTML=`<span>${msg}</span><button class="undo-btn">Deshacer</button>`;
+  document.body.appendChild(el);
+  let cancelled=false;
+  el.querySelector('.undo-btn').addEventListener('click',async()=>{cancelled=true;el.remove();await doUndo();toast('Restaurado');});
+  setTimeout(()=>{if(!cancelled&&el.parentNode)el.remove();},duration);
 }
 
 // ─── INIT ─────────────────────────────────────────────────────────────────
