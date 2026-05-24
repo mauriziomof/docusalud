@@ -92,11 +92,14 @@ body {
   text-align: center;
 }
 .lbox h2 {
-  font-family: 'Fraunces', serif;
-  font-size: 28px; font-weight: 300;
-  color: var(--text); margin-bottom: 4px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 30px; font-weight: 400;
+  color: var(--text); margin-bottom: 6px;
+  letter-spacing: -0.015em; line-height: 1;
+  text-transform: lowercase;
 }
-.lbox p { font-size: 12px; color: var(--text3); margin-bottom: 28px; letter-spacing: 0.04em; text-transform: uppercase; }
+.lbox h2 span { font-weight: 700; color: var(--forest); }
+.lbox p { font-size: 11px; color: var(--text3); margin-bottom: 28px; letter-spacing: 0.18em; text-transform: uppercase; }
 .lbox input {
   width: 100%; padding: 11px 14px;
   font-size: 14px; font-family: 'DM Sans', sans-serif;
@@ -124,15 +127,18 @@ body {
   display: flex; align-items: center; justify-content: space-between;
   flex-shrink: 0;
 }
-.brand { display: flex; align-items: center; gap: 10px; }
+.brand { display: flex; align-items: center; gap: 12px; }
 .brand-name {
   font-family: 'DM Sans', sans-serif;
-  font-size: 15px; font-weight: 700; color: var(--forest);
-  letter-spacing: -0.01em;
+  font-size: 18px; font-weight: 400; color: var(--text);
+  letter-spacing: -0.015em; line-height: 1;
+  text-transform: lowercase;
 }
-.brand-name span { font-weight: 400; }
-.brand-sub { font-size: 9px; color: var(--text3); letter-spacing: 0.18em; text-transform: uppercase; }
-.sync-wrap { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text3); }
+.brand-name span { font-weight: 700; color: var(--forest); }
+.brand-sub { font-size: 9px; color: var(--text3); letter-spacing: 0.18em; text-transform: uppercase; margin-top: 4px; }
+.ds-logo { flex-shrink: 0; display: block; }
+.ds-logo rect:first-of-type, .ds-logo path { transition: opacity 0.2s var(--ease, ease); }
+.sync-wrap { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text3); margin-left: 18px; margin-right: auto; }
 .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border2); }
 .dot.ok { background: #4CAF7D; }
 .dot.ing { background: var(--brass); animation: pu 1s infinite; }
@@ -149,9 +155,13 @@ body {
   width: 32px; height: 32px; border-radius: 50%;
   border: var(--border-default); background: transparent;
   cursor: pointer; display: flex; align-items: center; justify-content: center;
-  font-size: 14px; transition: all 0.12s; color: var(--text2);
+  transition: all 0.12s; color: var(--text2); padding: 0;
 }
-.dark-toggle:hover { background: var(--surface2); }
+.dark-toggle:hover { background: var(--surface2); color: var(--text); }
+.dark-icon { width: 16px; height: 16px; }
+.dark-icon-sun { display: none; }
+[data-theme="dark"] .dark-icon-moon { display: none; }
+[data-theme="dark"] .dark-icon-sun { display: block; }
 
 /* ── LAYOUT ─────────────────────────────────────────────────────────── */
 .layout { display: flex; flex: 1; overflow: hidden; }
@@ -225,7 +235,8 @@ body {
 
 /* ── EMPTY ──────────────────────────────────────────────────────────── */
 .empty { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 12px; }
-.empty h3 { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 300; color: var(--text2); }
+.empty h3 { font-family: 'DM Sans', sans-serif; font-size: 22px; font-weight: 400; color: var(--text); letter-spacing: -0.015em; line-height: 1; text-transform: lowercase; }
+.empty h3 span { font-weight: 700; color: var(--forest); }
 .empty p { font-size: 13px; color: var(--text3); }
 
 /* ── CARDS ──────────────────────────────────────────────────────────── */
@@ -355,24 +366,34 @@ body {
   body { height: 100dvh; }
   .layout { flex-direction: column; height: calc(100dvh - 54px - 58px); }
   .sidebar { width: 100%; min-width: unset; border-right: none; border-bottom: var(--border-default); display: none; }
-  .sidebar.open { display: flex; flex-direction: column; position: fixed; inset: 54px 0 58px 0; z-index: 100; }
+  .sidebar.open { display: flex; flex-direction: column; position: fixed; inset: 54px 0 58px 0; z-index: 100; background: var(--bg); }
   .main { flex: 1; overflow: hidden; }
-  .panel { padding: 12px; }
-  .topbar { padding: 0 12px; }
+  .panel { padding: 14px 14px 24px; }
+  /* Topbar: fixed feel + subtle elevation */
+  .topbar { padding: 0 14px; box-shadow: 0 1px 0 rgba(31,58,42,0.04); }
+  .brand-name { font-size: 17px; }
   .brand-sub { display: none; }
   .sync-wrap span { display: none; }
-  .tbtn { padding: 5px 8px; font-size: 11px; }
+  /* Hide less-essential topbar buttons on mobile — they're in the bottom-nav or moved */
+  .tbtn[title="Importar"], .tbtn[title="Imprimir"], .tbtn[title="Cerrar sesión"] { display: none; }
+  .tbtn { padding: 6px 8px; }
   .fg { grid-template-columns: 1fr; }
   .fg3 { grid-template-columns: 1fr 1fr; }
-  .tab { padding: 10px 9px; font-size: 11px; }
-  .phdr { padding: 10px 12px; }
-  .card { padding: 12px 14px; }
+  /* Sticky patient header + tabbar — floating above scroll content */
+  .phdr { padding: 12px 14px; gap: 10px; box-shadow: 0 1px 0 rgba(31,58,42,0.06); position: sticky; top: 0; z-index: 4; }
+  .pav { width: 34px; height: 34px; font-size: 12px; }
+  .phn { font-size: 14px; }
+  .phm { font-size: 10.5px; }
+  .tabbar { padding: 0 10px; position: sticky; top: 60px; z-index: 3; box-shadow: 0 2px 4px rgba(31,58,42,0.04); }
+  .tab { padding: 11px 12px; font-size: 12px; }
+  .card { padding: 14px 14px; }
   .mbox { padding: 18px; }
   .tooth { width: 24px; height: 30px; }
   .tooth .tn { font-size: 7px; }
   .tooth .ts { font-size: 9px; }
   .ml { height: 28px; }
-  .bottom-nav { display: flex; }
+  /* Bottom nav: subtle top elevation */
+  .bottom-nav { display: flex; box-shadow: 0 -1px 0 rgba(31,58,42,0.06), 0 -4px 12px rgba(31,58,42,0.05); }
   #menuBtn { display: block !important; }
 }
 
@@ -569,6 +590,7 @@ mark { background: var(--mist); color: var(--forest); padding: 0 2px; border-rad
 [data-theme="dark"] .firma-canvas { background: var(--surface2); }
 [data-theme="dark"] .rec-tag-tratamiento { background: rgba(47,93,58,0.25); color: #a8d4af; }
 [data-theme="dark"] .rec-tag-acceso { background: rgba(74,107,124,0.25); color: #92b6c4; }
+[data-theme="dark"] .rec-tag-edicion { background: rgba(201,169,97,0.25); color: #d6c19a; }
 
 
 /* ── POLISH: UX & aesthetic improvements (May 14, 2026) ─────────────────── */
@@ -614,7 +636,9 @@ body:has(.dot.ing) .topbar .brand svg { animation: logoBreathe 1.5s var(--ease) 
 .empty { gap: 16px; }
 .empty .empty-logo { opacity: 0.30; transition: opacity 0.6s var(--ease); animation: emptyBreathe 4s var(--ease) infinite; }
 @keyframes emptyBreathe { 0%,100% { opacity: 0.30; } 50% { opacity: 0.18; } }
-.empty h3 { font-family: 'Fraunces', serif; font-size: 24px; font-weight: 300; }
+.empty h3 { font-family: 'DM Sans', sans-serif; font-size: 26px; font-weight: 400; color: var(--text); letter-spacing: -0.015em; line-height: 1; text-transform: lowercase; }
+.empty h3 span { font-weight: 700; color: var(--forest); }
+.empty p { font-style: normal; }
 .empty p { font-family: 'Fraunces', serif; font-size: 14px; font-style: italic; color: var(--text2); }
 
 /* Patient header — Fraunces for the name (editorial moment) */
@@ -673,6 +697,136 @@ body:has(.dot.ing) .topbar .brand svg { animation: logoBreathe 1.5s var(--ease) 
 /* Signature canvas — slightly higher contrast in dark mode (was too dark to draw on) */
 [data-theme="dark"] .firma-canvas { background: #3a3a35; }
 
+
+/* ── ODONTOGRAMA TOOTH VIZ (v4) ─────────────────────────────────────────── */
+
+/* Desktop two-column layout: chart left, viz right */
+.odonto-layout { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(280px, 1fr); gap: 24px; align-items: start; margin-top: 14px; }
+.odonto-chart-wrap { min-width: 0; }
+.odonto-viz-wrap { min-width: 0; }
+
+.viz-panel {
+  background: var(--surface);
+  border: var(--border-default);
+  border-radius: var(--rl);
+  padding: 22px 22px 18px;
+  display: flex; flex-direction: column; gap: 14px;
+  position: sticky; top: 8px;
+}
+.viz-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 44px; }
+.viz-tooth-id { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.viz-tooth-num { font-family: 'Fraunces', serif; font-size: 30px; font-weight: 300; line-height: 1; color: var(--text); letter-spacing: -0.02em; }
+.viz-tooth-type { font-size: 10px; color: var(--text3); letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500; }
+
+.viz-view-toggle { display: inline-flex; background: var(--surface2); border: var(--border-default); border-radius: var(--r); padding: 2px; }
+.viz-view-btn { padding: 5px 11px; font-size: 11px; font-family: 'DM Sans', sans-serif; font-weight: 500; border: none; background: transparent; color: var(--text2); border-radius: 6px; cursor: pointer; transition: all 0.15s var(--ease, ease); letter-spacing: 0.02em; }
+.viz-view-btn:hover { color: var(--text); }
+.viz-view-btn.on { background: var(--surface); color: var(--forest); box-shadow: 0 1px 2px rgba(31,58,42,0.06); }
+
+.viz-canvas {
+  width: 100%; display: flex; justify-content: center; align-items: center;
+  padding: 18px 0;
+  background: radial-gradient(ellipse 70% 50% at 50% 40%, #FCFBF8 0%, var(--bone) 60%, var(--cream) 100%);
+  border-radius: var(--r);
+  min-height: 280px;
+  position: relative;
+  overflow: hidden;
+}
+.viz-canvas::before {
+  content: ''; position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%);
+  width: 100px; height: 8px;
+  background: radial-gradient(ellipse, rgba(31,58,42,0.10) 0%, transparent 70%);
+  pointer-events: none; filter: blur(2px);
+}
+.viz-canvas-lateral { min-height: 340px; padding: 22px 0; }
+.viz-canvas-oclusal { min-height: 260px; padding: 14px 6px; }
+.viz-svg { width: 100%; max-width: 220px; height: auto; display: block; position: relative; z-index: 1; }
+.viz-canvas-lateral .viz-svg { max-width: 190px; }
+.viz-canvas-oclusal .viz-svg { max-width: 280px; }
+
+/* Realistic tooth interaction states */
+.viz-surf-large { transition: filter 0.18s var(--ease, ease); cursor: pointer; }
+.viz-surf-large:hover { filter: brightness(1.05) drop-shadow(0 1px 4px rgba(31,58,42,0.18)); }
+.viz-edge-zone { cursor: pointer; transition: opacity 0.18s var(--ease, ease); }
+.viz-edge-zone .viz-edge-faint { opacity: 0; transition: opacity 0.2s var(--ease, ease); }
+.viz-edge-zone:hover .viz-edge-faint { opacity: 1; }
+.viz-edge-zone:hover circle { fill: rgba(31,58,42,0.04); }
+.viz-edge-zone.on:hover circle { filter: brightness(1.06); }
+.viz-edge-faint { font-family: 'DM Sans', sans-serif; font-size: 9px; font-weight: 600; fill: var(--text3); letter-spacing: 0.12em; }
+.viz-edge-mark { font-family: 'DM Sans', sans-serif; font-size: 10px; font-weight: 700; fill: #fff; letter-spacing: 0.04em; }
+.viz-surf { transition: opacity 0.12s var(--ease, ease), filter 0.12s var(--ease, ease); cursor: pointer; }
+.viz-surf:hover { filter: brightness(0.96) saturate(1.1); }
+.viz-surf.on { filter: saturate(1.15); }
+.viz-zone-lbl, .viz-zone-lbl-o, .viz-zone-lbl-lateral {
+  font-family: 'DM Sans', sans-serif; fill: var(--text3); font-size: 10px; font-weight: 600; letter-spacing: 0.1em;
+}
+.viz-zone-lbl-o { font-size: 13px; fill: var(--text3); }
+.viz-zone-lbl-lateral { font-family: 'Fraunces', serif; font-size: 32px; fill: var(--text3); opacity: 0.35; font-weight: 300; }
+.viz-dir-lbl { font-family: 'DM Sans', sans-serif; fill: var(--text2); font-size: 10.5px; font-style: normal; font-weight: 500; letter-spacing: 0.05em; opacity: 0.85; }
+
+.viz-badges { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+.viz-state-pill { font-size: 10.5px; padding: 3px 10px; border-radius: 20px; font-weight: 500; letter-spacing: 0.04em; border: 0.5px solid; }
+.viz-state-caries { background: var(--danger-light); color: var(--terra); border-color: rgba(184,85,62,0.4); }
+.viz-state-tratado { background: var(--accent-light); color: var(--forest); border-color: var(--accent-border); }
+.viz-state-ausente { background: var(--surface2); color: var(--text2); border-color: var(--border2); }
+.viz-state-corona { background: var(--info-light); color: var(--petrol); border-color: rgba(74,107,124,0.4); }
+.viz-state-endodoncia { background: var(--warn-light); color: #8C7438; border-color: rgba(201,169,97,0.45); }
+.viz-state-protesis { background: #F0EBF7; color: #6E4D9A; border-color: rgba(120,80,160,0.3); }
+
+.viz-hint { font-size: 11px; color: var(--text3); text-align: center; letter-spacing: 0.02em; padding: 4px 0; border-top: 0.5px solid var(--border); border-bottom: 0.5px solid var(--border); }
+
+.viz-picker { display: flex; flex-direction: column; gap: 6px; max-height: 260px; overflow-y: auto; padding-right: 4px; }
+.viz-quad-row { display: flex; align-items: center; gap: 8px; }
+.viz-quad-lbl { font-size: 10px; color: var(--text3); letter-spacing: 0.08em; text-transform: uppercase; min-width: 78px; flex-shrink: 0; }
+.viz-quad-pills { display: flex; gap: 3px; flex-wrap: wrap; flex: 1; }
+.viz-pill {
+  font-family: 'DM Sans', sans-serif; font-size: 10.5px; font-weight: 500;
+  padding: 4px 7px; min-width: 28px;
+  border: 0.5px solid var(--border); border-radius: 6px;
+  background: var(--surface); color: var(--text2);
+  cursor: pointer; transition: all 0.12s var(--ease, ease);
+  font-variant-numeric: tabular-nums;
+}
+.viz-pill:hover { border-color: var(--border2); color: var(--text); }
+.viz-pill.on { background: var(--forest); color: var(--bone); border-color: var(--forest); }
+.viz-pill.has-state { font-weight: 600; }
+.viz-pill[data-st="caries"]:not(.on) { color: var(--terra); border-color: rgba(184,85,62,0.4); background: rgba(184,85,62,0.06); }
+.viz-pill[data-st="tratado"]:not(.on) { color: var(--forest); border-color: var(--accent-border); background: var(--accent-light); }
+.viz-pill[data-st="ausente"]:not(.on) { color: var(--text3); background: var(--surface2); }
+.viz-pill[data-st="corona"]:not(.on) { color: var(--petrol); border-color: rgba(74,107,124,0.35); background: var(--info-light); }
+.viz-pill[data-st="endodoncia"]:not(.on) { color: #8C7438; border-color: rgba(201,169,97,0.4); background: var(--warn-light); }
+.viz-pill[data-st="protesis"]:not(.on) { color: #6E4D9A; border-color: rgba(120,80,160,0.3); background: #F0EBF7; }
+
+/* Desktop — viz is showcase; user picks via the FDI chart on the left */
+@media (min-width: 769px) {
+  .viz-picker { display: none; }
+  .viz-hint { display: none; }
+}
+.odonto-hint { font-size: 11px; color: var(--text3); text-align: center; margin-top: 10px; letter-spacing: 0.02em; }
+
+/* Mobile — chart hides, viz becomes primary, picker scrolls horizontally */
+@media (max-width: 768px) {
+  .odonto-layout { grid-template-columns: 1fr; gap: 14px; }
+  .odonto-chart-wrap { display: none; }
+  .viz-panel { position: static; padding: 14px 12px 12px; }
+  .viz-svg { max-width: 280px; }
+  .viz-canvas { min-height: 280px; }
+  .viz-tooth-num { font-size: 28px; }
+  .viz-pill { font-size: 11px; padding: 6px 9px; min-width: 32px; }
+  .viz-quad-row { flex-direction: column; align-items: flex-start; gap: 4px; }
+  .viz-quad-lbl { min-width: 0; }
+  .viz-quad-pills { width: 100%; overflow-x: auto; flex-wrap: nowrap; padding-bottom: 4px; -webkit-overflow-scrolling: touch; }
+  .viz-picker { max-height: none; }
+  /* Pin the state legend (tleg) so user can tap states while viewing tooth */
+  .tleg { position: sticky; top: 0; background: var(--surface); z-index: 5; padding: 8px 0; border-bottom: 0.5px solid var(--border); }
+}
+
+[data-theme="dark"] .viz-canvas { background: linear-gradient(180deg, var(--surface2) 0%, var(--surface) 100%); }
+[data-theme="dark"] .viz-zone-lbl-lateral { fill: var(--text2); opacity: 0.25; }
+[data-theme="dark"] .viz-pill.on { background: var(--mist); color: var(--forest); border-color: var(--mist); }
+[data-theme="dark"] .viz-state-endodoncia { color: #d6c19a; }
+[data-theme="dark"] .viz-state-protesis { color: #b09cd0; background: rgba(120,80,160,0.18); }
+
 </style>
 </head>
 <body>
@@ -680,17 +834,12 @@ body:has(.dot.ing) .topbar .brand svg { animation: logoBreathe 1.5s var(--ease) 
 <!-- LOGIN -->
 <div class="lbg" id="loginBg">
   <div class="lbox">
-    <svg width="52" height="52" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-bottom:16px">
-      <rect width="52" height="52" rx="12" fill="#1F3A2A"/>
-      <rect x="14" y="9" width="24" height="34" rx="3" fill="#DCE3D2" opacity="0.15" stroke="#DCE3D2" stroke-width="1.5"/>
-      <rect x="20" y="6" width="12" height="6" rx="2" fill="#1F3A2A" stroke="#DCE3D2" stroke-width="1.5"/>
-      <line x1="19" y1="22" x2="33" y2="22" stroke="#DCE3D2" stroke-width="1.5" stroke-linecap="round"/>
-      <line x1="19" y1="27" x2="33" y2="27" stroke="#DCE3D2" stroke-width="1.5" stroke-linecap="round"/>
-      <line x1="24" y1="17" x2="28" y2="17" stroke="#DCE3D2" stroke-width="2" stroke-linecap="round"/>
-      <line x1="26" y1="15" x2="26" y2="19" stroke="#DCE3D2" stroke-width="2" stroke-linecap="round"/>
-      <line x1="19" y1="33" x2="28" y2="33" stroke="#DCE3D2" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
+    <svg class="ds-logo ds-logo-lg" width="56" height="56" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="DocuSalud">
+      <rect width="52" height="52" rx="13" fill="#DCE3D2"/>
+      <path d="M 16 13 H 28 Q 40 13 40 26 Q 40 39 28 39 H 16 Z M 22 19 V 33 H 28 Q 34 33 34 26 Q 34 19 28 19 Z" fill="#1F3A2A" fill-rule="evenodd"/>
+      <rect x="16" y="42" width="20" height="2" rx="1" fill="#C9A961"/>
     </svg>
-    <h2>DocuSalud</h2>
+    <h2><span>docu</span>salud</h2>
     <p>Historias clínicas · Acceso privado</p>
     <form onsubmit="event.preventDefault(); checkLogin()">
       <input type="email" id="loginEmail" placeholder="Correo electrónico" autofocus autocomplete="username" oninput="document.getElementById('loginErr').textContent=''">
@@ -707,24 +856,22 @@ body:has(.dot.ing) .topbar .brand svg { animation: logoBreathe 1.5s var(--ease) 
     <button id="menuBtn" onclick="event.stopPropagation();toggleSidebar()" style="display:none;background:none;border:none;cursor:pointer;padding:4px;color:var(--text2)">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
     </button>
-    <svg width="28" height="28" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect width="52" height="52" rx="12" fill="#1F3A2A"/>
-      <rect x="14" y="9" width="24" height="34" rx="3" fill="#DCE3D2" opacity="0.15" stroke="#DCE3D2" stroke-width="1.5"/>
-      <rect x="20" y="6" width="12" height="6" rx="2" fill="#1F3A2A" stroke="#DCE3D2" stroke-width="1.5"/>
-      <line x1="19" y1="22" x2="33" y2="22" stroke="#DCE3D2" stroke-width="1.5" stroke-linecap="round"/>
-      <line x1="19" y1="27" x2="33" y2="27" stroke="#DCE3D2" stroke-width="1.5" stroke-linecap="round"/>
-      <line x1="24" y1="17" x2="28" y2="17" stroke="#DCE3D2" stroke-width="2" stroke-linecap="round"/>
-      <line x1="26" y1="15" x2="26" y2="19" stroke="#DCE3D2" stroke-width="2" stroke-linecap="round"/>
-      <line x1="19" y1="33" x2="28" y2="33" stroke="#DCE3D2" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
+    <svg class="ds-logo" width="32" height="32" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="DocuSalud">
+      <rect width="52" height="52" rx="13" fill="#DCE3D2"/>
+      <path d="M 16 13 H 28 Q 40 13 40 26 Q 40 39 28 39 H 16 Z M 22 19 V 33 H 28 Q 34 33 34 26 Q 34 19 28 19 Z" fill="#1F3A2A" fill-rule="evenodd"/>
+      <rect x="16" y="42" width="20" height="2" rx="1" fill="#C9A961"/>
     </svg>
     <div>
-      <div class="brand-name"><span style="font-weight:700">docu</span>salud</div>
+      <div class="brand-name"><span>docu</span>salud</div>
       <div class="brand-sub">Historias clínicas</div>
     </div>
   </div>
   <div class="sync-wrap"><div class="dot ing" id="syncDot"></div><span id="syncLabel">Conectando...</span></div>
   <div style="display:flex;gap:6px;align-items:center">
-    <button class="dark-toggle" onclick="toggleDark()" id="darkBtn" title="Modo oscuro" aria-label="Cambiar tema">🌙</button>
+    <button class="dark-toggle" onclick="toggleDark()" id="darkBtn" title="Modo oscuro" aria-label="Cambiar tema">
+      <svg class="dark-icon dark-icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      <svg class="dark-icon dark-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+    </button>
     <button class="tbtn" onclick="toggleCalendar()" title="Calendario" aria-label="Calendario">
       <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span class="lbl">Calendario</span>
     </button>
@@ -755,17 +902,12 @@ body:has(.dot.ing) .topbar .brand svg { animation: logoBreathe 1.5s var(--ease) 
   </div>
   <div class="main" id="mainArea">
     <div class="panel"><div class="empty">
-      <svg width="52" height="52" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg" style="opacity:.25">
-        <rect width="52" height="52" rx="12" fill="#1F3A2A"/>
-        <rect x="14" y="9" width="24" height="34" rx="3" fill="#DCE3D2" opacity="0.15" stroke="#DCE3D2" stroke-width="1.5"/>
-        <rect x="20" y="6" width="12" height="6" rx="2" fill="#1F3A2A" stroke="#DCE3D2" stroke-width="1.5"/>
-        <line x1="19" y1="22" x2="33" y2="22" stroke="#DCE3D2" stroke-width="1.5" stroke-linecap="round"/>
-        <line x1="19" y1="27" x2="33" y2="27" stroke="#DCE3D2" stroke-width="1.5" stroke-linecap="round"/>
-        <line x1="24" y1="17" x2="28" y2="17" stroke="#DCE3D2" stroke-width="2" stroke-linecap="round"/>
-        <line x1="26" y1="15" x2="26" y2="19" stroke="#DCE3D2" stroke-width="2" stroke-linecap="round"/>
-        <line x1="19" y1="33" x2="28" y2="33" stroke="#DCE3D2" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
+      <svg class="ds-logo ds-logo-lg empty-logo-svg" width="56" height="56" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="DocuSalud">
+        <rect width="52" height="52" rx="13" fill="#DCE3D2"/>
+        <path d="M 16 13 H 28 Q 40 13 40 26 Q 40 39 28 39 H 16 Z M 22 19 V 33 H 28 Q 34 33 34 26 Q 34 19 28 19 Z" fill="#1F3A2A" fill-rule="evenodd"/>
+        <rect x="16" y="42" width="20" height="2" rx="1" fill="#C9A961"/>
       </svg>
-      <h3>DocuSalud</h3>
+      <h3><span>docu</span>salud</h3>
       <p>Selecciona un paciente o crea uno nuevo.</p>
     </div></div>
   </div>
@@ -873,6 +1015,8 @@ let viewActual='paciente';
 let calendarDate=new Date();
 let calendarView='mes';
 let consultasIndex=new Map();
+let vizToothN=null;
+let vizView='lateral';
 let odontoMode=null;
 let surfaceMode=false;
 const autosaveTimers={};
@@ -885,11 +1029,10 @@ const accessLogged=new Set();
 window.toggleDark=function(){
   const isDark=document.documentElement.getAttribute('data-theme')==='dark';
   document.documentElement.setAttribute('data-theme',isDark?'':'dark');
-  document.getElementById('darkBtn').textContent=isDark?'🌙':'☀️';
   localStorage.setItem('ds_theme',isDark?'':'dark');
 }
 const savedTheme=localStorage.getItem('ds_theme');
-if(savedTheme==='dark'){document.documentElement.setAttribute('data-theme','dark');document.getElementById('darkBtn').textContent='☀️';}
+if(savedTheme==='dark'){document.documentElement.setAttribute('data-theme','dark');}
 
 // ─── AUTH ─────────────────────────────────────────────────────────────────
 // TEMP: emergency-access bypass while Firebase Auth setup pending.
@@ -897,14 +1040,11 @@ if(savedTheme==='dark'){document.documentElement.setAttribute('data-theme','dark
 // once accounts are provisioned in Firebase Console.
 const TEMP_BYPASS_PASS='ds-temp-2026-04';
 function isTempBypass(){return sessionStorage.getItem('ds_temp_bypass')==='1'}
-onAuthStateChanged(auth, user => {
-  if(isTempBypass()){
-    document.getElementById('loginBg').style.display='none';
-    return;
-  }
-  document.getElementById('loginBg').style.display = user ? 'none' : 'flex';
-});
 
+// IMPORTANT: define window.checkLogin BEFORE any Firebase call.
+// If Firebase init throws (e.g. file:// origin not allowed), the module would
+// halt and the login form would have nothing to submit. Defining the handler
+// first guarantees the bypass works even if Firebase blows up later.
 window.checkLogin = async function(){
   const email=document.getElementById('loginEmail').value.trim();
   const pass=document.getElementById('loginPass').value;
@@ -934,6 +1074,27 @@ window.cerrarSesion = async function(){
   sessionStorage.removeItem('ds_temp_bypass');
   try{await signOut(auth);}catch(e){}
   document.getElementById('loginBg').style.display='flex';
+}
+
+// If bypass is already set, hide login immediately (don't wait for Firebase auth listener)
+if(isTempBypass()){
+  const bg=document.getElementById('loginBg');
+  if(bg)bg.style.display='none';
+}
+
+// Wrap Firebase Auth listener in try/catch so a broken origin (file://, etc.)
+// doesn't crash the whole module and break the bypass form.
+try{
+  onAuthStateChanged(auth, user => {
+    if(isTempBypass()){
+      document.getElementById('loginBg').style.display='none';
+      return;
+    }
+    document.getElementById('loginBg').style.display = user ? 'none' : 'flex';
+  });
+}catch(e){
+  console.warn('[DocuSalud] Firebase Auth listener failed to attach:', e.message);
+  // Bypass path still works through window.checkLogin above.
 }
 
 // ─── MOBILE ───────────────────────────────────────────────────────────────
@@ -1191,7 +1352,8 @@ function rebuildConsultasIndex(){
 }
 
 // ─── EMPTY / LANDING (3.3.2) ──────────────────────────────────────────────
-function logoSVG(size=28){return`<svg width="${size}" height="${size}" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="52" height="52" rx="12" fill="#1F3A2A"/><rect x="14" y="9" width="24" height="34" rx="3" fill="#DCE3D2" opacity="0.15" stroke="#DCE3D2" stroke-width="1.5"/><rect x="20" y="6" width="12" height="6" rx="2" fill="#1F3A2A" stroke="#DCE3D2" stroke-width="1.5"/><line x1="19" y1="22" x2="33" y2="22" stroke="#DCE3D2" stroke-width="1.5" stroke-linecap="round"/><line x1="19" y1="27" x2="33" y2="27" stroke="#DCE3D2" stroke-width="1.5" stroke-linecap="round"/><line x1="24" y1="17" x2="28" y2="17" stroke="#DCE3D2" stroke-width="2" stroke-linecap="round"/><line x1="26" y1="15" x2="26" y2="19" stroke="#DCE3D2" stroke-width="2" stroke-linecap="round"/><line x1="19" y1="33" x2="28" y2="33" stroke="#DCE3D2" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/></svg>`}
+// v5-brand-pass: logo refresh
+function logoSVG(size=28){return`<svg class="ds-logo" width="${size}" height="${size}" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="DocuSalud"><rect width="52" height="52" rx="13" fill="#DCE3D2"/><path d="M 16 13 H 28 Q 40 13 40 26 Q 40 39 28 39 H 16 Z M 22 19 V 33 H 28 Q 34 33 34 26 Q 34 19 28 19 Z" fill="#1F3A2A" fill-rule="evenodd"/><rect x="16" y="42" width="20" height="2" rx="1" fill="#C9A961"/></svg>`}
 
 function renderEmpty(){
   const today=hoy();
@@ -1205,7 +1367,7 @@ function renderEmpty(){
   let html=`<div class="panel"><div class="landing-grid">
     <div class="empty">
       <div class="empty-logo">${logoSVG(52)}</div>
-      <h3>DocuSalud</h3>
+      <h3><span>docu</span>salud</h3>
       <p>${pacientes.length===0?'Tu consultorio empieza aquí.':'Selecciona un paciente o crea uno nuevo.'}</p>
     </div>`;
   if(todayConsultas.length>0){
@@ -1637,6 +1799,356 @@ function getToothState(p,n){
   const dominant=Object.keys(counts).sort((a,b)=>counts[b]-counts[a])[0];
   return{dominant,surfaces:t};
 }
+// ─── TOOTH VISUALIZATION (large interactive SVG) ─────────────────────────
+function getToothType(n){
+  const last=n%10;
+  if(last===1||last===2)return 'incisivo';
+  if(last===3)return 'canino';
+  if(last===4||last===5)return 'premolar';
+  return 'molar';
+}
+function isUpperTooth(n){
+  const q=Math.floor(n/10);
+  return q===1||q===2||q===5||q===6;
+}
+function isDeciduous(n){return n>=51&&n<=85;}
+function toothPosLabel(n){
+  const q=Math.floor(n/10);
+  const type=getToothType(n);
+  const labels={incisivo:'Incisivo',canino:'Canino',premolar:'Premolar',molar:'Molar'};
+  const side=(q===1||q===4||q===5||q===8)?'der.':'izq.';
+  const arch=isUpperTooth(n)?'sup.':'inf.';
+  const decid=isDeciduous(n)?' · temporal':'';
+  return `${labels[type]} ${arch} ${side}${decid}`;
+}
+function getSurfaceState(p,n,k){
+  const t=(p.teeth||{})[n];
+  if(!t)return 'sano';
+  if(typeof t==='string')return t;
+  return t[k]||'sano';
+}
+function surfaceColors(st){
+  const map={
+    sano:{fill:'var(--surface)',stroke:'var(--border2)'},
+    caries:{fill:'var(--danger-light)',stroke:'var(--terra)'},
+    tratado:{fill:'var(--accent-light)',stroke:'var(--forest)'},
+    ausente:{fill:'#E5E4DD',stroke:'var(--border2)'},
+    corona:{fill:'var(--info-light)',stroke:'var(--petrol)'},
+    endodoncia:{fill:'var(--warn-light)',stroke:'var(--brass)'},
+    protesis:{fill:'#F0EBF7',stroke:'#7850A0'}
+  };
+  return map[st]||map.sano;
+}
+// Outer shape per tooth type (returns SVG tag string for use inside clipPath + as visible border)
+function outerShapeSVG(type,attrs=''){
+  if(type==='molar')return `<rect x="22" y="22" width="156" height="156" rx="16" ${attrs}/>`;
+  if(type==='premolar')return `<rect x="32" y="28" width="136" height="144" rx="22" ${attrs}/>`;
+  if(type==='canino')return `<path d="M 100 18 Q 168 60 178 100 Q 168 140 100 182 Q 32 140 22 100 Q 32 60 100 18 Z" ${attrs}/>`;
+  return `<rect x="22" y="50" width="156" height="100" rx="16" ${attrs}/>`; // incisivo
+}
+function decorCusps(type){
+  if(type==='molar')return [[58,58],[142,58],[58,142],[142,142]];
+  if(type==='premolar')return [[78,68],[122,68]];
+  if(type==='canino')return [[100,52]];
+  return [];
+}
+// Realistic tooth path data per type (viewBox 200x260 for lateral view)
+// Each tooth has: crown (above gum), root paths (below gum), cervical line (gum),
+// optional cuspMarks (faint ridges on premolars/molars), rootCanals (for endodoncia),
+// pulpChamber (faint interior shape for depth).
+function getToothPaths(type){
+  if(type==='incisivo')return{
+    // narrower than before, more tapered profile, gentler curves
+    crown:'M 78 36 C 78 26 86 22 100 22 C 114 22 122 26 122 36 C 124 64 130 96 130 116 C 130 120 116 122 100 122 C 84 122 70 120 70 116 C 70 96 76 64 78 36 Z',
+    root:'M 70 116 C 72 160 84 210 96 240 C 99 245 101 245 104 240 C 116 210 128 160 130 116 C 130 121 100 124 70 116 Z',
+    cervical:'M 70 117 C 80 122 120 122 130 117',
+    highlight:'M 82 38 C 83 60 85 88 86 110 C 86 112 90 112 91 110 C 90 80 90 56 88 38 Z',
+    cuspMarks:'',
+    rootCanals:'M 100 122 L 100 232',
+    pulpChamber:'M 92 50 C 90 80 90 100 95 112 L 105 112 C 110 100 110 80 108 50 Z'
+  };
+  if(type==='canino')return{
+    // sharp pointed crown, longest single root
+    crown:'M 78 70 L 100 22 L 122 70 C 132 90 134 110 132 124 C 132 130 116 134 100 134 C 84 134 68 130 68 124 C 66 110 68 90 78 70 Z',
+    root:'M 68 124 C 72 175 88 230 98 256 C 100 260 100 260 102 256 C 112 230 128 175 132 124 C 132 130 100 137 68 124 Z',
+    cervical:'M 68 126 C 80 132 120 132 132 126',
+    highlight:'M 86 64 L 98 30 L 100 30 L 100 116 C 96 118 92 117 90 115 Z',
+    cuspMarks:'',
+    rootCanals:'M 100 134 L 100 250',
+    pulpChamber:'M 92 80 C 90 100 90 116 95 122 L 105 122 C 110 116 110 100 108 80 Z'
+  };
+  if(type==='premolar')return{
+    // 2 cusps visible (buccal + lingual), single root
+    crown:'M 54 78 C 56 58 70 50 84 50 C 92 52 96 60 100 60 C 104 60 108 52 116 50 C 130 50 144 58 146 78 C 152 100 152 122 148 130 C 132 134 118 134 100 134 C 82 134 68 134 52 130 C 48 122 48 100 54 78 Z',
+    root:'M 52 130 C 54 178 76 218 90 232 C 96 238 100 238 100 232 C 100 238 104 238 110 232 C 124 218 146 178 148 130 C 132 134 68 134 52 130 Z',
+    cervical:'M 52 132 C 80 138 120 138 148 132',
+    highlight:'M 60 78 C 62 100 64 118 66 128 C 67 130 71 130 72 128 C 72 110 70 90 66 76 Z',
+    cuspMarks:'M 84 52 C 85 62 86 70 88 76 M 116 52 C 115 62 114 70 112 76',
+    rootCanals:'M 100 134 L 100 226',
+    pulpChamber:'M 80 70 C 78 95 82 115 90 125 L 110 125 C 118 115 122 95 120 70 Z'
+  };
+  // molar — wider crown, 4 cusps visible, 2 separated roots
+  return{
+    crown:'M 32 78 C 34 56 50 48 64 48 C 72 56 80 52 86 52 C 92 56 100 56 100 56 C 100 56 108 56 114 52 C 120 52 128 56 136 48 C 150 48 166 56 168 78 C 174 100 174 128 170 142 C 138 146 62 146 30 142 C 26 128 26 100 32 78 Z',
+    rootMesial:'M 30 142 C 28 178 40 220 54 238 C 62 246 70 246 72 238 C 78 220 80 178 78 142 C 60 145 42 145 30 142 Z',
+    rootDistal:'M 122 142 C 120 178 122 220 128 238 C 130 246 138 246 146 238 C 160 220 172 178 170 142 C 158 145 140 145 122 142 Z',
+    cervical:'M 30 144 C 70 150 130 150 170 144',
+    highlight:'M 40 76 C 44 100 50 124 54 138 C 56 140 60 140 60 138 C 60 116 56 90 50 74 Z',
+    cuspMarks:'M 64 50 C 66 62 68 72 70 80 M 86 54 C 87 64 88 72 88 80 M 114 54 C 113 64 112 72 112 80 M 136 50 C 134 62 132 72 130 80',
+    rootCanals:'M 54 142 L 54 234 M 148 142 L 148 234',
+    pulpChamber:'M 50 70 C 48 100 56 130 70 138 L 130 138 C 144 130 152 100 150 70 Z'
+  };
+}
+
+function renderRealisticLateral(p,n,states,type,upper,tState){
+  const paths=getToothPaths(type);
+  const isWhole=typeof tState==='string';
+  const isAusente=isWhole&&tState==='ausente';
+  const isCorona=isWhole&&tState==='corona';
+  const isProtesis=isWhole&&tState==='protesis';
+  const isEndo=isWhole&&tState==='endodoncia';
+  const overlayState=isWhole?tState:(states.v!=='sano'?states.v:null);
+
+  let crownFill=`url(#enamel-${n})`;
+  let crownOpacity=1;
+  let stateOverlay='';
+  if(isAusente){
+    crownFill=`url(#aus-${n})`;
+    crownOpacity=0.55;
+  }else if(isCorona){
+    crownFill=`url(#corona-${n})`;
+  }else if(isProtesis){
+    crownFill=`url(#protesis-${n})`;
+  }else if(overlayState&&overlayState!=='sano'&&overlayState!=='corona'&&overlayState!=='protesis'&&overlayState!=='ausente'){
+    const sc=surfaceColors(overlayState);
+    stateOverlay=`<path d="${paths.crown}" fill="${sc.fill}" opacity="0.45" pointer-events="none"/>`;
+  }
+
+  const rootPaths=type==='molar'?`
+      <path d="${paths.rootMesial}" fill="url(#root-${n})" stroke="#9c8254" stroke-width="0.4" opacity="${isAusente?0.4:0.95}"/>
+      <path d="${paths.rootDistal}" fill="url(#root-${n})" stroke="#9c8254" stroke-width="0.4" opacity="${isAusente?0.4:0.95}"/>`
+    :`<path d="${paths.root}" fill="url(#root-${n})" stroke="#9c8254" stroke-width="0.4" opacity="${isAusente?0.4:0.95}"/>`;
+
+  // Subtle M/D side markers — only visible when state is set or on hover.
+  // Replaces the old dashed-box approach.
+  const edgeMark=(k,cx,cy)=>{
+    const st=states[k];
+    if(st==='sano'){
+      // Invisible-but-clickable zone; faint label appears on hover via CSS
+      return `<g class="viz-edge-zone" data-surf="${k}" onclick="vizClickSurface('${k}')">
+        <circle cx="${cx}" cy="${cy}" r="11" fill="transparent"/>
+        <text x="${cx}" y="${cy+3}" text-anchor="middle" class="viz-edge-faint" pointer-events="none">${k.toUpperCase()}</text>
+      </g>`;
+    }
+    const sc=surfaceColors(st);
+    return `<g class="viz-edge-zone on" data-surf="${k}" onclick="vizClickSurface('${k}')">
+      <circle cx="${cx}" cy="${cy}" r="8" fill="${sc.fill}" stroke="${sc.stroke}" stroke-width="1.3"/>
+      <text x="${cx}" y="${cy+3}" text-anchor="middle" class="viz-edge-mark" pointer-events="none">${SIMBOLOS[st]||'·'}</text>
+    </g>`;
+  };
+
+  // Pulp chamber for visual depth (only when no whole-tooth state overrides the crown look)
+  const showPulp=!isAusente&&!isCorona&&!isProtesis;
+
+  return `<svg viewBox="0 0 200 260" class="viz-svg" preserveAspectRatio="xMidYMid meet" aria-label="Diente ${n}">
+    <defs>
+      <linearGradient id="enamel-${n}" x1="0.3" y1="0" x2="0.7" y2="1">
+        <stop offset="0%" stop-color="#FEFDFA"/>
+        <stop offset="45%" stop-color="#F4F0E2"/>
+        <stop offset="100%" stop-color="#D6CFB8"/>
+      </linearGradient>
+      <linearGradient id="root-${n}" x1="0.3" y1="0" x2="0.7" y2="1">
+        <stop offset="0%" stop-color="#ECDDB8"/>
+        <stop offset="55%" stop-color="#D5C190"/>
+        <stop offset="100%" stop-color="#B59C66"/>
+      </linearGradient>
+      <linearGradient id="corona-${n}" x1="0.3" y1="0" x2="0.7" y2="1">
+        <stop offset="0%" stop-color="#F4D88B"/>
+        <stop offset="55%" stop-color="#D5B358"/>
+        <stop offset="100%" stop-color="#A88840"/>
+      </linearGradient>
+      <linearGradient id="protesis-${n}" x1="0.3" y1="0" x2="0.7" y2="1">
+        <stop offset="0%" stop-color="#AEC3CF"/>
+        <stop offset="55%" stop-color="#7A98A6"/>
+        <stop offset="100%" stop-color="#4A6B7C"/>
+      </linearGradient>
+      <linearGradient id="enamel-shine-${n}" x1="0" y1="0" x2="0.5" y2="0.6">
+        <stop offset="0%" stop-color="rgba(255,255,255,0.7)"/>
+        <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+      </linearGradient>
+      <radialGradient id="pulp-${n}" cx="0.5" cy="0.4" r="0.6">
+        <stop offset="0%" stop-color="rgba(184,140,90,0.18)"/>
+        <stop offset="100%" stop-color="rgba(184,140,90,0)"/>
+      </radialGradient>
+      <pattern id="aus-${n}" patternUnits="userSpaceOnUse" width="8" height="8" patternTransform="rotate(45)">
+        <rect width="8" height="8" fill="#ECEAE0"/>
+        <line x1="0" y1="4" x2="8" y2="4" stroke="#9A9A8E" stroke-width="0.8"/>
+      </pattern>
+      <filter id="tooth-shadow-${n}" x="-15%" y="-10%" width="130%" height="125%">
+        <feGaussianBlur in="SourceAlpha" stdDeviation="1.4"/>
+        <feOffset dx="1" dy="2.5"/>
+        <feComponentTransfer><feFuncA type="linear" slope="0.18"/></feComponentTransfer>
+        <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+    </defs>
+
+    <g filter="url(#tooth-shadow-${n})">
+      ${rootPaths}
+      <path d="${paths.crown}" fill="${crownFill}" stroke="#A89F8C" stroke-width="0.7" opacity="${crownOpacity}" class="viz-surf-large" data-surf="v" onclick="vizClickSurface('v')"/>
+      ${showPulp && paths.pulpChamber ? `<path d="${paths.pulpChamber}" fill="url(#pulp-${n})" pointer-events="none"/>` : ''}
+      ${stateOverlay}
+      ${showPulp?`<path d="${paths.highlight}" fill="url(#enamel-shine-${n})" opacity="0.7" pointer-events="none"/>`:''}
+      ${paths.cuspMarks?`<path d="${paths.cuspMarks}" stroke="#9E9580" stroke-width="0.8" fill="none" opacity="0.5" stroke-linecap="round" pointer-events="none"/>`:''}
+      <path d="${paths.cervical}" stroke="#7A6845" stroke-width="0.6" fill="none" opacity="0.4" pointer-events="none"/>
+      ${isEndo?`<path d="${paths.rootCanals}" stroke="#B89641" stroke-width="2.2" fill="none" opacity="0.85" stroke-dasharray="3,3" pointer-events="none"/>`:''}
+    </g>
+
+    ${edgeMark('m',14,84)}
+    ${edgeMark('d',186,84)}
+  </svg>`;
+}
+
+function renderRefinedOcclusal(p,n,states,type,upper){
+  const clipId=`oclip-${n}`;
+  const ausPatId=`aus-${n}`;
+  const f=k=>surfaceColors(states[k]);
+  const surfPoly=(k,points)=>{
+    const sc=f(k);
+    const isAus=states[k]==='ausente';
+    const fillAttr=isAus?`fill="url(#${ausPatId})"`:`fill="${sc.fill}"`;
+    return `<polygon points="${points}" ${fillAttr} stroke="${sc.stroke}" stroke-width="1.4" class="viz-surf ${states[k]!=='sano'?'on':''}" data-surf="${k}" onclick="vizClickSurface('${k}')"/>`;
+  };
+  const surfRect=(k,x,y,w,h,rx)=>{
+    const sc=f(k);
+    const isAus=states[k]==='ausente';
+    const fillAttr=isAus?`fill="url(#${ausPatId})"`:`fill="${sc.fill}"`;
+    return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${rx}" ${fillAttr} stroke="${sc.stroke}" stroke-width="1.4" class="viz-surf ${states[k]!=='sano'?'on':''}" data-surf="${k}" onclick="vizClickSurface('${k}')"/>`;
+  };
+  const cusps=decorCusps(type);
+  // viewBox expanded horizontally so mesial/distal labels sit OUTSIDE the tooth rect cleanly.
+  // Tooth shapes still occupy x=20-180 (centered around x=100), labels live in the side margin.
+  return `<svg viewBox="-40 0 280 210" class="viz-svg" preserveAspectRatio="xMidYMid meet" aria-label="Diente ${n} vista oclusal">
+    <defs>
+      <clipPath id="${clipId}">${outerShapeSVG(type)}</clipPath>
+      <pattern id="${ausPatId}" patternUnits="userSpaceOnUse" width="8" height="8" patternTransform="rotate(45)">
+        <rect width="8" height="8" fill="#ECEAE0"/>
+        <line x1="0" y1="4" x2="8" y2="4" stroke="#9A9A8E" stroke-width="0.8"/>
+      </pattern>
+      <filter id="ocl-shadow-${n}" x="-10%" y="-10%" width="120%" height="120%">
+        <feGaussianBlur in="SourceAlpha" stdDeviation="1.4"/>
+        <feOffset dx="0" dy="1.5"/>
+        <feComponentTransfer><feFuncA type="linear" slope="0.18"/></feComponentTransfer>
+        <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+    </defs>
+    <g filter="url(#ocl-shadow-${n})">
+      <g clip-path="url(#${clipId})">
+        ${surfPoly('l','20,20 70,70 130,70 180,20')}
+        ${surfPoly('m','20,20 70,70 70,130 20,180')}
+        ${surfPoly('d','180,20 130,70 130,130 180,180')}
+        ${surfPoly('v','20,180 70,130 130,130 180,180')}
+        ${surfRect('o',70,70,60,60,4)}
+        ${cusps.map(c=>`<circle cx="${c[0]}" cy="${c[1]}" r="3.5" fill="#A29A85" opacity="0.4" pointer-events="none"/>`).join('')}
+      </g>
+      <g pointer-events="none">${outerShapeSVG(type,'fill="none" stroke="#A89F8C" stroke-width="2"')}</g>
+    </g>
+    <text x="100" y="108" class="viz-zone-lbl-o" text-anchor="middle" pointer-events="none">O</text>
+    <text x="100" y="11" class="viz-dir-lbl" text-anchor="middle" pointer-events="none">${upper?'palatino':'lingual'}</text>
+    <text x="100" y="201" class="viz-dir-lbl" text-anchor="middle" pointer-events="none">vestibular</text>
+    <text x="-30" y="106" class="viz-dir-lbl" text-anchor="start" pointer-events="none">mesial</text>
+    <text x="230" y="106" class="viz-dir-lbl" text-anchor="end" pointer-events="none">distal</text>
+  </svg>`;
+}
+
+function renderToothVizSVG(p,n){
+  const type=getToothType(n);
+  const upper=isUpperTooth(n);
+  const tState=(p.teeth||{})[n];
+  const states={
+    m:getSurfaceState(p,n,'m'),
+    d:getSurfaceState(p,n,'d'),
+    o:getSurfaceState(p,n,'o'),
+    v:getSurfaceState(p,n,'v'),
+    l:getSurfaceState(p,n,'l')
+  };
+  if(vizView==='oclusal')return renderRefinedOcclusal(p,n,states,type,upper);
+  return renderRealisticLateral(p,n,states,type,upper,tState);
+}
+function vizToothPicker(p,mode){
+  // Pills grouped by quadrant
+  const groups=[];
+  if(mode==='permanente'||mode==='mixta'){
+    groups.push({label:'Sup. D',nums:[18,17,16,15,14,13,12,11]});
+    groups.push({label:'Sup. I',nums:[21,22,23,24,25,26,27,28]});
+    groups.push({label:'Inf. I',nums:[31,32,33,34,35,36,37,38]});
+    groups.push({label:'Inf. D',nums:[48,47,46,45,44,43,42,41]});
+  }
+  if(mode==='decidua'||mode==='mixta'){
+    groups.push({label:'Sup. D · temp.',nums:[55,54,53,52,51]});
+    groups.push({label:'Sup. I · temp.',nums:[61,62,63,64,65]});
+    groups.push({label:'Inf. I · temp.',nums:[71,72,73,74,75]});
+    groups.push({label:'Inf. D · temp.',nums:[85,84,83,82,81]});
+  }
+  return groups.map(g=>`<div class="viz-quad-row">
+    <span class="viz-quad-lbl">${g.label}</span>
+    <div class="viz-quad-pills">${g.nums.map(n=>{
+      const{dominant}=getToothState(p,n);
+      const cls=`viz-pill ${dominant!=='sano'?'has-state':''} ${vizToothN===n?'on':''}`;
+      return `<button class="${cls}" data-st="${dominant}" onclick="vizSetTooth(${n})" title="Diente ${n} · ${toothPosLabel(n)}">${n}</button>`;
+    }).join('')}</div>
+  </div>`).join('');
+}
+function renderToothVizPanel(p,mode){
+  // Ensure vizToothN is valid for current mode
+  if(vizToothN===null||(mode==='permanente'&&isDeciduous(vizToothN))||(mode==='decidua'&&!isDeciduous(vizToothN))){
+    vizToothN=mode==='decidua'?51:11;
+  }
+  const n=vizToothN;
+  const t=(p.teeth||{})[n];
+  const isWhole=typeof t==='string';
+  const dominantBadge=isWhole?`<span class="viz-state-pill viz-state-${t}">${SIMBOLOS[t]||t} · ${t}</span>`:'';
+  return `<div class="viz-panel">
+    <div class="viz-header">
+      <div class="viz-tooth-id"><span class="viz-tooth-num">${n}</span><span class="viz-tooth-type">${toothPosLabel(n)}</span></div>
+      <div class="viz-view-toggle">
+        <button class="viz-view-btn ${vizView==='lateral'?'on':''}" onclick="vizSetView('lateral')" title="Vista lateral">Lateral</button>
+        <button class="viz-view-btn ${vizView==='oclusal'?'on':''}" onclick="vizSetView('oclusal')" title="Vista oclusal">Oclusal</button>
+      </div>
+    </div>
+    <div class="viz-canvas viz-canvas-${vizView}">${renderToothVizSVG(p,n)}</div>
+    ${dominantBadge?`<div class="viz-badges">${dominantBadge}</div>`:''}
+    <div class="viz-hint">Estado activo: <strong style="color:var(--forest)">${estadoDiente}</strong> · clic en el diente para aplicar</div>
+    <div class="viz-picker">${vizToothPicker(p,mode)}</div>
+  </div>`;
+}
+window.vizSetTooth=function(n){vizToothN=n;renderOdonto();};
+window.vizSetView=function(v){vizView=v;renderOdonto();};
+window.vizClickSurface=async function(k){
+  const p=gp();if(!p.teeth)p.teeth={};
+  const n=vizToothN;if(!n)return;
+  const cur=p.teeth[n];
+  // Convert whole-tooth state to per-surface so user can edit individual faces
+  let surf;
+  if(typeof cur==='object'&&cur!==null){
+    surf={...cur};
+  }else if(typeof cur==='string'){
+    surf={m:cur,d:cur,o:cur,v:cur,l:cur};
+  }else{
+    surf={m:'sano',d:'sano',o:'sano',v:'sano',l:'sano'};
+  }
+  surf[k]=estadoDiente;
+  // If all sano → clear; if all same and not sano → store as string
+  const vals=SURFACE_KEYS.map(s=>surf[s]);
+  if(vals.every(v=>v==='sano')){
+    delete p.teeth[n];
+  }else if(vals.every(v=>v===vals[0])){
+    p.teeth[n]=vals[0];
+  }else{
+    p.teeth[n]=surf;
+  }
+  await guardar(p);renderOdonto();
+};
+
 function renderOdonto(){
   const p=gp();
   const mode=getOdontoMode(p);
@@ -1678,6 +2190,7 @@ function renderOdonto(){
   }
   const a=edadAnios(p.nacimiento);
   const autoMode=a===null||a>=12?'permanente':(a<6?'decidua':'mixta');
+  const vizPanel=renderToothVizPanel(p,mode);
   document.getElementById('panel').innerHTML=`
     <div class="card">
       <div class="ct-row"><div class="ct">Odontograma${a!==null?' · '+a+' años':''}</div>${statusEl('odonto')}</div>
@@ -1692,8 +2205,13 @@ function renderOdonto(){
         <label class="ctl-lbl"><input type="checkbox" id="surface-mode" ${surfaceMode?'checked':''} onchange="toggleSurfaceMode()"> Modo superficie</label>
       </div>
       <div class="tleg">${legs.map(l=>`<div class="leg${l.k===estadoDiente?' sel':''}" onclick="setEst('${l.k}')"><div class="ld" style="background:${l.bg};border-color:${l.bc}"></div>${l.l}</div>`).join('')}</div>
-      ${chart}
-      <p style="font-size:11px;color:var(--text3);text-align:center;margin-top:10px">${surfaceMode?'Modo superficie: clic abre el detalle por cara · ':''}Selecciona un estado y haz clic en el diente · Clic derecho para restablecer</p>
+      <div class="odonto-layout">
+        <div class="odonto-chart-wrap">
+          ${chart}
+          <p class="odonto-hint">${surfaceMode?'Modo superficie: clic abre el detalle por cara · ':''}Clic en un diente · Clic derecho para restablecer</p>
+        </div>
+        <div class="odonto-viz-wrap">${vizPanel}</div>
+      </div>
       <div class="f" style="margin-top:14px"><label>Observaciones</label><textarea id="o_ob" oninput="autosaveObs()">${e(p.teeth_obs||'')}</textarea></div>
     </div>`;
 }
@@ -1701,6 +2219,7 @@ window.setOdontoMode=function(m){odontoMode=m||null;renderOdonto();}
 window.toggleSurfaceMode=function(){surfaceMode=document.getElementById('surface-mode').checked;}
 window.setEst=function(st){estadoDiente=st;renderOdonto()}
 window.mDiente=async function(n){
+  vizToothN=n;
   const p=gp();if(!p.teeth)p.teeth={};
   if(surfaceMode){abrirSurfaceModal(n);return;}
   if(estadoDiente==='sano')delete p.teeth[n];
@@ -2329,8 +2848,10 @@ function undoToast(msg,doUndo,duration=5000){
 }
 
 // ─── INIT ─────────────────────────────────────────────────────────────────
+// build-marker: v3-cal-mes
 ss('ing','Conectando...');
 initSidebarResize();
+
 
 </script>
 </body>
