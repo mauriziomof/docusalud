@@ -1226,6 +1226,7 @@ function bootstrapUserPerms(user){
   if(userPermsUnsubscribe){userPermsUnsubscribe();userPermsUnsubscribe=null;}
   currentUserUid=user.uid;
   const ref=doc(db,'users',user.uid);
+  startPacientesListener();
   userPermsUnsubscribe=onSnapshot(ref,async snap=>{
     if(snap.exists()){
       currentUserPerms={uid:user.uid,...snap.data()};
@@ -1270,6 +1271,10 @@ try{
       isAdmin=false;
       currentUserUid=null;
       currentUserPerms=null;
+      pacientes=[];
+      renderLista();
+      renderEmpty();
+      if(pacientesUnsubscribe){pacientesUnsubscribe();pacientesUnsubscribe=null;}
       if(userPermsUnsubscribe){userPermsUnsubscribe();userPermsUnsubscribe=null;}
     }
     updateAdminUI();
@@ -1354,13 +1359,21 @@ function statusEl(formKey){
 }
 
 // ─── FIRESTORE ────────────────────────────────────────────────────────────
-onSnapshot(collection(db,'pacientes'),snap=>{
-  pacientes=snap.docs.map(d=>({id:d.id,...d.data()}));
-  rebuildConsultasIndex();
-  renderLista();
-  rerenderCurrent();
-  ss('ok','Sincronizado');
-},()=>ss('err','Sin conexión'));
+let pacientesUnsubscribe=null;
+function getPacientesCol(){
+  return collection(db,'usuarios',currentUserUid,'pacientes');
+}
+function startPacientesListener(){
+  if(pacientesUnsubscribe){pacientesUnsubscribe();pacientesUnsubscribe=null;}
+  if(!currentUserUid)return;
+  pacientesUnsubscribe=onSnapshot(getPacientesCol(),snap=>{
+    pacientes=snap.docs.map(d=>({id:d.id,...d.data()}));
+    rebuildConsultasIndex();
+    renderLista();
+    rerenderCurrent();
+    ss('ok','Sincronizado');
+  },()=>ss('err','Sin conexión'));
+}
 
 function rerenderCurrent(){
   if(viewActual==='calendario')renderCalendar();
@@ -1371,19 +1384,19 @@ function rerenderCurrent(){
 async function guardar(p){
   ss('ing','Guardando...');
   const{id,...data}=p;
-  try{await setDoc(doc(db,'pacientes',id),data);ss('ok','Guardado');ssRest();}
+  try{await setDoc(doc(db,'usuarios',currentUserUid,'pacientes',id),data);ss('ok','Guardado');ssRest();}
   catch(err){ss('err','Error');throw err;}
 }
 async function crear(data){
   ss('ing','Guardando...');
-  try{const ref=await addDoc(collection(db,'pacientes'),data);ss('ok','Guardado');return ref.id;}
+  try{const ref=await addDoc(getPacientesCol(),data);ss('ok','Guardado');return ref.id;}
   catch(err){ss('err','Error');return null;}
 }
-async function borrar(id){try{await deleteDoc(doc(db,'pacientes',id));}catch(err){}}
+async function borrar(id){try{await deleteDoc(doc(db,'usuarios',currentUserUid,'pacientes',id));}catch(err){}}
 
 async function ciExists(ci, excludeId){
   if(!ci||ci==='V-'||ci==='J-'||ci==='E-')return null;
-  const q1=query(collection(db,'pacientes'),where('ci','==',ci));
+  const q1=query(getPacientesCol(),where('ci','==',ci));
   const snap=await getDocs(q1);
   for(const d of snap.docs){if(d.id!==excludeId)return{id:d.id,...d.data()};}
   return null;
@@ -1418,7 +1431,7 @@ async function importarJSON(text){
     for(const p of d.pacientes){
       if(!ex.has(p.id)){
         const{id,...data}=p;
-        await setDoc(doc(db,'pacientes',p.id),data);
+        await setDoc(doc(db,'usuarios',currentUserUid,'pacientes',p.id),data);
         count++;
       }
     }
@@ -1456,7 +1469,7 @@ async function importarCSV(text){
     let count=0;
     for(const r of records){
       const data={...r,telefono2:'',email:'',especialidad:'general',motivo:'',antecedentes:'',patologias:'',oclusion:'',diagnostico:'',plan:'',plan_aceptado:'',restauracion:'',material:'',color_dental:'',color_deseado:'',laboratorio:'',indicaciones_tecnico:'',obs_importantes:'',teeth:{},teeth_obs:'',operatorias:[],procs:{},especialistas:[],records:[],consultas:[],firmas:{}};
-      await addDoc(collection(db,'pacientes'),data);
+      await addDoc(getPacientesCol(),data);
       count++;
     }
     toast(`${count} pacientes importados desde CSV`);
@@ -2032,7 +2045,7 @@ window.eliminarP=async function(){
   renderEmpty();
   undoToast(`${p.nombre} eliminado`,async()=>{
     const{id,...data}=snapshot;
-    await setDoc(doc(db,'pacientes',id),data);
+    await setDoc(doc(db,'usuarios',currentUserUid,'pacientes',id),data);
     idActual=id;renderLista();renderPaciente();
   });
 }
