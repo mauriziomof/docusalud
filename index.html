@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>DocuSalud</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
@@ -64,6 +64,8 @@
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+
 body {
   font-family: 'DM Sans', sans-serif;
   background: var(--bg);
@@ -71,6 +73,8 @@ body {
   font-size: 14px;
   height: 100vh;
   overflow: hidden;
+  overflow-x: hidden;
+  max-width: 100vw;
   display: flex;
   flex-direction: column;
   transition: background 0.3s, color 0.3s;
@@ -101,8 +105,9 @@ body {
 .lbox h2 span { font-weight: 700; color: var(--forest); }
 .lbox p { font-size: 11px; color: var(--text3); margin-bottom: 28px; letter-spacing: 0.18em; text-transform: uppercase; }
 .lbox input {
-  width: 100%; padding: 11px 14px;
-  font-size: 14px; font-family: 'DM Sans', sans-serif;
+  width: 100%; padding: 12px 14px;
+  /* 16px font-size prevents iOS Safari auto-zoom on focus */
+  font-size: 16px; font-family: 'DM Sans', sans-serif;
   border: var(--border-default); border-radius: var(--r);
   background: var(--surface2); color: var(--text);
   outline: none; text-align: center; letter-spacing: 0.12em;
@@ -371,6 +376,14 @@ body {
   .panel { padding: 14px 14px 24px; }
   /* Topbar: fixed feel + subtle elevation */
   .topbar { padding: 0 14px; box-shadow: 0 1px 0 rgba(31,58,42,0.04); }
+  /* Prevent iOS Safari auto-zoom when focusing form inputs (triggers when font < 16px) */
+  .mf input, .mf textarea, .mf select,
+  .f input, .f textarea, .f select,
+  .ptbl input, .otbl input,
+  .ci-input input, .ci-input select,
+  #search, .lbox input {
+    font-size: 16px !important;
+  }
   .brand-name { font-size: 17px; }
   .brand-sub { display: none; }
   .sync-wrap span { display: none; }
@@ -698,6 +711,112 @@ body:has(.dot.ing) .topbar .brand svg { animation: logoBreathe 1.5s var(--ease) 
 [data-theme="dark"] .firma-canvas { background: #3a3a35; }
 
 
+/* ── ADMIN BUTTON IN TOPBAR ─────────────────────────────────────────────── */
+.tbtn-admin {
+  color: var(--forest);
+  border-color: var(--accent-border);
+  background: var(--accent-light);
+}
+.tbtn-admin:hover { background: var(--mist); color: var(--forest); }
+.tbtn-admin .ico { color: var(--forest); }
+
+/* ── ADMIN VIEW ─────────────────────────────────────────────────────────── */
+.admin-panel { padding: 22px 28px 28px; overflow: auto; }
+.admin-users-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 14px;
+}
+.admin-user-card {
+  background: var(--surface);
+  border: var(--border-default);
+  border-radius: var(--rl);
+  padding: 16px 18px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: border-color 0.15s var(--ease, ease), box-shadow 0.15s var(--ease, ease);
+}
+.admin-user-card:hover {
+  border-color: var(--border2);
+  box-shadow: 0 2px 8px rgba(31,58,42,0.05);
+}
+.admin-user-head {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+  padding-bottom: 10px;
+  border-bottom: 0.5px solid var(--border);
+}
+.admin-user-name {
+  font-family: 'Fraunces', serif;
+  font-size: 16px; font-weight: 400; color: var(--text);
+  line-height: 1.2;
+}
+.admin-user-email {
+  font-size: 11px; color: var(--text3);
+  margin-top: 2px; letter-spacing: 0.02em;
+}
+.admin-user-meta {
+  font-size: 10px; color: var(--text3);
+  letter-spacing: 0.08em; text-transform: uppercase;
+  background: var(--surface2); padding: 4px 9px; border-radius: 20px;
+  flex-shrink: 0;
+}
+.admin-tabs-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 4px;
+}
+.admin-tab-chip {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 10px;
+  border-radius: var(--r);
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.12s var(--ease, ease);
+  color: var(--text2);
+  user-select: none;
+}
+.admin-tab-chip:hover { background: var(--surface2); }
+.admin-tab-chip input {
+  margin: 0; width: 13px; height: 13px;
+  accent-color: var(--forest);
+  cursor: pointer;
+}
+.admin-tab-chip.on { color: var(--text); }
+.admin-tab-chip.on:hover { background: var(--accent-light); }
+
+.admin-empty {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 48px 24px; gap: 14px;
+  text-align: center;
+}
+
+.admin-footer {
+  margin-top: 28px;
+  padding: 14px 18px;
+  background: var(--surface2);
+  border-radius: var(--r);
+  border-left: 3px solid var(--brass);
+}
+
+/* Dark mode tweaks */
+[data-theme="dark"] .tbtn-admin {
+  background: rgba(47,93,58,0.18);
+  color: var(--mist);
+  border-color: var(--accent-border);
+}
+[data-theme="dark"] .tbtn-admin .ico { color: var(--mist); }
+[data-theme="dark"] .admin-user-card { background: var(--surface); }
+[data-theme="dark"] .admin-tab-chip.on { color: var(--mist); }
+
+/* Mobile: stack to single column */
+@media (max-width: 768px) {
+  .admin-panel { padding: 14px 12px 18px; }
+  .admin-users-grid { grid-template-columns: 1fr; gap: 12px; }
+  .admin-tabs-grid { grid-template-columns: 1fr; }
+  .admin-user-card { padding: 14px; }
+  .admin-user-name { font-size: 15px; }
+}
+
+
 /* ── ODONTOGRAMA TOOTH VIZ (v4) ─────────────────────────────────────────── */
 
 /* Desktop two-column layout: chart left, viz right */
@@ -868,6 +987,9 @@ body:has(.dot.ing) .topbar .brand svg { animation: logoBreathe 1.5s var(--ease) 
   </div>
   <div class="sync-wrap"><div class="dot ing" id="syncDot"></div><span id="syncLabel">Conectando...</span></div>
   <div style="display:flex;gap:6px;align-items:center">
+    <button class="tbtn tbtn-admin" id="adminBtn" style="display:none" onclick="toggleAdmin()" title="Administración de usuarios" aria-label="Administración">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><span class="lbl">Admin</span>
+    </button>
     <button class="dark-toggle" onclick="toggleDark()" id="darkBtn" title="Modo oscuro" aria-label="Cambiar tema">
       <svg class="dark-icon dark-icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
       <svg class="dark-icon dark-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
@@ -1016,7 +1138,19 @@ let calendarDate=new Date();
 let calendarView='mes';
 let consultasIndex=new Map();
 let vizToothN=null;
-let vizView='lateral';
+let vizView='oclusal'; // lateral view removed; oclusal is the only mode
+
+// ─── ADMIN / USER PERMS ────────────────────────────────────────────────────
+// Bypass user (typed `ds-temp-2026-04`) is treated as admin. Real Firebase users
+// are filtered by their `tabsAllowed` array stored at /users/{uid}.
+const ALL_TABS = ['datos','clinico','odonto','plan','ops','est','rec','cons'];
+const TAB_LABELS = {datos:'Datos personales',clinico:'Historia clínica',odonto:'Odontograma',plan:'Plan de tratamiento',ops:'Operatorias',est:'Proc. estéticos',rec:'Récord',cons:'Consultas'};
+let isAdmin = false;
+let currentUserUid = null;
+let currentUserPerms = null;  // {email,name,tabsAllowed,...} from /users/{uid}, or null
+let allUsersList = [];
+let usersUnsubscribe = null;
+let userPermsUnsubscribe = null;
 let odontoMode=null;
 let surfaceMode=false;
 const autosaveTimers={};
@@ -1054,7 +1188,10 @@ window.checkLogin = async function(){
   // TEMP: bypass branch.
   if(pass===TEMP_BYPASS_PASS){
     sessionStorage.setItem('ds_temp_bypass','1');
+    isAdmin=true;
     document.getElementById('loginBg').style.display='none';
+    // Show the Admin button immediately (don't wait for next page load)
+    if(typeof updateAdminUI==='function')updateAdminUI();
     return;
   }
   btn.disabled=true;
@@ -1080,6 +1217,39 @@ window.cerrarSesion = async function(){
 if(isTempBypass()){
   const bg=document.getElementById('loginBg');
   if(bg)bg.style.display='none';
+  isAdmin=true;
+}
+
+// Subscribe to current Firebase user's permissions doc.
+// If it doesn't exist yet, create it with default access (all tabs allowed).
+function bootstrapUserPerms(user){
+  if(userPermsUnsubscribe){userPermsUnsubscribe();userPermsUnsubscribe=null;}
+  currentUserUid=user.uid;
+  const ref=doc(db,'users',user.uid);
+  userPermsUnsubscribe=onSnapshot(ref,async snap=>{
+    if(snap.exists()){
+      currentUserPerms={uid:user.uid,...snap.data()};
+    }else{
+      // First login — create with default perms (all tabs)
+      const initial={
+        email:user.email||'',
+        name:user.displayName||'',
+        tabsAllowed:[...ALL_TABS],
+        createdAt:new Date().toISOString(),
+        lastLoginAt:new Date().toISOString()
+      };
+      try{await setDoc(ref,initial);}catch(e){console.warn('Could not create user perms:',e.message);}
+      currentUserPerms={uid:user.uid,...initial};
+    }
+    updateAdminUI();
+    // Re-render current view so tab filter applies
+    if(viewActual==='paciente'&&idActual)renderPaciente();
+  });
+}
+
+function updateAdminUI(){
+  const btn=document.getElementById('adminBtn');
+  if(btn)btn.style.display=isAdmin?'inline-flex':'none';
 }
 
 // Wrap Firebase Auth listener in try/catch so a broken origin (file://, etc.)
@@ -1087,15 +1257,30 @@ if(isTempBypass()){
 try{
   onAuthStateChanged(auth, user => {
     if(isTempBypass()){
+      isAdmin=true;
       document.getElementById('loginBg').style.display='none';
+      updateAdminUI();
       return;
     }
     document.getElementById('loginBg').style.display = user ? 'none' : 'flex';
+    if(user){
+      isAdmin=false;
+      bootstrapUserPerms(user);
+    }else{
+      isAdmin=false;
+      currentUserUid=null;
+      currentUserPerms=null;
+      if(userPermsUnsubscribe){userPermsUnsubscribe();userPermsUnsubscribe=null;}
+    }
+    updateAdminUI();
   });
 }catch(e){
   console.warn('[DocuSalud] Firebase Auth listener failed to attach:', e.message);
   // Bypass path still works through window.checkLogin above.
 }
+
+// Initial UI sync (in case bypass set the flag before button exists in DOM)
+document.addEventListener('DOMContentLoaded',updateAdminUI);
 
 // ─── MOBILE ───────────────────────────────────────────────────────────────
 window.toggleSidebar=function(){document.getElementById('sidebar').classList.toggle('open')}
@@ -1410,6 +1595,100 @@ window.toggleCalendar=function(){
     viewActual='calendario';calendarDate=new Date();calendarView='mes';renderCalendar();
   }
 }
+
+// ─── ADMIN VIEW ────────────────────────────────────────────────────────────
+window.toggleAdmin=function(){
+  if(!isAdmin)return;
+  if(viewActual==='admin'){
+    viewActual='paciente';
+    if(usersUnsubscribe){usersUnsubscribe();usersUnsubscribe=null;}
+    if(idActual)renderPaciente();else renderEmpty();
+  }else{
+    viewActual='admin';
+    if(usersUnsubscribe){usersUnsubscribe();}
+    usersUnsubscribe=onSnapshot(collection(db,'users'),snap=>{
+      allUsersList=snap.docs.map(d=>({uid:d.id,...d.data()}));
+      // Sort by name then email
+      allUsersList.sort((a,b)=>(a.name||a.email||'').localeCompare(b.name||b.email||''));
+      if(viewActual==='admin')renderAdmin();
+    },err=>{
+      console.warn('Users subscription error:',err.message);
+      allUsersList=[];
+      if(viewActual==='admin')renderAdmin();
+    });
+    // Initial render even before snapshot lands
+    renderAdmin();
+  }
+}
+
+function renderAdmin(){
+  const userCount=allUsersList.length;
+  const isEmpty=userCount===0;
+  const userCards=allUsersList.map(u=>{
+    const allowed=new Set(u.tabsAllowed||ALL_TABS);
+    return `<div class="admin-user-card">
+      <div class="admin-user-head">
+        <div>
+          <div class="admin-user-name">${e(u.name||u.email||'(sin nombre)')}</div>
+          <div class="admin-user-email">${e(u.email||'')}</div>
+        </div>
+        <div class="admin-user-meta">${allowed.size}/${ALL_TABS.length} pestañas</div>
+      </div>
+      <div class="admin-tabs-grid">
+        ${ALL_TABS.map(k=>`
+          <label class="admin-tab-chip ${allowed.has(k)?'on':''}">
+            <input type="checkbox" ${allowed.has(k)?'checked':''} onchange="adminToggleTab('${u.uid}','${k}',this.checked)">
+            <span>${e(TAB_LABELS[k]||k)}</span>
+          </label>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+  const emptyState=isEmpty?`<div class="admin-empty">
+    <p style="font-family:'Fraunces',serif;font-size:18px;color:var(--text2);font-style:italic">No hay usuarios todavía.</p>
+    <p style="font-size:12px;color:var(--text3);max-width:480px;text-align:center;line-height:1.6">
+      Los usuarios aparecen aquí después de su primer inicio de sesión.
+      Para invitar un usuario nuevo: ve a Firebase Console → Authentication → Add user (correo + contraseña),
+      compártele la contraseña, y dile que entre a docusalud.org. Una vez que entre, podrás restringir sus pestañas desde aquí.
+    </p>
+  </div>`:'';
+
+  document.getElementById('mainArea').innerHTML=`
+    <div class="phdr">
+      <div style="flex:1">
+        <div class="phn">Administración</div>
+        <div class="phm">Visibilidad de pestañas por usuario${userCount?` · ${userCount} usuario${userCount===1?'':'s'}`:''}</div>
+      </div>
+      <button class="ba" onclick="toggleAdmin()">Cerrar administración</button>
+    </div>
+    <div class="panel admin-panel">
+      ${isEmpty?emptyState:`<div class="admin-users-grid">${userCards}</div>`}
+      <div class="admin-footer">
+        <p style="font-size:11px;color:var(--text3);line-height:1.6">
+          <strong>Cómo funciona:</strong> cada usuario ve solo las pestañas marcadas. Por defecto, los nuevos usuarios ven todas las pestañas — desmarca las que quieres ocultarles.
+          Los cambios se guardan automáticamente. La pestaña <em>Datos personales</em> conviene mantenerla siempre activa.
+        </p>
+      </div>
+    </div>`;
+}
+
+window.adminToggleTab=async function(uid,tabKey,nowChecked){
+  if(!isAdmin)return;
+  const user=allUsersList.find(u=>u.uid===uid);
+  if(!user)return;
+  const tabs=new Set(user.tabsAllowed||ALL_TABS);
+  if(nowChecked)tabs.add(tabKey);else tabs.delete(tabKey);
+  try{
+    await setDoc(doc(db,'users',uid),{
+      ...user,
+      tabsAllowed:Array.from(tabs),
+      updatedAt:new Date().toISOString(),
+      updatedBy:'admin'
+    },{merge:true});
+    // onSnapshot listener will re-render
+  }catch(err){
+    toast('Error al guardar: '+err.message);
+  }
+}
 function renderCalendar(){
   if(calendarView==='dia')renderCalendarDia();
   else renderCalendarMes();
@@ -1579,7 +1858,7 @@ function renderPaciente(){
   const p=gp();
   if(!p){renderEmpty();return;}
   const ini=p.nombre.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
-  const tabs=[
+  let tabs=[
     {k:'datos',l:'Datos personales'},
     {k:'clinico',l:'Historia clínica'},
     {k:'odonto',l:'Odontograma'},
@@ -1589,6 +1868,32 @@ function renderPaciente(){
     {k:'rec',l:'Récord'},
     {k:'cons',l:`Consultas <span class="badge">${(p.consultas||[]).length}</span>`}
   ];
+  // Filter by current user's allowed tabs (admins via bypass see everything).
+  if(!isAdmin && currentUserPerms && Array.isArray(currentUserPerms.tabsAllowed)){
+    const allowed=new Set(currentUserPerms.tabsAllowed);
+    tabs=tabs.filter(t=>allowed.has(t.k));
+    // If active tab got filtered out, fall back to first allowed
+    if(tabs.length>0 && !tabs.find(t=>t.k===tabActual)){
+      tabActual=tabs[0].k;
+    }
+  }
+  if(tabs.length===0){
+    // User has no tabs allowed at all — show a friendly blocker
+    document.getElementById('mainArea').innerHTML=`
+      <div class="phdr">
+        <div class="pav">${ini}</div>
+        <div style="flex:1;min-width:0">
+          <div class="phn">${e(p.nombre)}</div>
+          <div class="phm">${edad(p.nacimiento)}${edad(p.nacimiento)&&p.ci?' · ':''}${e(p.ci||'')}</div>
+        </div>
+        <button class="ba" onclick="volverInicio()">← Inicio</button>
+      </div>
+      <div class="panel"><div class="empty">
+        <h3 style="font-family:'DM Sans',sans-serif;font-weight:400">Acceso restringido</h3>
+        <p style="font-family:'Fraunces',serif;font-style:italic;color:var(--text2)">No tienes pestañas asignadas. Pide a un administrador que habilite tu acceso.</p>
+      </div></div>`;
+    return;
+  }
   document.getElementById('mainArea').innerHTML=`
     <div class="phdr">
       <div class="pav">${ini}</div>
@@ -2071,8 +2376,9 @@ function renderToothVizSVG(p,n){
     v:getSurfaceState(p,n,'v'),
     l:getSurfaceState(p,n,'l')
   };
-  if(vizView==='oclusal')return renderRefinedOcclusal(p,n,states,type,upper);
-  return renderRealisticLateral(p,n,states,type,upper,tState);
+  // Lateral view removed — always render oclusal. renderRealisticLateral kept in
+  // codebase for potential future use but no longer reachable from the UI.
+  return renderRefinedOcclusal(p,n,states,type,upper);
 }
 function vizToothPicker(p,mode){
   // Pills grouped by quadrant
@@ -2107,15 +2413,12 @@ function renderToothVizPanel(p,mode){
   const t=(p.teeth||{})[n];
   const isWhole=typeof t==='string';
   const dominantBadge=isWhole?`<span class="viz-state-pill viz-state-${t}">${SIMBOLOS[t]||t} · ${t}</span>`:'';
+  // Lateral view removed; we always render the oclusal cross-zone diagram.
   return `<div class="viz-panel">
     <div class="viz-header">
       <div class="viz-tooth-id"><span class="viz-tooth-num">${n}</span><span class="viz-tooth-type">${toothPosLabel(n)}</span></div>
-      <div class="viz-view-toggle">
-        <button class="viz-view-btn ${vizView==='lateral'?'on':''}" onclick="vizSetView('lateral')" title="Vista lateral">Lateral</button>
-        <button class="viz-view-btn ${vizView==='oclusal'?'on':''}" onclick="vizSetView('oclusal')" title="Vista oclusal">Oclusal</button>
-      </div>
     </div>
-    <div class="viz-canvas viz-canvas-${vizView}">${renderToothVizSVG(p,n)}</div>
+    <div class="viz-canvas viz-canvas-oclusal">${renderToothVizSVG(p,n)}</div>
     ${dominantBadge?`<div class="viz-badges">${dominantBadge}</div>`:''}
     <div class="viz-hint">Estado activo: <strong style="color:var(--forest)">${estadoDiente}</strong> · clic en el diente para aplicar</div>
     <div class="viz-picker">${vizToothPicker(p,mode)}</div>
