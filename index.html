@@ -388,7 +388,7 @@ body {
   .brand-sub { display: none; }
   .sync-wrap span { display: none; }
   /* Hide less-essential topbar buttons on mobile — they're in the bottom-nav or moved */
-  .tbtn[title="Importar"], .tbtn[title="Imprimir"] { display: none; }
+  .tbtn[title="Importar"], .tbtn[title="Imprimir"], .tbtn[title="Cerrar sesión"] { display: none; }
   .tbtn { padding: 6px 8px; }
   .fg { grid-template-columns: 1fr; }
   .fg3 { grid-template-columns: 1fr 1fr; }
@@ -1007,7 +1007,6 @@ body:has(.dot.ing) .topbar .brand svg { animation: logoBreathe 1.5s var(--ease) 
     <button class="tbtn" onclick="window.print()" title="Imprimir" aria-label="Imprimir">
       <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg><span class="lbl">Imprimir</span>
     </button>
-    <span id="userIndicator" style="font-size:11px;color:var(--text2);padding:0 8px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
     <button class="tbtn" onclick="cerrarSesion()" title="Cerrar sesión" aria-label="Cerrar sesión">
       <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg><span class="lbl">Cerrar sesión</span>
     </button>
@@ -1219,8 +1218,6 @@ if(isTempBypass()){
   const bg=document.getElementById('loginBg');
   if(bg)bg.style.display='none';
   isAdmin=true;
-  const ind=document.getElementById('userIndicator');
-  if(ind)ind.textContent='Admin (bypass)';
 }
 
 // Subscribe to current Firebase user's permissions doc.
@@ -1228,10 +1225,7 @@ if(isTempBypass()){
 function bootstrapUserPerms(user){
   if(userPermsUnsubscribe){userPermsUnsubscribe();userPermsUnsubscribe=null;}
   currentUserUid=user.uid;
-  const ind=document.getElementById('userIndicator');
-  if(ind)ind.textContent=user.email||'';
   const ref=doc(db,'users',user.uid);
-  startPacientesListener();
   userPermsUnsubscribe=onSnapshot(ref,async snap=>{
     if(snap.exists()){
       currentUserPerms={uid:user.uid,...snap.data()};
@@ -1276,12 +1270,6 @@ try{
       isAdmin=false;
       currentUserUid=null;
       currentUserPerms=null;
-      pacientes=[];
-      const ind=document.getElementById('userIndicator');
-      if(ind)ind.textContent='';
-      renderLista();
-      renderEmpty();
-      if(pacientesUnsubscribe){pacientesUnsubscribe();pacientesUnsubscribe=null;}
       if(userPermsUnsubscribe){userPermsUnsubscribe();userPermsUnsubscribe=null;}
     }
     updateAdminUI();
@@ -1366,21 +1354,13 @@ function statusEl(formKey){
 }
 
 // ─── FIRESTORE ────────────────────────────────────────────────────────────
-let pacientesUnsubscribe=null;
-function getPacientesCol(){
-  return collection(db,'usuarios',currentUserUid,'pacientes');
-}
-function startPacientesListener(){
-  if(pacientesUnsubscribe){pacientesUnsubscribe();pacientesUnsubscribe=null;}
-  if(!currentUserUid)return;
-  pacientesUnsubscribe=onSnapshot(getPacientesCol(),snap=>{
-    pacientes=snap.docs.map(d=>({id:d.id,...d.data()}));
-    rebuildConsultasIndex();
-    renderLista();
-    rerenderCurrent();
-    ss('ok','Sincronizado');
-  },()=>ss('err','Sin conexión'));
-}
+onSnapshot(collection(db,'pacientes'),snap=>{
+  pacientes=snap.docs.map(d=>({id:d.id,...d.data()}));
+  rebuildConsultasIndex();
+  renderLista();
+  rerenderCurrent();
+  ss('ok','Sincronizado');
+},()=>ss('err','Sin conexión'));
 
 function rerenderCurrent(){
   if(viewActual==='calendario')renderCalendar();
@@ -1391,19 +1371,19 @@ function rerenderCurrent(){
 async function guardar(p){
   ss('ing','Guardando...');
   const{id,...data}=p;
-  try{await setDoc(doc(db,'usuarios',currentUserUid,'pacientes',id),data);ss('ok','Guardado');ssRest();}
+  try{await setDoc(doc(db,'pacientes',id),data);ss('ok','Guardado');ssRest();}
   catch(err){ss('err','Error');throw err;}
 }
 async function crear(data){
   ss('ing','Guardando...');
-  try{const ref=await addDoc(getPacientesCol(),data);ss('ok','Guardado');return ref.id;}
+  try{const ref=await addDoc(collection(db,'pacientes'),data);ss('ok','Guardado');return ref.id;}
   catch(err){ss('err','Error');return null;}
 }
-async function borrar(id){try{await deleteDoc(doc(db,'usuarios',currentUserUid,'pacientes',id));}catch(err){}}
+async function borrar(id){try{await deleteDoc(doc(db,'pacientes',id));}catch(err){}}
 
 async function ciExists(ci, excludeId){
   if(!ci||ci==='V-'||ci==='J-'||ci==='E-')return null;
-  const q1=query(getPacientesCol(),where('ci','==',ci));
+  const q1=query(collection(db,'pacientes'),where('ci','==',ci));
   const snap=await getDocs(q1);
   for(const d of snap.docs){if(d.id!==excludeId)return{id:d.id,...d.data()};}
   return null;
@@ -1438,7 +1418,7 @@ async function importarJSON(text){
     for(const p of d.pacientes){
       if(!ex.has(p.id)){
         const{id,...data}=p;
-        await setDoc(doc(db,'usuarios',currentUserUid,'pacientes',p.id),data);
+        await setDoc(doc(db,'pacientes',p.id),data);
         count++;
       }
     }
@@ -1476,7 +1456,7 @@ async function importarCSV(text){
     let count=0;
     for(const r of records){
       const data={...r,telefono2:'',email:'',especialidad:'general',motivo:'',antecedentes:'',patologias:'',oclusion:'',diagnostico:'',plan:'',plan_aceptado:'',restauracion:'',material:'',color_dental:'',color_deseado:'',laboratorio:'',indicaciones_tecnico:'',obs_importantes:'',teeth:{},teeth_obs:'',operatorias:[],procs:{},especialistas:[],records:[],consultas:[],firmas:{}};
-      await addDoc(getPacientesCol(),data);
+      await addDoc(collection(db,'pacientes'),data);
       count++;
     }
     toast(`${count} pacientes importados desde CSV`);
@@ -2052,7 +2032,7 @@ window.eliminarP=async function(){
   renderEmpty();
   undoToast(`${p.nombre} eliminado`,async()=>{
     const{id,...data}=snapshot;
-    await setDoc(doc(db,'usuarios',currentUserUid,'pacientes',id),data);
+    await setDoc(doc(db,'pacientes',id),data);
     idActual=id;renderLista();renderPaciente();
   });
 }
