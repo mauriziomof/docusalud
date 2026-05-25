@@ -388,7 +388,7 @@ body {
   .brand-sub { display: none; }
   .sync-wrap span { display: none; }
   /* Hide less-essential topbar buttons on mobile — they're in the bottom-nav or moved */
-  .tbtn[title="Importar"], .tbtn[title="Imprimir"], .tbtn[title="Cerrar sesión"] { display: none; }
+  .tbtn[title="Importar"], .tbtn[title="Imprimir"] { display: none; }
   .tbtn { padding: 6px 8px; }
   .fg { grid-template-columns: 1fr; }
   .fg3 { grid-template-columns: 1fr 1fr; }
@@ -1007,6 +1007,7 @@ body:has(.dot.ing) .topbar .brand svg { animation: logoBreathe 1.5s var(--ease) 
     <button class="tbtn" onclick="window.print()" title="Imprimir" aria-label="Imprimir">
       <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg><span class="lbl">Imprimir</span>
     </button>
+    <span id="userIndicator" style="font-size:11px;color:var(--text2);padding:0 8px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
     <button class="tbtn" onclick="cerrarSesion()" title="Cerrar sesión" aria-label="Cerrar sesión">
       <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg><span class="lbl">Cerrar sesión</span>
     </button>
@@ -1218,6 +1219,8 @@ if(isTempBypass()){
   const bg=document.getElementById('loginBg');
   if(bg)bg.style.display='none';
   isAdmin=true;
+  const ind=document.getElementById('userIndicator');
+  if(ind)ind.textContent='Admin (bypass)';
 }
 
 // Subscribe to current Firebase user's permissions doc.
@@ -1225,6 +1228,8 @@ if(isTempBypass()){
 function bootstrapUserPerms(user){
   if(userPermsUnsubscribe){userPermsUnsubscribe();userPermsUnsubscribe=null;}
   currentUserUid=user.uid;
+  const ind=document.getElementById('userIndicator');
+  if(ind)ind.textContent=user.email||'';
   const ref=doc(db,'users',user.uid);
   startPacientesListener();
   userPermsUnsubscribe=onSnapshot(ref,async snap=>{
@@ -1272,6 +1277,8 @@ try{
       currentUserUid=null;
       currentUserPerms=null;
       pacientes=[];
+      const ind=document.getElementById('userIndicator');
+      if(ind)ind.textContent='';
       renderLista();
       renderEmpty();
       if(pacientesUnsubscribe){pacientesUnsubscribe();pacientesUnsubscribe=null;}
