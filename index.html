@@ -1,3 +1,4 @@
+<!-- test: verificar ciclo de desarrollo - Maurizio -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -12,13 +13,14 @@
   --forest:   #1F3A2A;
   --sage:     #2F5D3A;
   --olive:    #7A8A6E;
-  --mist:     #DCE3D2;
+  /* Palette refined per brand book v2 (May 2026): */
+  --mist:     #E3E7DA;
   --charcoal: #1A1A17;
   --slate:    #5C5C56;
-  --cream:    #F5F1E8;
-  --bone:     #FBFAF6;
+  --cream:    #F2EFE6;
+  --bone:     #FAF9F6;
   --terra:    #B8553E;
-  --brass:    #C9A961;
+  --brass:    #D2B385;
   --petrol:   #4A6B7C;
 
   --bg:       var(--cream);
@@ -104,6 +106,47 @@ body {
 }
 .lbox h2 span { font-weight: 700; color: var(--forest); }
 .lbox p { font-size: 11px; color: var(--text3); margin-bottom: 28px; letter-spacing: 0.18em; text-transform: uppercase; }
+
+/* ── AUTH VIEWS (login / signup / forgot password) ─────────────────────── */
+.auth-view { display: block; }
+.auth-title-row {
+  display: grid; grid-template-columns: 90px 1fr; gap: 8px; margin-bottom: 12px;
+}
+.auth-title-row select {
+  padding: 12px 10px; font-size: 16px; font-family: 'DM Sans', sans-serif;
+  border: var(--border-default); border-radius: var(--r);
+  background: var(--surface2); color: var(--text);
+  outline: none; cursor: pointer; text-align: center;
+}
+.auth-title-row select:focus { border-color: var(--forest); }
+.auth-title-row input { margin-bottom: 0 !important; }
+.auth-links {
+  display: flex; flex-direction: column; gap: 10px;
+  margin-top: 16px; padding-top: 16px;
+  border-top: 0.5px solid var(--border);
+}
+.auth-link {
+  background: none; border: none; cursor: pointer;
+  font-family: 'DM Sans', sans-serif; font-size: 12px;
+  color: var(--text2); letter-spacing: 0.04em;
+  padding: 4px 0; transition: color 0.12s var(--ease, ease);
+  text-align: center;
+}
+.auth-link:hover { color: var(--forest); }
+.auth-help {
+  font-size: 12px; color: var(--text2); margin-bottom: 18px;
+  text-align: center; line-height: 1.5;
+  font-style: italic; font-family: 'Fraunces', serif;
+  letter-spacing: 0; text-transform: none;
+}
+.auth-success {
+  font-size: 12px; color: var(--forest); margin-top: 12px;
+  padding: 10px 12px; background: var(--accent-light);
+  border-radius: var(--r); text-align: center;
+  border: 0.5px solid var(--accent-border);
+  min-height: 0;
+}
+.auth-success:empty { display: none; }
 .lbox input {
   width: 100%; padding: 12px 14px;
   /* 16px font-size prevents iOS Safari auto-zoom on focus */
@@ -391,7 +434,11 @@ body {
   .tbtn[title="Importar"], .tbtn[title="Imprimir"], .tbtn[title="Cerrar sesión"] { display: none; }
   .tbtn { padding: 6px 8px; }
   .fg { grid-template-columns: 1fr; }
-  .fg3 { grid-template-columns: 1fr 1fr; }
+  /* Datos personales: 3-column row (fecha, cédula, sexo) is too tight on phones — stack */
+  .fg3 { grid-template-columns: 1fr; }
+  /* CI input (V/J/E selector + number): make the number input fill width on mobile */
+  .ci-input { display: flex; }
+  .ci-input input { min-width: 0; }
   /* Sticky patient header + tabbar — floating above scroll content */
   .phdr { padding: 12px 14px; gap: 10px; box-shadow: 0 1px 0 rgba(31,58,42,0.06); position: sticky; top: 0; z-index: 4; }
   .pav { width: 34px; height: 34px; font-size: 12px; }
@@ -710,6 +757,89 @@ body:has(.dot.ing) .topbar .brand svg { animation: logoBreathe 1.5s var(--ease) 
 /* Signature canvas — slightly higher contrast in dark mode (was too dark to draw on) */
 [data-theme="dark"] .firma-canvas { background: #3a3a35; }
 
+/* ── SIDEBAR SMART FILTERS (v7-6) ──────────────────────────────────────── */
+.plist-filters {
+  display: flex; flex-direction: column; gap: 8px;
+  padding: 10px 10px 12px;
+  background: var(--surface2);
+  border-bottom: 0.5px solid var(--border);
+}
+.plist-filter-group { display: flex; flex-direction: column; gap: 4px; }
+.plist-filter-label {
+  font-size: 9px; color: var(--text3);
+  letter-spacing: 0.08em; text-transform: uppercase; font-weight: 500;
+  padding-left: 2px;
+}
+.plist-filter-chips { display: flex; gap: 4px; flex-wrap: wrap; }
+.plist-chip {
+  padding: 3px 8px; font-size: 10.5px; font-family: 'DM Sans', sans-serif;
+  border: 0.5px solid var(--border);
+  border-radius: 12px; background: var(--surface);
+  color: var(--text2); cursor: pointer;
+  transition: all 0.12s var(--ease, ease); letter-spacing: 0.02em;
+}
+.plist-chip:hover { color: var(--text); border-color: var(--border2); }
+.plist-chip.on {
+  background: var(--accent-light); color: var(--forest);
+  border-color: var(--accent-border); font-weight: 600;
+}
+
+/* ── PROFILE BUTTON (top-right avatar) ─────────────────────────────────── */
+.profile-btn {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: var(--accent-light);
+  border: 0.5px solid var(--accent-border);
+  color: var(--forest);
+  font-family: 'DM Sans', sans-serif; font-weight: 600;
+  font-size: 12px; letter-spacing: 0.04em;
+  cursor: pointer; padding: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  transition: all 0.12s var(--ease, ease);
+  margin-left: 4px;
+}
+.profile-btn:hover { background: var(--mist); transform: scale(1.05); }
+
+/* ── PROFILE PAGE ──────────────────────────────────────────────────────── */
+.profile-panel { padding: 22px 28px 28px; overflow: auto; }
+.profile-hero {
+  display: flex; align-items: center; gap: 18px;
+  padding: 22px 24px;
+  background: linear-gradient(135deg, var(--accent-light) 0%, var(--surface) 100%);
+  border: var(--border-default); border-radius: var(--rl);
+  margin-bottom: 18px;
+}
+.profile-avatar-lg {
+  width: 64px; height: 64px; border-radius: 50%;
+  background: var(--forest); color: var(--cream);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'DM Sans', sans-serif; font-weight: 600;
+  font-size: 24px; letter-spacing: 0.04em;
+  flex-shrink: 0;
+}
+.profile-hero-name {
+  font-family: 'Fraunces', serif;
+  font-size: 22px; font-weight: 400; color: var(--text);
+  line-height: 1.1; margin-bottom: 4px;
+}
+.profile-hero-email {
+  font-size: 12px; color: var(--text3); letter-spacing: 0.02em;
+}
+.profile-card {
+  background: var(--surface);
+  border: var(--border-default);
+  border-radius: var(--rl);
+  padding: 18px 22px;
+  margin-bottom: 14px;
+}
+.profile-card .ct { margin-bottom: 12px; }
+
+@media (max-width: 768px) {
+  .profile-panel { padding: 14px 14px 18px; }
+  .profile-hero { padding: 16px 18px; gap: 14px; }
+  .profile-avatar-lg { width: 52px; height: 52px; font-size: 20px; }
+  .profile-hero-name { font-size: 19px; }
+  .profile-btn { width: 32px; height: 32px; font-size: 11px; }
+}
 
 /* ── ADMIN BUTTON IN TOPBAR ─────────────────────────────────────────────── */
 .tbtn-admin {
@@ -788,6 +918,64 @@ body:has(.dot.ing) .topbar .brand svg { animation: logoBreathe 1.5s var(--ease) 
   padding: 48px 24px; gap: 14px;
   text-align: center;
 }
+
+/* Admin toolbar (search + filter chips) */
+.admin-toolbar {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  margin-bottom: 18px; padding-bottom: 14px;
+  border-bottom: 0.5px solid var(--border);
+}
+.admin-search {
+  position: relative; flex: 1; min-width: 240px;
+}
+.admin-search input {
+  width: 100%; padding: 10px 14px 10px 36px;
+  font-size: 13px; font-family: 'DM Sans', sans-serif;
+  border: var(--border-default); border-radius: var(--r);
+  background: var(--surface2); color: var(--text);
+  outline: none; transition: border 0.12s var(--ease, ease);
+}
+.admin-search input:focus { border-color: var(--forest); background: var(--surface); }
+.admin-search-ico {
+  position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+  width: 14px; height: 14px; color: var(--text3); pointer-events: none;
+}
+.admin-filter-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.admin-filter-chip {
+  padding: 7px 12px; font-size: 11px; font-family: 'DM Sans', sans-serif;
+  font-weight: 500; border: var(--border-default); border-radius: var(--r);
+  background: var(--surface); color: var(--text2); cursor: pointer;
+  transition: all 0.12s var(--ease, ease); letter-spacing: 0.02em;
+}
+.admin-filter-chip:hover { color: var(--text); border-color: var(--border2); }
+.admin-filter-chip.on { background: var(--accent-light); color: var(--forest); border-color: var(--accent-border); font-weight: 600; }
+
+/* Per-user actions (impersonate button + tab count badge) */
+.admin-user-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.admin-impersonate-btn {
+  font-size: 11px; padding: 5px 10px;
+  background: var(--surface2); color: var(--forest);
+  border: 0.5px solid var(--accent-border);
+}
+.admin-impersonate-btn:hover { background: var(--accent-light); }
+
+/* Impersonation banner — shown when admin is "viewing as" another user */
+.impersonation-banner {
+  position: sticky; top: 0; z-index: 6;
+  background: linear-gradient(90deg, var(--brass) 0%, #E5C99B 100%);
+  color: var(--charcoal);
+  padding: 8px 16px;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  font-size: 12px; letter-spacing: 0.02em;
+  box-shadow: 0 1px 4px rgba(31,58,42,0.08);
+}
+.impersonation-banner .imp-text { display: flex; align-items: center; gap: 8px; }
+.impersonation-banner strong { font-weight: 600; }
+.impersonation-banner .imp-exit-btn {
+  background: var(--charcoal); color: var(--cream); border-color: var(--charcoal);
+  font-size: 11px; padding: 5px 12px;
+}
+.impersonation-banner .imp-exit-btn:hover { background: var(--forest); border-color: var(--forest); }
 
 .admin-footer {
   margin-top: 28px;
@@ -954,18 +1142,67 @@ body:has(.dot.ing) .topbar .brand svg { animation: logoBreathe 1.5s var(--ease) 
 <div class="lbg" id="loginBg">
   <div class="lbox">
     <svg class="ds-logo ds-logo-lg" width="56" height="56" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="DocuSalud">
-      <rect width="52" height="52" rx="13" fill="#DCE3D2"/>
-      <path d="M 16 13 H 28 Q 40 13 40 26 Q 40 39 28 39 H 16 Z M 22 19 V 33 H 28 Q 34 33 34 26 Q 34 19 28 19 Z" fill="#1F3A2A" fill-rule="evenodd"/>
-      <rect x="16" y="42" width="20" height="2" rx="1" fill="#C9A961"/>
+      <rect width="52" height="52" rx="13" fill="#E3E7DA"/>
+      <path d="M 20 11 H 31 Q 42 11 42 26 Q 42 41 31 41 H 20 Z M 26 17 V 35 H 31 Q 36 35 36 26 Q 36 17 31 17 Z" fill="#1F3A2A" fill-rule="evenodd"/>
+      <rect x="13" y="15" width="3.5" height="1.8" rx="0.9" fill="#D2B385"/>
+      <rect x="13" y="20" width="3.5" height="1.8" rx="0.9" fill="#D2B385"/>
+      <rect x="13" y="25" width="3.5" height="1.8" rx="0.9" fill="#D2B385"/>
+      <rect x="13" y="30" width="3.5" height="1.8" rx="0.9" fill="#D2B385"/>
+      <rect x="13" y="35" width="3.5" height="1.8" rx="0.9" fill="#D2B385"/>
+      <rect x="22" y="44" width="14" height="1.8" rx="0.9" fill="#D2B385"/>
     </svg>
     <h2><span>docu</span>salud</h2>
     <p>Historias clínicas · Acceso privado</p>
-    <form onsubmit="event.preventDefault(); checkLogin()">
-      <input type="email" id="loginEmail" placeholder="Correo electrónico" autofocus autocomplete="username" oninput="document.getElementById('loginErr').textContent=''">
-      <input type="password" id="loginPass" placeholder="Contraseña" autocomplete="current-password" oninput="document.getElementById('loginErr').textContent=''">
-      <button type="submit" id="loginBtn">Entrar</button>
-    </form>
-    <div class="lerr" id="loginErr"></div>
+
+    <!-- LOGIN VIEW (default) -->
+    <div id="loginView" class="auth-view">
+      <form onsubmit="event.preventDefault(); checkLogin()">
+        <input type="email" id="loginEmail" placeholder="Correo electrónico" autocomplete="username" oninput="document.getElementById('loginErr').textContent=''">
+        <input type="password" id="loginPass" placeholder="Contraseña" autocomplete="current-password" oninput="document.getElementById('loginErr').textContent=''">
+        <button type="submit" id="loginBtn">Entrar</button>
+      </form>
+      <div class="lerr" id="loginErr"></div>
+      <div class="auth-links">
+        <button type="button" class="auth-link" onclick="showAuthView('signup')">Crear usuario</button>
+        <button type="button" class="auth-link" onclick="showAuthView('forgot')">¿Olvidaste tu contraseña?</button>
+      </div>
+    </div>
+
+    <!-- SIGNUP VIEW -->
+    <div id="signupView" class="auth-view" style="display:none">
+      <form onsubmit="event.preventDefault(); doSignup()">
+        <div class="auth-title-row">
+          <select id="signupTitle" aria-label="Título">
+            <option value="">Sin título</option>
+            <option value="Dr.">Dr.</option>
+            <option value="Dra.">Dra.</option>
+          </select>
+          <input type="text" id="signupName" placeholder="Nombre completo" autocomplete="name" required>
+        </div>
+        <input type="email" id="signupEmail" placeholder="Correo electrónico" autocomplete="email" required>
+        <input type="password" id="signupPass" placeholder="Contraseña (mín. 6)" autocomplete="new-password" minlength="6" required>
+        <input type="password" id="signupPassConfirm" placeholder="Confirmar contraseña" autocomplete="new-password" minlength="6" required>
+        <button type="submit" id="signupBtn">Crear cuenta</button>
+      </form>
+      <div class="lerr" id="signupErr"></div>
+      <div class="auth-links">
+        <button type="button" class="auth-link" onclick="showAuthView('login')">← Volver al login</button>
+      </div>
+    </div>
+
+    <!-- FORGOT PASSWORD VIEW -->
+    <div id="forgotView" class="auth-view" style="display:none">
+      <p class="auth-help">Ingresa tu correo y te enviaremos un enlace para recuperar tu contraseña.</p>
+      <form onsubmit="event.preventDefault(); doForgot()">
+        <input type="email" id="forgotEmail" placeholder="Correo electrónico" autocomplete="email" required>
+        <button type="submit" id="forgotBtn">Enviar enlace</button>
+      </form>
+      <div class="lerr" id="forgotErr"></div>
+      <div class="auth-success" id="forgotSuccess"></div>
+      <div class="auth-links">
+        <button type="button" class="auth-link" onclick="showAuthView('login')">← Volver al login</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -976,9 +1213,14 @@ body:has(.dot.ing) .topbar .brand svg { animation: logoBreathe 1.5s var(--ease) 
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
     </button>
     <svg class="ds-logo" width="32" height="32" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="DocuSalud">
-      <rect width="52" height="52" rx="13" fill="#DCE3D2"/>
-      <path d="M 16 13 H 28 Q 40 13 40 26 Q 40 39 28 39 H 16 Z M 22 19 V 33 H 28 Q 34 33 34 26 Q 34 19 28 19 Z" fill="#1F3A2A" fill-rule="evenodd"/>
-      <rect x="16" y="42" width="20" height="2" rx="1" fill="#C9A961"/>
+      <rect width="52" height="52" rx="13" fill="#E3E7DA"/>
+      <path d="M 20 11 H 31 Q 42 11 42 26 Q 42 41 31 41 H 20 Z M 26 17 V 35 H 31 Q 36 35 36 26 Q 36 17 31 17 Z" fill="#1F3A2A" fill-rule="evenodd"/>
+      <rect x="13" y="15" width="3.5" height="1.8" rx="0.9" fill="#D2B385"/>
+      <rect x="13" y="20" width="3.5" height="1.8" rx="0.9" fill="#D2B385"/>
+      <rect x="13" y="25" width="3.5" height="1.8" rx="0.9" fill="#D2B385"/>
+      <rect x="13" y="30" width="3.5" height="1.8" rx="0.9" fill="#D2B385"/>
+      <rect x="13" y="35" width="3.5" height="1.8" rx="0.9" fill="#D2B385"/>
+      <rect x="22" y="44" width="14" height="1.8" rx="0.9" fill="#D2B385"/>
     </svg>
     <div>
       <div class="brand-name"><span>docu</span>salud</div>
@@ -1009,6 +1251,9 @@ body:has(.dot.ing) .topbar .brand svg { animation: logoBreathe 1.5s var(--ease) 
     </button>
     <button class="tbtn" onclick="cerrarSesion()" title="Cerrar sesión" aria-label="Cerrar sesión">
       <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg><span class="lbl">Cerrar sesión</span>
+    </button>
+    <button class="profile-btn" id="profileBtn" onclick="openProfile()" title="Mi perfil" aria-label="Mi perfil" style="display:none">
+      <span id="profileInitials">D</span>
     </button>
   </div>
 </div>
@@ -1052,15 +1297,20 @@ body:has(.dot.ing) .topbar .brand svg { animation: logoBreathe 1.5s var(--ease) 
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
     Exportar
   </button>
+  <button class="bn-btn" onclick="cerrarSesion()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+    Salir
+  </button>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script type="module">
+import { collection, onSnapshot, doc, setDoc, addDoc, deleteDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged, signOut, updateProfile, updatePassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, onSnapshot, doc, setDoc, addDoc, deleteDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-
+import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 const firebaseConfig = {
   apiKey: "AIzaSyCn1ELv-CLd2-C-agYGVt7dHeYlrw7T-_M",
   authDomain: "docusalud-4b215.firebaseapp.com",
@@ -1069,15 +1319,9 @@ const firebaseConfig = {
   messagingSenderId: "1061568032939",
   appId: "1:1061568032939:web:8bc330818071ea15bf87ee"
 };
-
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
-
-{ app, db, auth };
-
-
-
 
 // ─── CONSTANTS ────────────────────────────────────────────────────────────
 const UPPER=[18,17,16,15,14,13,12,11,21,22,23,24,25,26,27,28];
@@ -1147,10 +1391,16 @@ const ALL_TABS = ['datos','clinico','odonto','plan','ops','est','rec','cons'];
 const TAB_LABELS = {datos:'Datos personales',clinico:'Historia clínica',odonto:'Odontograma',plan:'Plan de tratamiento',ops:'Operatorias',est:'Proc. estéticos',rec:'Récord',cons:'Consultas'};
 let isAdmin = false;
 let currentUserUid = null;
-let currentUserPerms = null;  // {email,name,tabsAllowed,...} from /users/{uid}, or null
+let currentUserPerms = null;  // {email,name,title,tabsAllowed,tabOrder,...} from /users/{uid}, or null
 let allUsersList = [];
 let usersUnsubscribe = null;
 let userPermsUnsubscribe = null;
+// Admin can impersonate a regular user: when viewAsUid is set, the patient listener
+// filters as if we were that user. Admin still has admin powers (can leave impersonation).
+let viewAsUid = null;
+// Search/filter state for admin user list
+let adminSearchQuery = '';
+let adminFilterRole = 'all';  // 'all' | 'with-patients' | 'no-patients'
 let odontoMode=null;
 let surfaceMode=false;
 const autosaveTimers={};
@@ -1174,6 +1424,10 @@ if(savedTheme==='dark'){document.documentElement.setAttribute('data-theme','dark
 // once accounts are provisioned in Firebase Console.
 const TEMP_BYPASS_PASS='ds-temp-2026-04';
 function isTempBypass(){return sessionStorage.getItem('ds_temp_bypass')==='1'}
+// Email allowlist for admin role. Anyone logged in via Firebase Auth with one of these
+// emails gets admin powers (sees everyone's patients, can impersonate, manages user perms).
+// The bypass password remains as super-admin emergency access.
+const ADMIN_EMAILS=['mauriziomof@gmail.com','angelorossettij@gmail.com'];
 
 // IMPORTANT: define window.checkLogin BEFORE any Firebase call.
 // If Firebase init throws (e.g. file:// origin not allowed), the module would
@@ -1192,6 +1446,8 @@ window.checkLogin = async function(){
     document.getElementById('loginBg').style.display='none';
     // Show the Admin button immediately (don't wait for next page load)
     if(typeof updateAdminUI==='function')updateAdminUI();
+    // Subscribe to all pacientes as admin
+    if(typeof setupPacientesListener==='function')setupPacientesListener();
     return;
   }
   btn.disabled=true;
@@ -1209,15 +1465,96 @@ window.checkLogin = async function(){
 
 window.cerrarSesion = async function(){
   sessionStorage.removeItem('ds_temp_bypass');
+  isAdmin=false;
+  viewAsUid=null;
   try{await signOut(auth);}catch(e){}
   document.getElementById('loginBg').style.display='flex';
+  showAuthView('login');
 }
+
+// ─── AUTH VIEW ROUTER (login / signup / forgot password) ─────────────────
+window.showAuthView = function(name){
+  ['login','signup','forgot'].forEach(v=>{
+    const el=document.getElementById(v+'View');
+    if(el)el.style.display=v===name?'block':'none';
+  });
+  // Clear any error/success states
+  ['loginErr','signupErr','forgotErr','forgotSuccess'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el)el.textContent='';
+  });
+  // Focus first input in the active view
+  setTimeout(()=>{
+    const f=document.querySelector(`#${name}View input, #${name}View select`);
+    if(f)f.focus();
+  },50);
+};
+
+window.doSignup = async function(){
+  const titulo=document.getElementById('signupTitle').value;
+  const nombre=document.getElementById('signupName').value.trim();
+  const email=document.getElementById('signupEmail').value.trim();
+  const pass=document.getElementById('signupPass').value;
+  const passConfirm=document.getElementById('signupPassConfirm').value;
+  const err=document.getElementById('signupErr');
+  const btn=document.getElementById('signupBtn');
+  err.textContent='';
+  if(!nombre){err.textContent='Ingresa tu nombre completo.';return;}
+  if(!email){err.textContent='Ingresa tu correo electrónico.';return;}
+  if(pass.length<6){err.textContent='La contraseña debe tener al menos 6 caracteres.';return;}
+  if(pass!==passConfirm){err.textContent='Las contraseñas no coinciden.';return;}
+  btn.disabled=true;btn.textContent='Creando cuenta…';
+  // Stash title + name so bootstrapUserPerms can save them when /users/{uid} is created
+  sessionStorage.setItem('ds_pending_title',titulo||'');
+  sessionStorage.setItem('ds_pending_name',nombre);
+  try{
+    const cred=await createUserWithEmailAndPassword(auth,email,pass);
+    const displayName=titulo?`${titulo} ${nombre}`:nombre;
+    try{await updateProfile(cred.user,{displayName});}catch(e){console.warn('updateProfile failed:',e.message);}
+    // onAuthStateChanged will fire and bootstrap perms with the pending title/name
+  }catch(e){
+    sessionStorage.removeItem('ds_pending_title');
+    sessionStorage.removeItem('ds_pending_name');
+    let msg='No se pudo crear la cuenta.';
+    if(e.code==='auth/email-already-in-use')msg='Este correo ya tiene una cuenta. Usa "Volver al login".';
+    else if(e.code==='auth/invalid-email')msg='Correo electrónico inválido.';
+    else if(e.code==='auth/weak-password')msg='Contraseña muy débil (mín. 6 caracteres).';
+    else if(e.code==='auth/operation-not-allowed')msg='El registro está deshabilitado. Contacta al administrador.';
+    err.textContent=msg;
+  }finally{
+    btn.disabled=false;btn.textContent='Crear cuenta';
+  }
+};
+
+window.doForgot = async function(){
+  const email=document.getElementById('forgotEmail').value.trim();
+  const err=document.getElementById('forgotErr');
+  const success=document.getElementById('forgotSuccess');
+  const btn=document.getElementById('forgotBtn');
+  err.textContent='';success.textContent='';
+  if(!email){err.textContent='Ingresa tu correo electrónico.';return;}
+  btn.disabled=true;btn.textContent='Enviando…';
+  try{
+    await sendPasswordResetEmail(auth,email);
+    success.textContent='Te enviamos un enlace al correo. Revisa tu bandeja de entrada (y la carpeta de spam).';
+    document.getElementById('forgotEmail').value='';
+  }catch(e){
+    let msg='No se pudo enviar el enlace.';
+    if(e.code==='auth/user-not-found')msg='No encontramos una cuenta con ese correo.';
+    else if(e.code==='auth/invalid-email')msg='Correo electrónico inválido.';
+    err.textContent=msg;
+  }finally{
+    btn.disabled=false;btn.textContent='Enviar enlace';
+  }
+};
 
 // If bypass is already set, hide login immediately (don't wait for Firebase auth listener)
 if(isTempBypass()){
   const bg=document.getElementById('loginBg');
   if(bg)bg.style.display='none';
   isAdmin=true;
+  // Subscribe to pacientes as admin
+  setupPacientesListener();
 }
 
 // Subscribe to current Firebase user's permissions doc.
@@ -1229,12 +1566,21 @@ function bootstrapUserPerms(user){
   userPermsUnsubscribe=onSnapshot(ref,async snap=>{
     if(snap.exists()){
       currentUserPerms={uid:user.uid,...snap.data()};
+      // Update lastLoginAt opportunistically (don't await)
+      try{setDoc(ref,{lastLoginAt:new Date().toISOString()},{merge:true});}catch(e){}
     }else{
-      // First login — create with default perms (all tabs)
+      // First login — create with default perms (all tabs).
+      // If this signup just happened, pull title + name from sessionStorage.
+      const pendingTitle=sessionStorage.getItem('ds_pending_title')||'';
+      const pendingName=sessionStorage.getItem('ds_pending_name')||user.displayName||'';
+      sessionStorage.removeItem('ds_pending_title');
+      sessionStorage.removeItem('ds_pending_name');
       const initial={
         email:user.email||'',
-        name:user.displayName||'',
+        name:pendingName,
+        title:pendingTitle,
         tabsAllowed:[...ALL_TABS],
+        tabOrder:[...ALL_TABS],
         createdAt:new Date().toISOString(),
         lastLoginAt:new Date().toISOString()
       };
@@ -1244,13 +1590,120 @@ function bootstrapUserPerms(user){
     updateAdminUI();
     // Re-render current view so tab filter applies
     if(viewActual==='paciente'&&idActual)renderPaciente();
+    // Now that we know the user's uid, set up the patient listener with ownerUid filtering
+    setupPacientesListener();
   });
 }
 
 function updateAdminUI(){
   const btn=document.getElementById('adminBtn');
   if(btn)btn.style.display=isAdmin?'inline-flex':'none';
+  // Update profile button visibility + initials
+  const profBtn=document.getElementById('profileBtn');
+  const profInit=document.getElementById('profileInitials');
+  if(profBtn){
+    // Show profile button only for non-admin authenticated users
+    profBtn.style.display = (!isAdmin && currentUserUid) ? 'inline-flex' : 'none';
+    if(profInit && currentUserPerms){
+      const name=currentUserPerms.name||currentUserPerms.email||'D';
+      profInit.textContent=name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+    }
+  }
 }
+
+// ─── PROFILE PAGE ──────────────────────────────────────────────────────────
+window.openProfile=function(){
+  if(!currentUserPerms){toast('Inicia sesión primero');return;}
+  viewActual='profile';
+  renderProfile();
+};
+
+function renderProfile(){
+  if(!currentUserPerms){renderEmpty();return;}
+  const p=currentUserPerms;
+  const initials=(p.name||p.email||'D').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  const fullName=p.title?`${p.title} ${p.name||''}`.trim():(p.name||'(sin nombre)');
+  document.getElementById('mainArea').innerHTML=`
+    ${impersonationBanner()}
+    <div class="phdr">
+      <div style="flex:1">
+        <div class="phn">Mi perfil</div>
+        <div class="phm">${e(p.email||'')}</div>
+      </div>
+      <button class="ba" onclick="volverInicio()">← Inicio</button>
+    </div>
+    <div class="panel profile-panel">
+      <div class="profile-hero">
+        <div class="profile-avatar-lg">${e(initials)}</div>
+        <div>
+          <div class="profile-hero-name">${e(fullName)}</div>
+          <div class="profile-hero-email">${e(p.email||'')}</div>
+        </div>
+      </div>
+
+      <div class="profile-card">
+        <div class="ct">Información personal</div>
+        <div class="mf"><label>Título</label><select id="prof_title">
+          <option value="" ${!p.title?'selected':''}>Sin título</option>
+          <option value="Dr." ${p.title==='Dr.'?'selected':''}>Dr.</option>
+          <option value="Dra." ${p.title==='Dra.'?'selected':''}>Dra.</option>
+        </select></div>
+        <div class="mf"><label>Nombre completo</label><input id="prof_name" value="${e(p.name||'')}" placeholder="Nombre y apellidos"></div>
+        <div class="mf"><label>Correo electrónico</label><input value="${e(p.email||'')}" disabled style="opacity:0.6;cursor:not-allowed"></div>
+        <button class="ba" onclick="saveProfile()" style="margin-top:8px">Guardar cambios</button>
+      </div>
+
+      <div class="profile-card">
+        <div class="ct">Cambiar contraseña</div>
+        <div class="mf"><label>Nueva contraseña</label><input type="password" id="prof_newpass" placeholder="Mínimo 6 caracteres" minlength="6"></div>
+        <div class="mf"><label>Confirmar nueva contraseña</label><input type="password" id="prof_newpass2" placeholder="Repite la contraseña" minlength="6"></div>
+        <button class="ba" onclick="changePassword()" style="margin-top:8px">Cambiar contraseña</button>
+        <p style="font-size:11px;color:var(--text3);margin-top:8px;font-style:italic">Si recibes un error de sesión, cierra sesión, vuelve a entrar, y reintenta.</p>
+      </div>
+
+      <div class="profile-card">
+        <div class="ct">Sesión</div>
+        <button class="bd" onclick="cerrarSesion()">Cerrar sesión</button>
+      </div>
+    </div>`;
+}
+
+window.saveProfile=async function(){
+  if(!currentUserUid){toast('No autenticado');return;}
+  const title=g('prof_title');
+  const name=g('prof_name').trim();
+  if(!name){toast('El nombre no puede estar vacío');return;}
+  try{
+    await setDoc(doc(db,'users',currentUserUid),{
+      title,name,updatedAt:new Date().toISOString()
+    },{merge:true});
+    // Also update Firebase Auth profile displayName
+    if(auth.currentUser&&updateProfile){
+      const displayName=title?`${title} ${name}`:name;
+      try{await updateProfile(auth.currentUser,{displayName});}catch(e){}
+    }
+    toast('Perfil guardado');
+  }catch(err){toast('Error: '+err.message);}
+};
+
+window.changePassword=async function(){
+  const newpass=g('prof_newpass');
+  const newpass2=g('prof_newpass2');
+  if(!newpass||newpass.length<6){toast('La contraseña debe tener al menos 6 caracteres');return;}
+  if(newpass!==newpass2){toast('Las contraseñas no coinciden');return;}
+  if(!auth.currentUser){toast('No autenticado');return;}
+  try{
+    await updatePassword(auth.currentUser,newpass);
+    toast('Contraseña actualizada con éxito');
+    document.getElementById('prof_newpass').value='';
+    document.getElementById('prof_newpass2').value='';
+  }catch(e){
+    let msg='Error al cambiar contraseña';
+    if(e.code==='auth/requires-recent-login')msg='Por seguridad, cierra sesión y vuelve a entrar antes de cambiar la contraseña.';
+    else if(e.code==='auth/weak-password')msg='Contraseña muy débil.';
+    toast(msg);
+  }
+};
 
 // Wrap Firebase Auth listener in try/catch so a broken origin (file://, etc.)
 // doesn't crash the whole module and break the bypass form.
@@ -1264,13 +1717,17 @@ try{
     }
     document.getElementById('loginBg').style.display = user ? 'none' : 'flex';
     if(user){
-      isAdmin=false;
+      // If admin email allowlist OR bypass is active, treat as admin.
+      // Otherwise this is a regular user.
+      isAdmin = isTempBypass() || ADMIN_EMAILS.includes((user.email||'').toLowerCase());
       bootstrapUserPerms(user);
     }else{
-      isAdmin=false;
+      isAdmin = isTempBypass();  // bypass keeps admin even without Firebase user
       currentUserUid=null;
       currentUserPerms=null;
+      pacientes=[];renderLista();
       if(userPermsUnsubscribe){userPermsUnsubscribe();userPermsUnsubscribe=null;}
+      if(pacientesUnsub){pacientesUnsub();pacientesUnsub=null;}
     }
     updateAdminUI();
   });
@@ -1354,16 +1811,44 @@ function statusEl(formKey){
 }
 
 // ─── FIRESTORE ────────────────────────────────────────────────────────────
-onSnapshot(collection(db,'pacientes'),snap=>{
-  pacientes=snap.docs.map(d=>({id:d.id,...d.data()}));
-  rebuildConsultasIndex();
-  renderLista();
-  rerenderCurrent();
-  ss('ok','Sincronizado');
-},()=>ss('err','Sin conexión'));
+// Patient listener: ownerUid-aware so non-admin users see only their own patients.
+// Admins see everyone unless they're impersonating a specific user via viewAsUid.
+let pacientesUnsub = null;
+function setupPacientesListener(){
+  if(pacientesUnsub){pacientesUnsub();pacientesUnsub=null;}
+  let q;
+  if(isAdmin){
+    if(viewAsUid){
+      // Admin impersonating a specific user
+      q = query(collection(db,'pacientes'), where('ownerUid','==',viewAsUid));
+    }else{
+      // Admin sees everyone's patients
+      q = collection(db,'pacientes');
+    }
+  }else if(currentUserUid){
+    // Regular user: only their own patients
+    q = query(collection(db,'pacientes'), where('ownerUid','==',currentUserUid));
+  }else{
+    // Not authenticated — clear list
+    pacientes=[];rebuildConsultasIndex();renderLista();
+    return;
+  }
+  ss('ing','Conectando...');
+  pacientesUnsub = onSnapshot(q, snap=>{
+    pacientes=snap.docs.map(d=>({id:d.id,...d.data()}));
+    rebuildConsultasIndex();
+    renderLista();
+    rerenderCurrent();
+    ss('ok','Sincronizado');
+  },err=>{
+    console.warn('Pacientes listener error:',err.message);
+    ss('err','Sin conexión');
+  });
+}
 
 function rerenderCurrent(){
   if(viewActual==='calendario')renderCalendar();
+  else if(viewActual==='admin')renderAdmin();
   else if(idActual&&gp())renderPaciente();
   else renderEmpty();
 }
@@ -1371,19 +1856,49 @@ function rerenderCurrent(){
 async function guardar(p){
   ss('ing','Guardando...');
   const{id,...data}=p;
+  // Preserve ownerUid if missing (for migration backward-compat — assign to current user)
+  if(!data.ownerUid&&currentUserUid)data.ownerUid=currentUserUid;
   try{await setDoc(doc(db,'pacientes',id),data);ss('ok','Guardado');ssRest();}
   catch(err){ss('err','Error');throw err;}
 }
 async function crear(data){
   ss('ing','Guardando...');
+  // Stamp the patient with its owner so multi-clinic filtering works.
+  // If the admin is impersonating, the new patient belongs to the impersonated user.
+  data.ownerUid = viewAsUid || currentUserUid || 'orphan';
   try{const ref=await addDoc(collection(db,'pacientes'),data);ss('ok','Guardado');return ref.id;}
   catch(err){ss('err','Error');return null;}
 }
 async function borrar(id){try{await deleteDoc(doc(db,'pacientes',id));}catch(err){}}
 
+// Admin-only one-shot migration helper. Maurizio runs from browser console:
+//   await window.migrateOrphanPatients('hisUidFromAdminView')
+// to assign all patients without ownerUid to that user.
+window.migrateOrphanPatients = async function(targetUid){
+  if(!isAdmin){console.warn('Solo admins pueden migrar.');return;}
+  if(!targetUid){console.warn('Pasa el UID del usuario destino.');return;}
+  const all=await getDocs(collection(db,'pacientes'));
+  let count=0;
+  for(const docSnap of all.docs){
+    const data=docSnap.data();
+    if(!data.ownerUid){
+      await setDoc(doc(db,'pacientes',docSnap.id),{...data,ownerUid:targetUid},{merge:true});
+      count++;
+    }
+  }
+  console.log(`Migrados ${count} pacientes huérfanos → ${targetUid}`);
+  return count;
+};
+
 async function ciExists(ci, excludeId){
   if(!ci||ci==='V-'||ci==='J-'||ci==='E-')return null;
-  const q1=query(collection(db,'pacientes'),where('ci','==',ci));
+  let q1;
+  // Non-admins: scope CI uniqueness check to their own patients
+  if(!isAdmin && currentUserUid){
+    q1=query(collection(db,'pacientes'),where('ci','==',ci),where('ownerUid','==',currentUserUid));
+  }else{
+    q1=query(collection(db,'pacientes'),where('ci','==',ci));
+  }
   const snap=await getDocs(q1);
   for(const d of snap.docs){if(d.id!==excludeId)return{id:d.id,...d.data()};}
   return null;
@@ -1502,17 +2017,96 @@ function matchesSearch(p,q){
   return ['nombre','ci','telefono','telefono2'].some(k=>(p[k]||'').toLowerCase().includes(q));
 }
 
+// ─── SMART SIDEBAR FILTERS (v7-6) ────────────────────────────────────────
+let sidebarFilterAge='all';
+let sidebarFilterRecency='all';
+let sidebarSortMode='name';
+
+window.setSidebarAge=function(v){sidebarFilterAge=v;renderLista();};
+window.setSidebarRecency=function(v){sidebarFilterRecency=v;renderLista();};
+window.setSidebarSort=function(v){sidebarSortMode=v;renderLista();};
+
+function patientLastConsultaDate(p){
+  if(!p.consultas||p.consultas.length===0)return '';
+  let max='';
+  for(const c of p.consultas){if(c.fecha&&c.fecha>max)max=c.fecha;}
+  return max;
+}
+function patientMatchesAgeFilter(p,f){
+  if(f==='all')return true;
+  const yrs=edadAnios(p.nacimiento);
+  if(yrs===null)return false;
+  if(f==='kids')return yrs<=12;
+  if(f==='youth')return yrs>=13&&yrs<=25;
+  if(f==='adults')return yrs>=26&&yrs<=60;
+  if(f==='seniors')return yrs>60;
+  return true;
+}
+function patientMatchesRecencyFilter(p,f){
+  if(f==='all')return true;
+  const last=patientLastConsultaDate(p);
+  if(!last)return false;
+  const now=new Date();
+  const lastDate=new Date(last);
+  const diffDays=Math.floor((now-lastDate)/(1000*60*60*24));
+  if(f==='week')return diffDays<=7;
+  if(f==='month')return diffDays<=30;
+  return true;
+}
+
 // ─── LIST ─────────────────────────────────────────────────────────────────
 function renderLista(){
   const q=currentFilter;
-  const filtered=pacientes.filter(p=>matchesSearch(p,q)).sort((a,b)=>a.nombre.localeCompare(b.nombre));
-  document.getElementById('plist').innerHTML=filtered.length===0?
-    '<p style="font-size:12px;color:var(--text3);padding:10px 8px">Sin resultados</p>':
-    filtered.map(p=>`<div class="pi${p.id===idActual?' on':''}" onclick="seleccionar('${p.id}')">
-      <div class="pn">${highlight(p.nombre,q)}</div>
-      <div class="pm">${highlight(p.ci||'Sin CI',q)} · ${(p.consultas||[]).length} consulta${(p.consultas||[]).length!==1?'s':''}</div>
-    </div>`).join('');
-  const footer=q?`${filtered.length} de ${pacientes.length} pacientes`:`${pacientes.length} paciente${pacientes.length!==1?'s':''}`;
+  let filtered=pacientes.filter(p=>
+    matchesSearch(p,q) &&
+    patientMatchesAgeFilter(p,sidebarFilterAge) &&
+    patientMatchesRecencyFilter(p,sidebarFilterRecency)
+  );
+  if(sidebarSortMode==='name'){
+    filtered.sort((a,b)=>(a.nombre||'').localeCompare(b.nombre||''));
+  }else if(sidebarSortMode==='recent'){
+    filtered.sort((a,b)=>patientLastConsultaDate(b).localeCompare(patientLastConsultaDate(a)));
+  }else if(sidebarSortMode==='active'){
+    filtered.sort((a,b)=>(b.consultas||[]).length-(a.consultas||[]).length);
+  }
+  const anyFilterActive = sidebarFilterAge!=='all' || sidebarFilterRecency!=='all' || sidebarSortMode!=='name';
+  const chipBar=`<div class="plist-filters">
+    <div class="plist-filter-group">
+      <span class="plist-filter-label">Edad</span>
+      <div class="plist-filter-chips">
+        ${[['all','Todos'],['kids','Niños'],['youth','Jóvenes'],['adults','Adultos'],['seniors','Mayores']].map(([k,l])=>
+          `<button class="plist-chip${sidebarFilterAge===k?' on':''}" onclick="setSidebarAge('${k}')">${l}</button>`
+        ).join('')}
+      </div>
+    </div>
+    <div class="plist-filter-group">
+      <span class="plist-filter-label">Última visita</span>
+      <div class="plist-filter-chips">
+        ${[['all','Todos'],['week','Semana'],['month','Mes']].map(([k,l])=>
+          `<button class="plist-chip${sidebarFilterRecency===k?' on':''}" onclick="setSidebarRecency('${k}')">${l}</button>`
+        ).join('')}
+      </div>
+    </div>
+    <div class="plist-filter-group">
+      <span class="plist-filter-label">Orden</span>
+      <div class="plist-filter-chips">
+        ${[['name','A-Z'],['recent','Recientes'],['active','Activos']].map(([k,l])=>
+          `<button class="plist-chip${sidebarSortMode===k?' on':''}" onclick="setSidebarSort('${k}')">${l}</button>`
+        ).join('')}
+      </div>
+    </div>
+  </div>`;
+  const itemsHtml = filtered.length===0?
+    `<p style="font-size:12px;color:var(--text3);padding:10px 8px">${pacientes.length===0?'Sin pacientes aún':'Sin resultados con los filtros'}</p>`:
+    filtered.map(p=>{
+      const yrs=edadAnios(p.nacimiento);
+      return `<div class="pi${p.id===idActual?' on':''}" onclick="seleccionar('${p.id}')">
+        <div class="pn">${highlight(p.nombre,q)}</div>
+        <div class="pm">${highlight(p.ci||'Sin CI',q)}${yrs!==null?` · ${yrs}a`:''} · ${(p.consultas||[]).length} consulta${(p.consultas||[]).length!==1?'s':''}</div>
+      </div>`;
+    }).join('');
+  document.getElementById('plist').innerHTML=chipBar+itemsHtml;
+  const footer=anyFilterActive||q?`${filtered.length} de ${pacientes.length} pacientes`:`${pacientes.length} paciente${pacientes.length!==1?'s':''}`;
   document.getElementById('sfooter').textContent=footer;
 }
 
@@ -1537,10 +2131,16 @@ function rebuildConsultasIndex(){
 }
 
 // ─── EMPTY / LANDING (3.3.2) ──────────────────────────────────────────────
-// v5-brand-pass: logo refresh
-function logoSVG(size=28){return`<svg class="ds-logo" width="${size}" height="${size}" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="DocuSalud"><rect width="52" height="52" rx="13" fill="#DCE3D2"/><path d="M 16 13 H 28 Q 40 13 40 26 Q 40 39 28 39 H 16 Z M 22 19 V 33 H 28 Q 34 33 34 26 Q 34 19 28 19 Z" fill="#1F3A2A" fill-rule="evenodd"/><rect x="16" y="42" width="20" height="2" rx="1" fill="#C9A961"/></svg>`}
+// v7 notebook-D logo: spiral binding marks on the left + brass underline
+function logoSVG(size=28){return`<svg class="ds-logo" width="${size}" height="${size}" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="DocuSalud"><rect width="52" height="52" rx="13" fill="#E3E7DA"/><path d="M 20 11 H 31 Q 42 11 42 26 Q 42 41 31 41 H 20 Z M 26 17 V 35 H 31 Q 36 35 36 26 Q 36 17 31 17 Z" fill="#1F3A2A" fill-rule="evenodd"/><rect x="13" y="15" width="3.5" height="1.8" rx="0.9" fill="#D2B385"/><rect x="13" y="20" width="3.5" height="1.8" rx="0.9" fill="#D2B385"/><rect x="13" y="25" width="3.5" height="1.8" rx="0.9" fill="#D2B385"/><rect x="13" y="30" width="3.5" height="1.8" rx="0.9" fill="#D2B385"/><rect x="13" y="35" width="3.5" height="1.8" rx="0.9" fill="#D2B385"/><rect x="22" y="44" width="14" height="1.8" rx="0.9" fill="#D2B385"/></svg>`}
 
 function renderEmpty(){
+  // Admins (without an impersonated user) land directly in admin view.
+  // No "Consultas de hoy" widget — they get the user management list.
+  if(isAdmin && !viewAsUid){
+    viewActual='admin';
+    return renderAdminEntry();
+  }
   const today=hoy();
   const todayConsultas=[];
   for(const p of pacientes){
@@ -1549,11 +2149,21 @@ function renderEmpty(){
     }
   }
   todayConsultas.sort((a,b)=>(a.hora||'00:00').localeCompare(b.hora||'00:00'));
-  let html=`<div class="panel"><div class="landing-grid">
+  // Personal greeting with título Dr./Dra. if set
+  let greeting='Selecciona un paciente o crea uno nuevo.';
+  if(currentUserPerms&&currentUserPerms.name){
+    const fullName=currentUserPerms.title?`${currentUserPerms.title} ${currentUserPerms.name.split(' ')[0]}`:currentUserPerms.name.split(' ')[0];
+    greeting=pacientes.length===0
+      ?`Hola ${fullName}, tu consultorio empieza aquí.`
+      :`Hola ${fullName}, selecciona un paciente o crea uno nuevo.`;
+  }else if(pacientes.length===0){
+    greeting='Tu consultorio empieza aquí.';
+  }
+  let html=`${impersonationBanner()}<div class="panel"><div class="landing-grid">
     <div class="empty">
       <div class="empty-logo">${logoSVG(52)}</div>
       <h3><span>docu</span>salud</h3>
-      <p>${pacientes.length===0?'Tu consultorio empieza aquí.':'Selecciona un paciente o crea uno nuevo.'}</p>
+      <p>${e(greeting)}</p>
     </div>`;
   if(todayConsultas.length>0){
     html+=`<div class="card today-card">
@@ -1597,18 +2207,17 @@ window.toggleCalendar=function(){
 }
 
 // ─── ADMIN VIEW ────────────────────────────────────────────────────────────
-window.toggleAdmin=function(){
-  if(!isAdmin)return;
-  if(viewActual==='admin'){
-    viewActual='paciente';
-    if(usersUnsubscribe){usersUnsubscribe();usersUnsubscribe=null;}
-    if(idActual)renderPaciente();else renderEmpty();
-  }else{
-    viewActual='admin';
-    if(usersUnsubscribe){usersUnsubscribe();}
+// Admin is permanently in admin mode (no "Cerrar administración" button).
+// Admin can impersonate a user via the "Ver como" button on each card → viewAsUid.
+// While impersonating, a banner shows at the top of the screen.
+
+// Set up subscription + render (called from renderEmpty when admin lands)
+function renderAdminEntry(){
+  if(!isAdmin)return renderEmpty();
+  viewActual='admin';
+  if(!usersUnsubscribe){
     usersUnsubscribe=onSnapshot(collection(db,'users'),snap=>{
       allUsersList=snap.docs.map(d=>({uid:d.id,...d.data()}));
-      // Sort by name then email
       allUsersList.sort((a,b)=>(a.name||a.email||'').localeCompare(b.name||b.email||''));
       if(viewActual==='admin')renderAdmin();
     },err=>{
@@ -1616,23 +2225,72 @@ window.toggleAdmin=function(){
       allUsersList=[];
       if(viewActual==='admin')renderAdmin();
     });
-    // Initial render even before snapshot lands
-    renderAdmin();
   }
+  renderAdmin();
 }
 
+// Open admin (from topbar button when admin has navigated elsewhere)
+window.toggleAdmin=function(){
+  if(!isAdmin)return;
+  viewActual='admin';
+  // Exit any active impersonation when going back to admin
+  if(viewAsUid){viewAsUid=null;setupPacientesListener();}
+  renderAdminEntry();
+};
+
+// Impersonate a regular user (admin clicks "Ver como")
+window.impersonateUser=function(uid){
+  if(!isAdmin)return;
+  const target=allUsersList.find(u=>u.uid===uid);
+  if(!target){toast('Usuario no encontrado');return;}
+  viewAsUid=uid;
+  setupPacientesListener();
+  viewActual='paciente';
+  idActual=null;
+  renderEmpty();
+  renderLista();
+  toast(`Viendo como ${target.name||target.email}`);
+};
+
+window.exitImpersonation=function(){
+  viewAsUid=null;
+  setupPacientesListener();
+  renderAdminEntry();
+};
+
 function renderAdmin(){
+  const q=(adminSearchQuery||'').toLowerCase().trim();
+  // Compute patient counts per user (so admin can sort/filter by activity)
+  const ownerCounts={};
+  for(const p of pacientes){
+    if(p.ownerUid)ownerCounts[p.ownerUid]=(ownerCounts[p.ownerUid]||0)+1;
+  }
+  let filtered=allUsersList.filter(u=>{
+    const haystack=`${u.name||''} ${u.email||''} ${u.title||''}`.toLowerCase();
+    if(q && !haystack.includes(q))return false;
+    if(adminFilterRole==='with-patients' && !ownerCounts[u.uid])return false;
+    if(adminFilterRole==='no-patients' && ownerCounts[u.uid])return false;
+    return true;
+  });
   const userCount=allUsersList.length;
+  const filteredCount=filtered.length;
   const isEmpty=userCount===0;
-  const userCards=allUsersList.map(u=>{
+  const noMatches=!isEmpty && filteredCount===0;
+
+  const userCards=filtered.map(u=>{
     const allowed=new Set(u.tabsAllowed||ALL_TABS);
+    const fullName=u.title?`${u.title} ${u.name||''}`.trim():(u.name||u.email||'(sin nombre)');
+    const patientCount=ownerCounts[u.uid]||0;
     return `<div class="admin-user-card">
       <div class="admin-user-head">
-        <div>
-          <div class="admin-user-name">${e(u.name||u.email||'(sin nombre)')}</div>
-          <div class="admin-user-email">${e(u.email||'')}</div>
+        <div style="min-width:0;flex:1">
+          <div class="admin-user-name">${e(fullName)}</div>
+          <div class="admin-user-email">${e(u.email||'')} · ${patientCount} paciente${patientCount===1?'':'s'}</div>
         </div>
-        <div class="admin-user-meta">${allowed.size}/${ALL_TABS.length} pestañas</div>
+        <div class="admin-user-actions">
+          <button class="ba admin-impersonate-btn" onclick="impersonateUser('${u.uid}')" title="Ver como este usuario">Ver como</button>
+          <div class="admin-user-meta">${allowed.size}/${ALL_TABS.length}</div>
+        </div>
       </div>
       <div class="admin-tabs-grid">
         ${ALL_TABS.map(k=>`
@@ -1643,32 +2301,64 @@ function renderAdmin(){
       </div>
     </div>`;
   }).join('');
+
   const emptyState=isEmpty?`<div class="admin-empty">
     <p style="font-family:'Fraunces',serif;font-size:18px;color:var(--text2);font-style:italic">No hay usuarios todavía.</p>
     <p style="font-size:12px;color:var(--text3);max-width:480px;text-align:center;line-height:1.6">
       Los usuarios aparecen aquí después de su primer inicio de sesión.
-      Para invitar un usuario nuevo: ve a Firebase Console → Authentication → Add user (correo + contraseña),
-      compártele la contraseña, y dile que entre a docusalud.org. Una vez que entre, podrás restringir sus pestañas desde aquí.
+      Comparte el link de docusalud.org con un odontólogo y dile que se cree una cuenta; aparecerá aquí.
     </p>
+  </div>`:'';
+
+  const noMatchesState=noMatches?`<div class="admin-empty">
+    <p style="font-family:'Fraunces',serif;font-size:16px;color:var(--text2);font-style:italic">Ningún usuario coincide con los filtros.</p>
   </div>`:'';
 
   document.getElementById('mainArea').innerHTML=`
     <div class="phdr">
       <div style="flex:1">
         <div class="phn">Administración</div>
-        <div class="phm">Visibilidad de pestañas por usuario${userCount?` · ${userCount} usuario${userCount===1?'':'s'}`:''}</div>
+        <div class="phm">${userCount?`${userCount} usuario${userCount===1?'':'s'}${q||adminFilterRole!=='all'?` · mostrando ${filteredCount}`:''}`:'Sin usuarios aún'}</div>
       </div>
-      <button class="ba" onclick="toggleAdmin()">Cerrar administración</button>
     </div>
     <div class="panel admin-panel">
-      ${isEmpty?emptyState:`<div class="admin-users-grid">${userCards}</div>`}
+      <div class="admin-toolbar">
+        <div class="admin-search">
+          <svg class="admin-search-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="adminSearchInput" placeholder="Buscar por nombre, correo o título…" value="${e(adminSearchQuery)}" oninput="adminSetSearch(this.value)">
+        </div>
+        <div class="admin-filter-chips">
+          <button class="admin-filter-chip ${adminFilterRole==='all'?'on':''}" onclick="adminSetFilter('all')">Todos</button>
+          <button class="admin-filter-chip ${adminFilterRole==='with-patients'?'on':''}" onclick="adminSetFilter('with-patients')">Con pacientes</button>
+          <button class="admin-filter-chip ${adminFilterRole==='no-patients'?'on':''}" onclick="adminSetFilter('no-patients')">Sin pacientes</button>
+        </div>
+      </div>
+      ${isEmpty?emptyState:(noMatches?noMatchesState:`<div class="admin-users-grid">${userCards}</div>`)}
       <div class="admin-footer">
         <p style="font-size:11px;color:var(--text3);line-height:1.6">
-          <strong>Cómo funciona:</strong> cada usuario ve solo las pestañas marcadas. Por defecto, los nuevos usuarios ven todas las pestañas — desmarca las que quieres ocultarles.
-          Los cambios se guardan automáticamente. La pestaña <em>Datos personales</em> conviene mantenerla siempre activa.
+          <strong>Cómo funciona:</strong> cada usuario ve solo las pestañas marcadas. <strong>Ver como</strong> te lleva a la vista del usuario — verás exactamente lo que él/ella ve y podrás editar. Los cambios se guardan automáticamente.
         </p>
       </div>
     </div>`;
+  // Restore focus to search input if it was just typed in
+  if(adminSearchQuery){
+    const inp=document.getElementById('adminSearchInput');
+    if(inp&&document.activeElement!==inp){inp.focus();inp.setSelectionRange(adminSearchQuery.length,adminSearchQuery.length);}
+  }
+}
+
+window.adminSetSearch=function(q){adminSearchQuery=q;renderAdmin();};
+window.adminSetFilter=function(f){adminFilterRole=f;renderAdmin();};
+
+// Persistent banner shown while admin is impersonating a user
+function impersonationBanner(){
+  if(!viewAsUid)return '';
+  const target=allUsersList.find(u=>u.uid===viewAsUid);
+  const name=target?((target.title?`${target.title} `:'')+(target.name||target.email||'(sin nombre)')):viewAsUid;
+  return `<div class="impersonation-banner">
+    <div class="imp-text"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg> Viendo como <strong>${e(name)}</strong></div>
+    <button class="ba imp-exit-btn" onclick="exitImpersonation()">Salir</button>
+  </div>`;
 }
 
 window.adminToggleTab=async function(uid,tabKey,nowChecked){
@@ -1895,6 +2585,7 @@ function renderPaciente(){
     return;
   }
   document.getElementById('mainArea').innerHTML=`
+    ${impersonationBanner()}
     <div class="phdr">
       <div class="pav">${ini}</div>
       <div style="flex:1;min-width:0">
@@ -2316,6 +3007,7 @@ function renderRealisticLateral(p,n,states,type,upper,tState){
 function renderRefinedOcclusal(p,n,states,type,upper){
   const clipId=`oclip-${n}`;
   const ausPatId=`aus-${n}`;
+  const mesialOnRight=mesialOnRightForTooth(n);
   const f=k=>surfaceColors(states[k]);
   const surfPoly=(k,points)=>{
     const sc=f(k);
@@ -2349,8 +3041,12 @@ function renderRefinedOcclusal(p,n,states,type,upper){
     <g filter="url(#ocl-shadow-${n})">
       <g clip-path="url(#${clipId})">
         ${surfPoly('l','20,20 70,70 130,70 180,20')}
-        ${surfPoly('m','20,20 70,70 70,130 20,180')}
-        ${surfPoly('d','180,20 130,70 130,130 180,180')}
+        ${/* Mesial is always toward midline (right side of viz for Q1/Q4, left for Q2/Q3).
+              Surface keys m/d still represent anatomical mesial/distal in the data; we just
+              swap which screen polygon they bind to so users click visually correct sides. */ ''}
+        ${mesialOnRight ?
+          `${surfPoly('d','20,20 70,70 70,130 20,180')}${surfPoly('m','180,20 130,70 130,130 180,180')}` :
+          `${surfPoly('m','20,20 70,70 70,130 20,180')}${surfPoly('d','180,20 130,70 130,130 180,180')}`}
         ${surfPoly('v','20,180 70,130 130,130 180,180')}
         ${surfRect('o',70,70,60,60,4)}
         ${cusps.map(c=>`<circle cx="${c[0]}" cy="${c[1]}" r="3.5" fill="#A29A85" opacity="0.4" pointer-events="none"/>`).join('')}
@@ -2360,9 +3056,20 @@ function renderRefinedOcclusal(p,n,states,type,upper){
     <text x="100" y="108" class="viz-zone-lbl-o" text-anchor="middle" pointer-events="none">O</text>
     <text x="100" y="11" class="viz-dir-lbl" text-anchor="middle" pointer-events="none">${upper?'palatino':'lingual'}</text>
     <text x="100" y="201" class="viz-dir-lbl" text-anchor="middle" pointer-events="none">vestibular</text>
-    <text x="-30" y="106" class="viz-dir-lbl" text-anchor="start" pointer-events="none">mesial</text>
-    <text x="230" y="106" class="viz-dir-lbl" text-anchor="end" pointer-events="none">distal</text>
+    ${mesialOnRight ?
+      `<text x="-30" y="106" class="viz-dir-lbl" text-anchor="start" pointer-events="none">distal</text>
+       <text x="230" y="106" class="viz-dir-lbl" text-anchor="end" pointer-events="none">mesial</text>` :
+      `<text x="-30" y="106" class="viz-dir-lbl" text-anchor="start" pointer-events="none">mesial</text>
+       <text x="230" y="106" class="viz-dir-lbl" text-anchor="end" pointer-events="none">distal</text>`}
   </svg>`;
+}
+
+// For right-side quadrants (Q1 upper-right, Q4 lower-right, Q5/Q8 deciduous), the
+// anatomical mesial direction is toward the midline → on the RIGHT side of the viz
+// (because viewer faces the patient). For left-side quadrants, mesial is on the LEFT.
+function mesialOnRightForTooth(n){
+  const q=Math.floor(n/10);
+  return q===1||q===4||q===5||q===8;
 }
 
 function renderToothVizSVG(p,n){
@@ -2501,9 +3208,7 @@ function renderOdonto(){
         <label class="ctl-lbl">Dentición:</label>
         <select onchange="setOdontoMode(this.value)">
           <option value="">Auto (${autoMode})</option>
-          <option value="permanente"${odontoMode==='permanente'?' selected':''}>Permanente</option>
-          <option value="decidua"${odontoMode==='decidua'?' selected':''}>Decidua</option>
-          <option value="mixta"${odontoMode==='mixta'?' selected':''}>Mixta</option>
+          ${['permanente','decidua','mixta'].filter(m=>m!==autoMode).map(m=>`<option value="${m}"${odontoMode===m?' selected':''}>${m.charAt(0).toUpperCase()+m.slice(1)}</option>`).join('')}
         </select>
         <label class="ctl-lbl"><input type="checkbox" id="surface-mode" ${surfaceMode?'checked':''} onchange="toggleSurfaceMode()"> Modo superficie</label>
       </div>
@@ -2559,7 +3264,6 @@ function abrirSurfaceModal(n){
     renderOdonto();
   });
 }
-
 // ─── PLAN + FIRMAS (3.6.1, 3.6.2) ─────────────────────────────────────────
 function renderPlan(){
   const p=gp();
@@ -2823,6 +3527,9 @@ window.updProc=function(k,f,v){
 // ─── RECORD (3.8.1 audit log) ─────────────────────────────────────────────
 let recordFilter='all';
 function logAccess(patientId){
+  // Admin accesses are invisible to the patient owner — no audit trail entry written.
+  // This way regular users don't see "desconocido" or admin emails in their Récord.
+  if(isAdmin)return;
   if(accessLogged.has(patientId))return;
   accessLogged.add(patientId);
   const p=pacientes.find(x=>x.id===patientId);
@@ -3045,27 +3752,43 @@ window.abrirModal=abrirModal;
 // ─── NEW PATIENT (3.2.1, 3.2.2, 3.2.3, 3.2.4) ─────────────────────────────
 window.modalNuevo=function(){
   abrirModal('Nuevo paciente',
-    `<div class="mf"><label>Nombre completo *</label><input id="m_no" placeholder="Nombre y apellidos"></div>
-     <div class="mf"><label>Cédula</label>${ciInputHTML('m_ci','')}</div>
-     <div class="mf"><label>Teléfono</label><input ${phoneInputAttrs('m_te','')}></div>
+    `<div class="mf"><label>Nombre completo *</label><input id="m_no" placeholder="Nombre y apellidos" required></div>
+     <div class="mf"><label>Cédula *</label>${ciInputHTML('m_ci','')}</div>
+     <div class="mf"><label>Teléfono *</label><input ${phoneInputAttrs('m_te','')} required></div>
      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-       <div class="mf"><label>Fecha de nacimiento</label><input type="date" id="m_na"></div>
-       <div class="mf"><label>Sexo</label><select id="m_sx"><option value="">—</option><option value="F">Femenino</option><option value="M">Masculino</option><option value="O">Otro</option></select></div>
+       <div class="mf"><label>Fecha de nacimiento *</label><input type="date" id="m_na" required></div>
+       <div class="mf"><label>Sexo *</label><select id="m_sx" required><option value="">—</option><option value="F">Femenino</option><option value="M">Masculino</option><option value="O">Otro</option></select></div>
      </div>
      <div class="mf"><label>Especialidad</label><select id="m_esp">${ESPECIALIDADES.map(es=>`<option value="${es.key}">${es.label}</option>`).join('')}</select></div>
-     <div id="m_err" style="font-size:12px;color:var(--terra);min-height:14px;margin-top:4px"></div>`,
+     <div id="m_err" style="font-size:12px;color:var(--terra);min-height:14px;margin-top:4px"></div>
+     <p style="font-size:11px;color:var(--text3);margin-top:4px;font-style:italic">* Campos obligatorios</p>`,
     async()=>{
-      const nombre=g('m_no').trim();
-      if(!nombre){alert('El nombre es obligatorio.');return;}
-      const ci=getCIValue('m_ci');
       const errDiv=document.getElementById('m_err');
       errDiv.textContent='';
+      const nombre=g('m_no').trim();
+      const ci=getCIValue('m_ci');
+      const telefono=(g('m_te')||'').trim();
+      const nacimiento=g('m_na');
+      const sexo=g('m_sx');
+      // Required-field validation (v7-5)
+      const missing=[];
+      if(!nombre)missing.push('Nombre completo');
+      if(!ci)missing.push('Cédula');
+      if(!telefono)missing.push('Teléfono');
+      if(!nacimiento)missing.push('Fecha de nacimiento');
+      if(!sexo)missing.push('Sexo');
+      if(missing.length){
+        errDiv.textContent=`Falta completar: ${missing.join(', ')}.`;
+        return;
+      }
+      // Format checks
+      if(telefono.length<7){errDiv.textContent='El teléfono debe tener al menos 7 dígitos.';return;}
       if(ci){
         const dup=await ciExists(ci);
         if(dup){errDiv.textContent=`Ya existe un paciente con la cédula ${ci}: ${dup.nombre}`;return;}
       }
       const data={
-        nombre,ci,telefono:g('m_te'),nacimiento:g('m_na'),sexo:g('m_sx'),especialidad:g('m_esp')||'general',
+        nombre,ci,telefono,nacimiento,sexo,especialidad:g('m_esp')||'general',
         telefono2:'',email:'',motivo:'',antecedentes:'',patologias:'',oclusion:'',diagnostico:'',
         plan:'',plan_aceptado:'',restauracion:'',material:'',color_dental:'',color_deseado:'',laboratorio:'',indicaciones_tecnico:'',obs_importantes:'',
         teeth:{},teeth_obs:'',operatorias:[],procs:{},especialistas:[],records:[],consultas:[],firmas:{}
@@ -3154,7 +3877,6 @@ function undoToast(msg,doUndo,duration=5000){
 // build-marker: v3-cal-mes
 ss('ing','Conectando...');
 initSidebarResize();
-
 
 </script>
 </body>
