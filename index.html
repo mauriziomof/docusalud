@@ -5,7 +5,30 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>DocuSalud</title>
+<meta name="description" content="DocuSalud — Sistema de historias clínicas para odontólogos. Gestiona pacientes, consultas, odontograma y plan de tratamiento desde cualquier dispositivo. Acceso seguro y privado.">
+<meta name="keywords" content="historia clinica odontologica, software dental, odontologia digital, expediente dental, docusalud">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#1F3A2A">
+<link rel="canonical" href="https://docusalud.org">
+<link rel="icon" type="image/svg+xml" href="logo.svg">
+<link rel="apple-touch-icon" href="logo.png">
+<meta property="og:type" content="website">
+<meta property="og:title" content="DocuSalud — Historias Clínicas para Odontólogos">
+<meta property="og:description" content="Sistema digital de historias clínicas diseñado para odontólogos. Gestiona pacientes, consultas, odontograma y plan de tratamiento desde cualquier dispositivo.">
+<meta property="og:url" content="https://docusalud.org">
+<meta property="og:image" content="https://docusalud.org/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="es_VE">
+<meta property="og:site_name" content="DocuSalud">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="DocuSalud — Historias Clínicas para Odontólogos">
+<meta name="twitter:description" content="Sistema digital de historias clínicas diseñado para odontólogos.">
+<meta name="twitter:image" content="https://docusalud.org/og-image.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
 <style>
 /* ── TOKENS ─────────────────────────────────────────────────────────── */
@@ -136,7 +159,7 @@ body {
 .auth-help {
   font-size: 12px; color: var(--text2); margin-bottom: 18px;
   text-align: center; line-height: 1.5;
-  font-style: italic; font-family: 'Fraunces', serif;
+  font-style: normal; font-family: 'DM Sans', sans-serif;
   letter-spacing: 0; text-transform: none;
 }
 .auth-success {
@@ -431,7 +454,7 @@ body {
   .brand-sub { display: none; }
   .sync-wrap span { display: none; }
   /* Hide less-essential topbar buttons on mobile — they're in the bottom-nav or moved */
-  .tbtn[title="Importar"], .tbtn[title="Imprimir"], .tbtn[title="Cerrar sesión"] { display: none; }
+  .tbtn[title="Importar"], .tbtn[title="Imprimir"], .tbtn[title="Cerrar sesión"], .tbtn[title="Calendario"], .tbtn[title="Exportar"] { display: none; }
   .tbtn { padding: 6px 8px; }
   .fg { grid-template-columns: 1fr; }
   /* Datos personales: 3-column row (fecha, cédula, sexo) is too tight on phones — stack */
@@ -1134,6 +1157,70 @@ body:has(.dot.ing) .topbar .brand svg { animation: logoBreathe 1.5s var(--ease) 
 [data-theme="dark"] .viz-state-endodoncia { color: #d6c19a; }
 [data-theme="dark"] .viz-state-protesis { color: #b09cd0; background: rgba(120,80,160,0.18); }
 
+/* ── v7.1 additions ─────────────────────────────────────────────────── */
+/* Modal 2-column rows (fecha/hora, fecha/sexo) — collapse on mobile (Bug #2) */
+.modal-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+/* Auto-resize free-text fields (#11): grow with content, no inner scroll */
+.mf textarea, textarea.auto-grow { overflow-y: hidden; resize: none; min-height: 60px; }
+@media(max-width:768px){
+  .modal-grid-2 { grid-template-columns: 1fr; }
+}
+/* ── v7.1 Tranche 2 ─────────────────────────────────────────────────── */
+/* Filter panel (#4) */
+.plist-filterbar { display:flex; align-items:center; gap:8px; padding:8px 8px 4px; }
+.filter-toggle-btn { font:inherit; font-size:12px; padding:6px 12px; border:var(--border-default); border-radius:20px; background:var(--surface); color:var(--text2); cursor:pointer; }
+.filter-toggle-btn.on { background:var(--accent-light); color:var(--forest); border-color:var(--accent-border); }
+.filter-clear-link { font-size:11px; color:var(--terra); background:none; border:none; cursor:pointer; }
+.filter-panel { padding:8px; border-bottom:0.5px solid var(--border); margin-bottom:6px; }
+.filter-panel-actions { display:flex; gap:8px; margin-top:10px; }
+.filter-saved { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; align-items:center; }
+.saved-chip { display:inline-flex; align-items:center; }
+.saved-del { background:none; border:none; color:var(--text3); cursor:pointer; font-size:14px; padding:0 4px; }
+/* Admin user status (#3) */
+.admin-status { font-size:10px; font-weight:600; padding:2px 8px; border-radius:20px; }
+.admin-status.active { background:var(--accent-light); color:var(--forest); }
+.admin-status.inactive { background:#EFE0DC; color:var(--terra); }
+/* Antecedentes / hábitos (#5) */
+.ant-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px 18px; }
+.ant-row, .hab-row { display:flex; align-items:center; gap:8px; }
+.ant-row label, .hab-row label { flex:1; font-size:12px; color:var(--text2); }
+.ant-row select, .hab-row select { width:74px; padding:5px 6px; font-size:12px; border:var(--border-default); border-radius:6px; background:var(--surface2); color:var(--text); }
+.hab-grid { display:grid; grid-template-columns:1fr; gap:8px; }
+.hab-row input { flex:1.4; padding:6px 8px; font-size:12px; border:var(--border-default); border-radius:6px; background:var(--surface2); color:var(--text); }
+.lbox img.ds-logo-lg { display:block; margin:6px auto 6px; }
+@media(max-width:768px){ .ant-grid { grid-template-columns:1fr; } .hab-row { flex-wrap:wrap; } }
+/* ── v7.1 Tranche 3 (review fixes) ── */
+.admin-user-actions { display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
+.admin-user-actions button { padding:5px 11px; font-size:11px; white-space:nowrap; }
+.admin-user-name .admin-status { margin-left:6px; vertical-align:middle; }
+.filter-panel { padding:12px 10px 14px; }
+.filter-panel .plist-filter-group { margin-bottom:12px; }
+.filter-panel .plist-filter-chips { gap:6px; }
+.filter-panel .plist-filter-label { margin-bottom:3px; }
+.age-range { display:flex; align-items:center; gap:8px; }
+.age-range input { width:68px; padding:6px 8px; font-size:13px; border:var(--border-default); border-radius:6px; background:var(--surface2); color:var(--text); }
+.age-range span { color:var(--text3); }
+.auth-title-row { grid-template-columns:110px 1fr; align-items:stretch; }
+.auth-title-row select { text-align:left; padding:12px 26px 12px 12px; height:100%; }
+.admin-invites { border:var(--border-default); border-radius:var(--rl); padding:14px 16px; margin-bottom:16px; background:var(--surface); }
+.admin-invites-head { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px; }
+.invite-list { display:flex; flex-direction:column; gap:8px; }
+.invite-row { display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:8px 10px; border:0.5px solid var(--border); border-radius:8px; }
+.invite-row.used { opacity:0.6; }
+.invite-code { font-family:monospace; font-size:14px; font-weight:600; color:var(--forest); letter-spacing:0.05em; }
+.invite-status { font-size:11px; padding:2px 8px; border-radius:20px; }
+.invite-status.free { background:var(--accent-light); color:var(--forest); }
+.invite-status.used { background:var(--surface2); color:var(--text3); }
+.invite-actions { margin-left:auto; display:flex; gap:6px; }
+.invite-actions button { padding:4px 10px; font-size:11px; }
+@media(max-width:768px){ .age-range input{ font-size:16px; } }
+/* ── v7.1 dentist specialties ── */
+.esp-select { margin-bottom:12px; text-align:left; }
+.esp-select-label { font-size:12px; color:var(--text2); margin-bottom:6px; }
+.esp-chips { display:flex; flex-wrap:wrap; gap:6px; }
+.esp-chip { font:inherit; font-size:12px; padding:6px 11px; border:var(--border-default); border-radius:20px; background:var(--surface2); color:var(--text2); cursor:pointer; }
+.esp-chip.on { background:var(--accent-light); color:var(--forest); border-color:var(--accent-border); font-weight:500; }
+.admin-user-esp { font-size:11px; color:var(--text2); margin-top:3px; }
 </style>
 </head>
 <body>
@@ -1141,16 +1228,7 @@ body:has(.dot.ing) .topbar .brand svg { animation: logoBreathe 1.5s var(--ease) 
 <!-- LOGIN -->
 <div class="lbg" id="loginBg">
   <div class="lbox">
-    <svg class="ds-logo ds-logo-lg" width="56" height="56" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="DocuSalud">
-      <rect width="52" height="52" rx="13" fill="#E3E7DA"/>
-      <path d="M 20 11 H 31 Q 42 11 42 26 Q 42 41 31 41 H 20 Z M 26 17 V 35 H 31 Q 36 35 36 26 Q 36 17 31 17 Z" fill="#1F3A2A" fill-rule="evenodd"/>
-      <rect x="13" y="15" width="3.5" height="1.8" rx="0.9" fill="#D2B385"/>
-      <rect x="13" y="20" width="3.5" height="1.8" rx="0.9" fill="#D2B385"/>
-      <rect x="13" y="25" width="3.5" height="1.8" rx="0.9" fill="#D2B385"/>
-      <rect x="13" y="30" width="3.5" height="1.8" rx="0.9" fill="#D2B385"/>
-      <rect x="13" y="35" width="3.5" height="1.8" rx="0.9" fill="#D2B385"/>
-      <rect x="22" y="44" width="14" height="1.8" rx="0.9" fill="#D2B385"/>
-    </svg>
+    <img class="ds-logo ds-logo-lg" src="logo.svg" width="56" height="56" alt="DocuSalud">
     <h2><span>docu</span>salud</h2>
     <p>Historias clínicas · Acceso privado</p>
 
@@ -1182,6 +1260,8 @@ body:has(.dot.ing) .topbar .brand svg { animation: logoBreathe 1.5s var(--ease) 
         <input type="email" id="signupEmail" placeholder="Correo electrónico" autocomplete="email" required>
         <input type="password" id="signupPass" placeholder="Contraseña (mín. 6)" autocomplete="new-password" minlength="6" required>
         <input type="password" id="signupPassConfirm" placeholder="Confirmar contraseña" autocomplete="new-password" minlength="6" required>
+        <div class="esp-select"><div class="esp-select-label">Tus especialidades (una o más)</div><div class="esp-chips" id="signupEspChips"></div></div>
+        <input type="text" id="signupCode" placeholder="Código de invitación" autocomplete="off" required>
         <button type="submit" id="signupBtn">Crear cuenta</button>
       </form>
       <div class="lerr" id="signupErr"></div>
@@ -1212,16 +1292,7 @@ body:has(.dot.ing) .topbar .brand svg { animation: logoBreathe 1.5s var(--ease) 
     <button id="menuBtn" onclick="event.stopPropagation();toggleSidebar()" style="display:none;background:none;border:none;cursor:pointer;padding:4px;color:var(--text2)">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
     </button>
-    <svg class="ds-logo" width="32" height="32" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="DocuSalud">
-      <rect width="52" height="52" rx="13" fill="#E3E7DA"/>
-      <path d="M 20 11 H 31 Q 42 11 42 26 Q 42 41 31 41 H 20 Z M 26 17 V 35 H 31 Q 36 35 36 26 Q 36 17 31 17 Z" fill="#1F3A2A" fill-rule="evenodd"/>
-      <rect x="13" y="15" width="3.5" height="1.8" rx="0.9" fill="#D2B385"/>
-      <rect x="13" y="20" width="3.5" height="1.8" rx="0.9" fill="#D2B385"/>
-      <rect x="13" y="25" width="3.5" height="1.8" rx="0.9" fill="#D2B385"/>
-      <rect x="13" y="30" width="3.5" height="1.8" rx="0.9" fill="#D2B385"/>
-      <rect x="13" y="35" width="3.5" height="1.8" rx="0.9" fill="#D2B385"/>
-      <rect x="22" y="44" width="14" height="1.8" rx="0.9" fill="#D2B385"/>
-    </svg>
+    <img class="ds-logo" src="logo.svg" width="32" height="32" alt="DocuSalud">
     <div>
       <div class="brand-name"><span>docu</span>salud</div>
       <div class="brand-sub">Historias clínicas</div>
@@ -1249,9 +1320,6 @@ body:has(.dot.ing) .topbar .brand svg { animation: logoBreathe 1.5s var(--ease) 
     <button class="tbtn" onclick="window.print()" title="Imprimir" aria-label="Imprimir">
       <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg><span class="lbl">Imprimir</span>
     </button>
-    <button class="tbtn" onclick="cerrarSesion()" title="Cerrar sesión" aria-label="Cerrar sesión">
-      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg><span class="lbl">Cerrar sesión</span>
-    </button>
     <button class="profile-btn" id="profileBtn" onclick="openProfile()" title="Mi perfil" aria-label="Mi perfil" style="display:none">
       <span id="profileInitials">D</span>
     </button>
@@ -1269,11 +1337,7 @@ body:has(.dot.ing) .topbar .brand svg { animation: logoBreathe 1.5s var(--ease) 
   </div>
   <div class="main" id="mainArea">
     <div class="panel"><div class="empty">
-      <svg class="ds-logo ds-logo-lg empty-logo-svg" width="56" height="56" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="DocuSalud">
-        <rect width="52" height="52" rx="13" fill="#DCE3D2"/>
-        <path d="M 16 13 H 28 Q 40 13 40 26 Q 40 39 28 39 H 16 Z M 22 19 V 33 H 28 Q 34 33 34 26 Q 34 19 28 19 Z" fill="#1F3A2A" fill-rule="evenodd"/>
-        <rect x="16" y="42" width="20" height="2" rx="1" fill="#C9A961"/>
-      </svg>
+      <img class="ds-logo ds-logo-lg empty-logo-svg" src="logo.svg" width="56" height="56" alt="DocuSalud">
       <h3><span>docu</span>salud</h3>
       <p>Selecciona un paciente o crea uno nuevo.</p>
     </div></div>
@@ -1297,20 +1361,33 @@ body:has(.dot.ing) .topbar .brand svg { animation: logoBreathe 1.5s var(--ease) 
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
     Exportar
   </button>
-  <button class="bn-btn" onclick="cerrarSesion()">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-    Salir
+  <button class="bn-btn" onclick="document.getElementById('impFile').click()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+    Importar
   </button>
 </div>
 
 <div class="toast" id="toast"></div>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "DocuSalud",
+  "description": "Sistema de historias clínicas para odontólogos",
+  "url": "https://docusalud.org",
+  "applicationCategory": "MedicalApplication",
+  "operatingSystem": "Web",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+}
+</script>
 
 <script type="module">
-import { collection, onSnapshot, doc, setDoc, addDoc, deleteDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { collection, onSnapshot, doc, getDoc, setDoc, addDoc, deleteDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged, signOut, updateProfile, updatePassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 const firebaseConfig = {
   apiKey: "AIzaSyCn1ELv-CLd2-C-agYGVt7dHeYlrw7T-_M",
   authDomain: "docusalud-4b215.firebaseapp.com",
@@ -1322,6 +1399,9 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
+    // v7.1 — offline persistence: writes are cached in IndexedDB and synced on
+    // reconnect, so data is never lost and the UI keeps working without network.
+    try{ enableIndexedDbPersistence(db).catch(()=>{}); }catch(e){}
 
 // ─── CONSTANTS ────────────────────────────────────────────────────────────
 const UPPER=[18,17,16,15,14,13,12,11,21,22,23,24,25,26,27,28];
@@ -1339,6 +1419,7 @@ const PROCS_GROUPED=[
 const PROC_NO_DATE=new Set(['tipo_y_marca_de_cemento']);
 const VITA_SHADES=['A1','A2','A3','A3.5','A4','B1','B2','B3','B4','C1','C2','C3','C4','D2','D3','D4','OM1','OM2','OM3','BL1','BL2','BL3','BL4'];
 const FIBRA_OPTIONS=['Sí','No','N/A'];
+const ESP_ODONTO=['Odontología General','Endodoncia','Ortodoncia y Ortopedia Maxilofacial','Periodoncia e Implantología','Cirugía Oral y Maxilofacial','Prostodoncia (Prótesis Dental)','Odontopediatría','Patología Oral y Maxilofacial','Radiología Oral y Maxilofacial','Odontología Forense','Estética Dental','Rehabilitación Oral','Oclusión y Disfunción Temporomandibular','Láser en Odontología','Odontogeriatría','Odontología del Deporte','Implantología Oral'];
 const ESPECIALIDADES=[
   {key:'general',label:'General'},
   {key:'endodoncia',label:'Endodoncia'},
@@ -1401,6 +1482,8 @@ let viewAsUid = null;
 // Search/filter state for admin user list
 let adminSearchQuery = '';
 let adminFilterRole = 'all';  // 'all' | 'with-patients' | 'no-patients'
+let invitacionesList = [];
+let invitacionesUnsub = null;
 let odontoMode=null;
 let surfaceMode=false;
 const autosaveTimers={};
@@ -1428,6 +1511,10 @@ function isTempBypass(){return sessionStorage.getItem('ds_temp_bypass')==='1'}
 // emails gets admin powers (sees everyone's patients, can impersonate, manages user perms).
 // The bypass password remains as super-admin emergency access.
 const ADMIN_EMAILS=['mauriziomof@gmail.com','angelorossettij@gmail.com'];
+    // v7.1 — defensive allowlist check (Bug #1): the admin view must NEVER render for a
+    // non-allowlisted account, no matter how the isAdmin flag ended up set.
+    function isAllowlistedAdmin(){ try{ return isTempBypass() || (auth.currentUser && ADMIN_EMAILS.includes((auth.currentUser.email||'').toLowerCase())); }catch(e){ return isTempBypass(); } }
+    window.isAllowlistedAdmin=isAllowlistedAdmin;
 
 // IMPORTANT: define window.checkLogin BEFORE any Firebase call.
 // If Firebase init throws (e.g. file:// origin not allowed), the module would
@@ -1483,6 +1570,8 @@ window.showAuthView = function(name){
     const el=document.getElementById(id);
     if(el)el.textContent='';
   });
+  // Populate the dentist-specialty chips when entering signup
+  if(name==='signup'){const c=document.getElementById('signupEspChips');if(c&&!c.children.length)c.innerHTML=espChipsHTML([]);}
   // Focus first input in the active view
   setTimeout(()=>{
     const f=document.querySelector(`#${name}View input, #${name}View select`);
@@ -1503,18 +1592,36 @@ window.doSignup = async function(){
   if(!email){err.textContent='Ingresa tu correo electrónico.';return;}
   if(pass.length<6){err.textContent='La contraseña debe tener al menos 6 caracteres.';return;}
   if(pass!==passConfirm){err.textContent='Las contraseñas no coinciden.';return;}
-  btn.disabled=true;btn.textContent='Creando cuenta…';
+  const codigo=(document.getElementById('signupCode').value||'').trim().toUpperCase();
+  if(!codigo){err.textContent='Ingresa tu código de invitación.';return;}
+  btn.disabled=true;btn.textContent='Verificando código…';
+  // v7.1 — require a valid, unused invitation code (one-time use).
+  const invRef=doc(db,'invitaciones',codigo);
+  try{
+    const invSnap=await getDoc(invRef);
+    if(!invSnap.exists()||invSnap.data().usado===true){
+      err.textContent='Código de invitación inválido o ya utilizado.';
+      btn.disabled=false;btn.textContent='Crear cuenta';return;
+    }
+  }catch(ev){
+    err.textContent='No se pudo validar el código. Revisa tu conexión e intenta de nuevo.';
+    btn.disabled=false;btn.textContent='Crear cuenta';return;
+  }
+  btn.textContent='Creando cuenta…';
   // Stash title + name so bootstrapUserPerms can save them when /users/{uid} is created
   sessionStorage.setItem('ds_pending_title',titulo||'');
   sessionStorage.setItem('ds_pending_name',nombre);
+  sessionStorage.setItem('ds_pending_esp',JSON.stringify(getEspFrom('signupEspChips')));
   try{
     const cred=await createUserWithEmailAndPassword(auth,email,pass);
     const displayName=titulo?`${titulo} ${nombre}`:nombre;
     try{await updateProfile(cred.user,{displayName});}catch(e){console.warn('updateProfile failed:',e.message);}
+    try{await setDoc(invRef,{usado:true,usadoPor:email,usadoEn:new Date().toISOString()},{merge:true});}catch(e){}
     // onAuthStateChanged will fire and bootstrap perms with the pending title/name
   }catch(e){
     sessionStorage.removeItem('ds_pending_title');
     sessionStorage.removeItem('ds_pending_name');
+    sessionStorage.removeItem('ds_pending_esp');
     let msg='No se pudo crear la cuenta.';
     if(e.code==='auth/email-already-in-use')msg='Este correo ya tiene una cuenta. Usa "Volver al login".';
     else if(e.code==='auth/invalid-email')msg='Correo electrónico inválido.';
@@ -1566,6 +1673,12 @@ function bootstrapUserPerms(user){
   userPermsUnsubscribe=onSnapshot(ref,async snap=>{
     if(snap.exists()){
       currentUserPerms={uid:user.uid,...snap.data()};
+      // v7.1 (#3) — block deactivated accounts.
+      if(currentUserPerms.status==='inactive' && !isAdmin && !isTempBypass()){
+        toast('Tu cuenta está desactivada. Contacta al administrador.');
+        try{signOut(auth);}catch(e){}
+        return;
+      }
       // Update lastLoginAt opportunistically (don't await)
       try{setDoc(ref,{lastLoginAt:new Date().toISOString()},{merge:true});}catch(e){}
     }else{
@@ -1575,12 +1688,16 @@ function bootstrapUserPerms(user){
       const pendingName=sessionStorage.getItem('ds_pending_name')||user.displayName||'';
       sessionStorage.removeItem('ds_pending_title');
       sessionStorage.removeItem('ds_pending_name');
+      const pendingEsp=JSON.parse(sessionStorage.getItem('ds_pending_esp')||'[]');
+      sessionStorage.removeItem('ds_pending_esp');
       const initial={
         email:user.email||'',
         name:pendingName,
         title:pendingTitle,
         tabsAllowed:[...ALL_TABS],
         tabOrder:[...ALL_TABS],
+        especialidades:pendingEsp,
+        status:'active',
         createdAt:new Date().toISOString(),
         lastLoginAt:new Date().toISOString()
       };
@@ -1602,24 +1719,33 @@ function updateAdminUI(){
   const profBtn=document.getElementById('profileBtn');
   const profInit=document.getElementById('profileInitials');
   if(profBtn){
-    // Show profile button only for non-admin authenticated users
-    profBtn.style.display = (!isAdmin && currentUserUid) ? 'inline-flex' : 'none';
-    if(profInit && currentUserPerms){
-      const name=currentUserPerms.name||currentUserPerms.email||'D';
-      profInit.textContent=name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
-    }
+    // v7.1 — show profile button for ALL authenticated sessions (incl. admin & bypass)
+    // so logout is always reachable from the profile menu, especially on mobile.
+    const _authed = !!currentUserUid || isAdmin || isTempBypass();
+    profBtn.style.display = _authed ? 'inline-flex' : 'none';
+    const _nm = (currentUserPerms && (currentUserPerms.name||currentUserPerms.email)) || (isAdmin?'Admin':'D');
+    if(profInit) profInit.textContent = _nm.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
   }
 }
 
 // ─── PROFILE PAGE ──────────────────────────────────────────────────────────
 window.openProfile=function(){
-  if(!currentUserPerms){toast('Inicia sesión primero');return;}
+  if(!currentUserPerms && !isAdmin && !isTempBypass()){toast('Inicia sesión primero');return;}
   viewActual='profile';
   renderProfile();
 };
 
 function renderProfile(){
-  if(!currentUserPerms){renderEmpty();return;}
+  if(!currentUserPerms){
+    // Admin / bypass session has no /users doc — show a minimal panel with logout.
+    document.getElementById('mainArea').innerHTML=`
+      ${impersonationBanner()}
+      <div class="phdr"><div style="flex:1"><div class="phn">Mi perfil</div><div class="phm">Sesión de administrador</div></div><button class="ba" onclick="volverInicio()">← Inicio</button></div>
+      <div class="panel profile-panel">
+        <div class="profile-card"><div class="ct">Sesión</div><button class="bd" onclick="cerrarSesion()">Cerrar sesión</button></div>
+      </div>`;
+    return;
+  }
   const p=currentUserPerms;
   const initials=(p.name||p.email||'D').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
   const fullName=p.title?`${p.title} ${p.name||''}`.trim():(p.name||'(sin nombre)');
@@ -1651,6 +1777,13 @@ function renderProfile(){
         <div class="mf"><label>Nombre completo</label><input id="prof_name" value="${e(p.name||'')}" placeholder="Nombre y apellidos"></div>
         <div class="mf"><label>Correo electrónico</label><input value="${e(p.email||'')}" disabled style="opacity:0.6;cursor:not-allowed"></div>
         <button class="ba" onclick="saveProfile()" style="margin-top:8px">Guardar cambios</button>
+      </div>
+
+      <div class="profile-card">
+        <div class="ct">Especialidades</div>
+        <p style="font-size:11px;color:var(--text3);margin-bottom:8px">Tus especialidades (informativo). Puedes elegir una o más.</p>
+        <div class="esp-chips" id="profEspChips">${espChipsHTML(p.especialidades||[])}</div>
+        <button class="ba" onclick="saveEsp()" style="margin-top:10px">Guardar especialidades</button>
       </div>
 
       <div class="profile-card">
@@ -1756,6 +1889,15 @@ function ss(state,label){const d=document.getElementById('syncDot');const l=docu
 // Returns sync indicator to resting state "Sincronizado" so transient "Guardado" doesn't stick around.
 let _ssRestTimer=null;
 function ssRest(){if(_ssRestTimer)clearTimeout(_ssRestTimer);_ssRestTimer=setTimeout(()=>ss('ok','Sincronizado'),2500);}
+// ── v7.1 auto-resize free-text fields (#11) ───────────────────────────────
+function autoGrow(t){ if(!t)return; t.style.height='auto'; t.style.height=Math.min(t.scrollHeight,600)+'px'; }
+function initAutoGrow(root){ (root||document).querySelectorAll('textarea').forEach(t=>{ if(t.dataset._ag)return; t.dataset._ag='1'; t.classList.add('auto-grow'); const h=()=>autoGrow(t); t.addEventListener('input',h); requestAnimationFrame(h); }); }
+window.initAutoGrow=initAutoGrow;
+const _agObs=new MutationObserver(()=>initAutoGrow(document));
+document.addEventListener('DOMContentLoaded',()=>{ const ma=document.getElementById('mainArea'); if(ma)_agObs.observe(ma,{childList:true,subtree:true}); initAutoGrow(document); });
+// ── v7.1 connection state hints (#10) ─────────────────────────────────────
+window.addEventListener('offline',()=>ss('err','Sin conexión · los cambios se guardan localmente'));
+window.addEventListener('online',()=>{ ss('ing','Reconectando…'); setTimeout(()=>ss('ok','Sincronizado'),1500); });
 function gp(){return pacientes.find(p=>p.id===idActual)}
 function g(id){const el=document.getElementById(id);return el?el.value:''}
 function e(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
@@ -1854,20 +1996,28 @@ function rerenderCurrent(){
 }
 
 async function guardar(p){
-  ss('ing','Guardando...');
   const{id,...data}=p;
-  // Preserve ownerUid if missing (for migration backward-compat — assign to current user)
   if(!data.ownerUid&&currentUserUid)data.ownerUid=currentUserUid;
-  try{await setDoc(doc(db,'pacientes',id),data);ss('ok','Guardado');ssRest();}
-  catch(err){ss('err','Error');throw err;}
+  ss('ing','Guardando...');
+  // Optimistic local apply so the UI reflects the change immediately, even offline.
+  const _i=pacientes.findIndex(x=>x.id===id);
+  if(_i>=0)pacientes[_i]={id,...data};
+  // Fire-and-track: don't block the UI on server ack. Offline persistence queues
+  // the write and syncs on reconnect — no data loss, modal can close right away.
+  setDoc(doc(db,'pacientes',id),data)
+    .then(()=>{ss('ok','Sincronizado');ssRest();})
+    .catch(()=>{ss('err','Sin conexión · guardado local, se sincronizará');});
+  return id;
 }
 async function crear(data){
-  ss('ing','Guardando...');
-  // Stamp the patient with its owner so multi-clinic filtering works.
-  // If the admin is impersonating, the new patient belongs to the impersonated user.
   data.ownerUid = viewAsUid || currentUserUid || 'orphan';
-  try{const ref=await addDoc(collection(db,'pacientes'),data);ss('ok','Guardado');return ref.id;}
-  catch(err){ss('err','Error');return null;}
+  ss('ing','Guardando...');
+  // Generate the doc id locally so we can return immediately (offline-safe).
+  const ref=doc(collection(db,'pacientes'));
+  setDoc(ref,data)
+    .then(()=>{ss('ok','Sincronizado');ssRest();})
+    .catch(()=>{ss('err','Sin conexión · guardado local, se sincronizará');});
+  return ref.id;
 }
 async function borrar(id){try{await deleteDoc(doc(db,'pacientes',id));}catch(err){}}
 
@@ -2018,13 +2168,22 @@ function matchesSearch(p,q){
 }
 
 // ─── SMART SIDEBAR FILTERS (v7-6) ────────────────────────────────────────
-let sidebarFilterAge='all';
+let sidebarAgeMin='';
+let sidebarAgeMax='';
 let sidebarFilterRecency='all';
 let sidebarSortMode='name';
+let filterPanelOpen=false;
 
-window.setSidebarAge=function(v){sidebarFilterAge=v;renderLista();};
+window.setAgeMin=function(v){sidebarAgeMin=v;renderLista();};
+window.setAgeMax=function(v){sidebarAgeMax=v;renderLista();};
 window.setSidebarRecency=function(v){sidebarFilterRecency=v;renderLista();};
 window.setSidebarSort=function(v){sidebarSortMode=v;renderLista();};
+// v7.1 (#4) — Excel-style filter panel: toggle, clear, save & restore.
+window.toggleFilterPanel=function(){filterPanelOpen=!filterPanelOpen;renderLista();};
+window.clearFilters=function(){sidebarAgeMin='';sidebarAgeMax='';sidebarFilterRecency='all';sidebarSortMode='name';renderLista();};
+window.saveCurrentFilter=function(){const n=prompt('Nombre para este filtro:');if(!n)return;const arr=JSON.parse(localStorage.getItem('ds_saved_filters')||'[]');arr.push({name:n.trim().slice(0,40),ageMin:sidebarAgeMin,ageMax:sidebarAgeMax,recency:sidebarFilterRecency,sort:sidebarSortMode});localStorage.setItem('ds_saved_filters',JSON.stringify(arr));toast('Filtro guardado');renderLista();};
+window.applySavedFilter=function(i){const arr=JSON.parse(localStorage.getItem('ds_saved_filters')||'[]');const f=arr[i];if(!f)return;sidebarAgeMin=f.ageMin||'';sidebarAgeMax=f.ageMax||'';sidebarFilterRecency=f.recency;sidebarSortMode=f.sort;renderLista();};
+window.deleteSavedFilter=function(i){const arr=JSON.parse(localStorage.getItem('ds_saved_filters')||'[]');arr.splice(i,1);localStorage.setItem('ds_saved_filters',JSON.stringify(arr));renderLista();};
 
 function patientLastConsultaDate(p){
   if(!p.consultas||p.consultas.length===0)return '';
@@ -2032,14 +2191,12 @@ function patientLastConsultaDate(p){
   for(const c of p.consultas){if(c.fecha&&c.fecha>max)max=c.fecha;}
   return max;
 }
-function patientMatchesAgeFilter(p,f){
-  if(f==='all')return true;
+function patientMatchesAge(p){
+  if(sidebarAgeMin===''&&sidebarAgeMax==='')return true;
   const yrs=edadAnios(p.nacimiento);
   if(yrs===null)return false;
-  if(f==='kids')return yrs<=12;
-  if(f==='youth')return yrs>=13&&yrs<=25;
-  if(f==='adults')return yrs>=26&&yrs<=60;
-  if(f==='seniors')return yrs>60;
+  if(sidebarAgeMin!==''&&yrs<+sidebarAgeMin)return false;
+  if(sidebarAgeMax!==''&&yrs>+sidebarAgeMax)return false;
   return true;
 }
 function patientMatchesRecencyFilter(p,f){
@@ -2059,7 +2216,7 @@ function renderLista(){
   const q=currentFilter;
   let filtered=pacientes.filter(p=>
     matchesSearch(p,q) &&
-    patientMatchesAgeFilter(p,sidebarFilterAge) &&
+    patientMatchesAge(p) &&
     patientMatchesRecencyFilter(p,sidebarFilterRecency)
   );
   if(sidebarSortMode==='name'){
@@ -2069,33 +2226,26 @@ function renderLista(){
   }else if(sidebarSortMode==='active'){
     filtered.sort((a,b)=>(b.consultas||[]).length-(a.consultas||[]).length);
   }
-  const anyFilterActive = sidebarFilterAge!=='all' || sidebarFilterRecency!=='all' || sidebarSortMode!=='name';
-  const chipBar=`<div class="plist-filters">
-    <div class="plist-filter-group">
-      <span class="plist-filter-label">Edad</span>
-      <div class="plist-filter-chips">
-        ${[['all','Todos'],['kids','Niños'],['youth','Jóvenes'],['adults','Adultos'],['seniors','Mayores']].map(([k,l])=>
-          `<button class="plist-chip${sidebarFilterAge===k?' on':''}" onclick="setSidebarAge('${k}')">${l}</button>`
-        ).join('')}
-      </div>
-    </div>
-    <div class="plist-filter-group">
-      <span class="plist-filter-label">Última visita</span>
-      <div class="plist-filter-chips">
-        ${[['all','Todos'],['week','Semana'],['month','Mes']].map(([k,l])=>
-          `<button class="plist-chip${sidebarFilterRecency===k?' on':''}" onclick="setSidebarRecency('${k}')">${l}</button>`
-        ).join('')}
-      </div>
-    </div>
-    <div class="plist-filter-group">
-      <span class="plist-filter-label">Orden</span>
-      <div class="plist-filter-chips">
-        ${[['name','A-Z'],['recent','Recientes'],['active','Activos']].map(([k,l])=>
-          `<button class="plist-chip${sidebarSortMode===k?' on':''}" onclick="setSidebarSort('${k}')">${l}</button>`
-        ).join('')}
-      </div>
-    </div>
-  </div>`;
+  const anyFilterActive = (sidebarAgeMin!==''||sidebarAgeMax!=='') || sidebarFilterRecency!=='all' || sidebarSortMode!=='name';
+  const _savedF=JSON.parse(localStorage.getItem('ds_saved_filters')||'[]');
+  const _active=((sidebarAgeMin!==''||sidebarAgeMax!=='')?1:0)+(sidebarFilterRecency!=='all'?1:0)+(sidebarSortMode!=='name'?1:0);
+  const _groups=`
+    <div class="plist-filter-group"><span class="plist-filter-label">Edad (años)</span><div class="age-range">
+      <input type="number" min="0" max="120" inputmode="numeric" placeholder="Mín" value="${sidebarAgeMin}" onchange="setAgeMin(this.value)">
+      <span>–</span>
+      <input type="number" min="0" max="120" inputmode="numeric" placeholder="Máx" value="${sidebarAgeMax}" onchange="setAgeMax(this.value)">
+    </div></div>
+    <div class="plist-filter-group"><span class="plist-filter-label">Última visita</span><div class="plist-filter-chips">
+      ${[['all','Todos'],['week','Semana'],['month','Mes']].map(([k,l])=>`<button class="plist-chip${sidebarFilterRecency===k?' on':''}" onclick="setSidebarRecency('${k}')">${l}</button>`).join('')}
+    </div></div>
+    <div class="plist-filter-group"><span class="plist-filter-label">Orden</span><div class="plist-filter-chips">
+      ${[['name','A-Z'],['recent','Recientes'],['active','Activos']].map(([k,l])=>`<button class="plist-chip${sidebarSortMode===k?' on':''}" onclick="setSidebarSort('${k}')">${l}</button>`).join('')}
+    </div></div>`;
+  const _panel=filterPanelOpen?`<div class="filter-panel">${_groups}
+    <div class="filter-panel-actions"><button class="plist-chip" onclick="clearFilters()">Limpiar todo</button><button class="plist-chip" onclick="saveCurrentFilter()">Guardar filtro</button></div>
+    ${_savedF.length?`<div class="filter-saved">${_savedF.map((f,i)=>`<span class="saved-chip"><button class="plist-chip" onclick="applySavedFilter(${i})">★ ${e(f.name)}</button><button class="saved-del" onclick="deleteSavedFilter(${i})" title="Borrar filtro guardado">×</button></span>`).join('')}</div>`:''}
+  </div>`:'';
+  const chipBar=`<div class="plist-filterbar"><button class="filter-toggle-btn${(_active||filterPanelOpen)?' on':''}" onclick="toggleFilterPanel()">⚙ Filtros${_active?` · ${_active}`:''}</button>${_active?`<button class="filter-clear-link" onclick="clearFilters()">Limpiar</button>`:''}</div>${_panel}`;
   const itemsHtml = filtered.length===0?
     `<p style="font-size:12px;color:var(--text3);padding:10px 8px">${pacientes.length===0?'Sin pacientes aún':'Sin resultados con los filtros'}</p>`:
     filtered.map(p=>{
@@ -2132,9 +2282,11 @@ function rebuildConsultasIndex(){
 
 // ─── EMPTY / LANDING (3.3.2) ──────────────────────────────────────────────
 // v7 notebook-D logo: spiral binding marks on the left + brass underline
-function logoSVG(size=28){return`<svg class="ds-logo" width="${size}" height="${size}" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="DocuSalud"><rect width="52" height="52" rx="13" fill="#E3E7DA"/><path d="M 20 11 H 31 Q 42 11 42 26 Q 42 41 31 41 H 20 Z M 26 17 V 35 H 31 Q 36 35 36 26 Q 36 17 31 17 Z" fill="#1F3A2A" fill-rule="evenodd"/><rect x="13" y="15" width="3.5" height="1.8" rx="0.9" fill="#D2B385"/><rect x="13" y="20" width="3.5" height="1.8" rx="0.9" fill="#D2B385"/><rect x="13" y="25" width="3.5" height="1.8" rx="0.9" fill="#D2B385"/><rect x="13" y="30" width="3.5" height="1.8" rx="0.9" fill="#D2B385"/><rect x="13" y="35" width="3.5" height="1.8" rx="0.9" fill="#D2B385"/><rect x="22" y="44" width="14" height="1.8" rx="0.9" fill="#D2B385"/></svg>`}
+function logoSVG(size=28){return`<img class="ds-logo" src="logo.svg" width="${size}" height="${size}" alt="DocuSalud">`}
 
 function renderEmpty(){
+  // v7.1 — self-heal (Bug #1): drop a stale admin flag for non-allowlisted sessions.
+  if(isAdmin && !isAllowlistedAdmin()){ isAdmin=false; updateAdminUI(); }
   // Admins (without an impersonated user) land directly in admin view.
   // No "Consultas de hoy" widget — they get the user management list.
   if(isAdmin && !viewAsUid){
@@ -2213,7 +2365,7 @@ window.toggleCalendar=function(){
 
 // Set up subscription + render (called from renderEmpty when admin lands)
 function renderAdminEntry(){
-  if(!isAdmin)return renderEmpty();
+  if(!isAdmin || !isAllowlistedAdmin()){ isAdmin=false; return renderEmpty(); }
   viewActual='admin';
   if(!usersUnsubscribe){
     usersUnsubscribe=onSnapshot(collection(db,'users'),snap=>{
@@ -2225,6 +2377,13 @@ function renderAdminEntry(){
       allUsersList=[];
       if(viewActual==='admin')renderAdmin();
     });
+  }
+  if(!invitacionesUnsub){
+    invitacionesUnsub=onSnapshot(collection(db,'invitaciones'),snap=>{
+      invitacionesList=snap.docs.map(d=>({code:d.id,...d.data()}));
+      invitacionesList.sort((a,b)=>(b.creadoEn||'').localeCompare(a.creadoEn||''));
+      if(viewActual==='admin')renderAdmin();
+    },err=>{console.warn('Invitaciones sub error:',err.message);});
   }
   renderAdmin();
 }
@@ -2279,18 +2438,22 @@ function renderAdmin(){
 
   const userCards=filtered.map(u=>{
     const allowed=new Set(u.tabsAllowed||ALL_TABS);
+    const status=u.status||'active';
     const fullName=u.title?`${u.title} ${u.name||''}`.trim():(u.name||u.email||'(sin nombre)');
     const patientCount=ownerCounts[u.uid]||0;
     return `<div class="admin-user-card">
       <div class="admin-user-head">
         <div style="min-width:0;flex:1">
-          <div class="admin-user-name">${e(fullName)}</div>
+          <div class="admin-user-name">${e(fullName)} <span class="admin-status ${status}">${status==='inactive'?'Inactivo':'Activo'}</span></div>
           <div class="admin-user-email">${e(u.email||'')} · ${patientCount} paciente${patientCount===1?'':'s'}</div>
+          ${(u.especialidades&&u.especialidades.length)?`<div class="admin-user-esp">${u.especialidades.map(s=>e(s)).join(' · ')}</div>`:''}
         </div>
-        <div class="admin-user-actions">
-          <button class="ba admin-impersonate-btn" onclick="impersonateUser('${u.uid}')" title="Ver como este usuario">Ver como</button>
-          <div class="admin-user-meta">${allowed.size}/${ALL_TABS.length}</div>
-        </div>
+        <div class="admin-user-meta">${allowed.size}/${ALL_TABS.length}</div>
+      </div>
+      <div class="admin-user-actions">
+        <button class="ba admin-impersonate-btn" onclick="impersonateUser('${u.uid}')" title="Ver como este usuario">Ver como</button>
+        <button class="bc" onclick="adminSetStatus('${u.uid}','${status==='inactive'?'active':'inactive'}')">${status==='inactive'?'Activar':'Desactivar'}</button>
+        <button class="bd" onclick="adminRemoveUser('${u.uid}')" title="Quitar de la lista">Quitar</button>
       </div>
       <div class="admin-tabs-grid">
         ${ALL_TABS.map(k=>`
@@ -2313,6 +2476,18 @@ function renderAdmin(){
   const noMatchesState=noMatches?`<div class="admin-empty">
     <p style="font-family:'Fraunces',serif;font-size:16px;color:var(--text2);font-style:italic">Ningún usuario coincide con los filtros.</p>
   </div>`:'';
+  const invitesHTML=`<div class="admin-invites">
+    <div class="admin-invites-head"><div class="ct">Códigos de invitación</div><button class="ba" onclick="generateInvite()">+ Generar invitación</button></div>
+    ${invitacionesList.length?`<div class="invite-list">${invitacionesList.map(c=>`
+      <div class="invite-row ${c.usado?'used':''}">
+        <code class="invite-code">${e(c.code)}</code>
+        ${c.usado?`<span class="invite-status used">Usado · ${e(c.usadoPor||'')}</span>`:`<span class="invite-status free">Disponible</span>`}
+        <div class="invite-actions">
+          ${c.usado?'':`<button class="bc" onclick="copyInvite('${e(c.code)}')">Copiar</button>`}
+          <button class="bd" onclick="deleteInvite('${e(c.code)}')">Borrar</button>
+        </div>
+      </div>`).join('')}</div>`:`<p style="font-size:12px;color:var(--text3);padding:6px 2px">Aún no hay códigos. Genera uno y compártelo con el odontólogo para que pueda crear su cuenta.</p>`}
+  </div>`;
 
   document.getElementById('mainArea').innerHTML=`
     <div class="phdr">
@@ -2333,6 +2508,7 @@ function renderAdmin(){
           <button class="admin-filter-chip ${adminFilterRole==='no-patients'?'on':''}" onclick="adminSetFilter('no-patients')">Sin pacientes</button>
         </div>
       </div>
+      ${invitesHTML}
       ${isEmpty?emptyState:(noMatches?noMatchesState:`<div class="admin-users-grid">${userCards}</div>`)}
       <div class="admin-footer">
         <p style="font-size:11px;color:var(--text3);line-height:1.6">
@@ -2349,6 +2525,33 @@ function renderAdmin(){
 
 window.adminSetSearch=function(q){adminSearchQuery=q;renderAdmin();};
 window.adminSetFilter=function(f){adminFilterRole=f;renderAdmin();};
+// v7.1 (#3) — soft-delete user management. Real Firebase Auth deletion is done by
+// the admins directly in the Firebase console; here we manage the app-side /users doc.
+window.adminSetStatus=async function(uid,status){
+  if(!isAdmin)return;
+  try{ await setDoc(doc(db,'users',uid),{status,statusUpdatedAt:new Date().toISOString()},{merge:true}); toast(status==='inactive'?'Usuario desactivado':'Usuario activado'); }
+  catch(e){ toast('No se pudo actualizar'); }
+};
+window.adminRemoveUser=async function(uid){
+  if(!isAdmin)return;
+  const u=allUsersList.find(x=>x.uid===uid);
+  if(!confirm(`¿Quitar a "${(u&&(u.name||u.email))||uid}" de la lista de administración?\n\nEsto NO borra su acceso en Firebase Authentication (eso se hace desde la consola de Firebase). Solo lo quita del panel.`))return;
+  try{ await deleteDoc(doc(db,'users',uid)); toast('Usuario quitado de la lista'); }
+  catch(e){ toast('No se pudo quitar'); }
+};
+// v7.1 — one-time invitation codes
+window.generateInvite=async function(){
+  if(!isAdmin)return;
+  const code='INV-'+Math.random().toString(36).slice(2,7).toUpperCase();
+  try{ await setDoc(doc(db,'invitaciones',code),{usado:false,creadoPor:(auth.currentUser&&auth.currentUser.email)||'admin',creadoEn:new Date().toISOString()}); toast('Código generado: '+code); }
+  catch(e){ toast('No se pudo generar el código'); }
+};
+window.copyInvite=function(code){ try{navigator.clipboard.writeText(code);toast('Código copiado: '+code);}catch(e){toast(code);} };
+window.deleteInvite=async function(code){ if(!isAdmin)return; if(!confirm('¿Borrar el código '+code+'?'))return; try{await deleteDoc(doc(db,'invitaciones',code));toast('Código borrado');}catch(e){} };
+// v7.1 — dentist specialties (informational, multi-select)
+function espChipsHTML(selected){const sel=selected||[];return ESP_ODONTO.map(s=>`<button type="button" class="esp-chip${sel.includes(s)?' on':''}" data-esp="${e(s)}" onclick="this.classList.toggle('on')">${e(s)}</button>`).join('');}
+function getEspFrom(id){const c=document.getElementById(id);if(!c)return[];return [...c.querySelectorAll('.esp-chip.on')].map(b=>b.dataset.esp);}
+window.saveEsp=async function(){if(!currentUserUid){toast('No autenticado');return;}const esp=getEspFrom('profEspChips');try{await setDoc(doc(db,'users',currentUserUid),{especialidades:esp,updatedAt:new Date().toISOString()},{merge:true});toast('Especialidades guardadas');}catch(e){toast('No se pudo guardar');}};
 
 // Persistent banner shown while admin is impersonating a user
 function impersonationBanner(){
@@ -2684,13 +2887,18 @@ function renderDatos(){
         <div class="f"><label>Teléfono 2</label><input ${phoneInputAttrs('d_t2',p.telefono2||'')}></div>
       </div>
       <div class="fg"><div class="f full"><label>Correo electrónico</label><input id="d_em" value="${e(p.email||'')}"></div></div>
-      <div class="fg"><div class="f full"><label>Especialidad</label><select id="d_esp" onchange="autosaveDatos()">
-        ${ESPECIALIDADES.map(es=>`<option value="${es.key}"${(p.especialidad||'general')===es.key?' selected':''}>${es.label}</option>`).join('')}
-      </select></div></div>
+      <div class="fg">
+        <div class="f"><label>Ocupación</label><input id="d_oc" value="${e(p.ocupacion||'')}"></div>
+        <div class="f"><label>Dirección</label><input id="d_dir" value="${e(p.direccion||'')}"></div>
+      </div>
+      <div class="fg">
+        <div class="f"><label>Familiar / Representante (parentesco)</label><input id="d_rep" value="${e(p.representante||'')}"></div>
+        <div class="f"><label>Referido por</label><input id="d_ref" value="${e(p.referido||'')}"></div>
+      </div>
     </div>
     <div style="display:flex;gap:8px"><button class="bd" onclick="eliminarP()">Eliminar paciente</button></div>`;
   // wire autosave
-  ['d_n','d_nac','d_ci_p','d_ci_n','d_sx','d_t1','d_t2','d_em','d_esp'].forEach(id=>{
+  ['d_n','d_nac','d_ci_p','d_ci_n','d_sx','d_t1','d_t2','d_em','d_oc','d_dir','d_rep','d_ref'].forEach(id=>{
     const el=document.getElementById(id);
     if(el){
       el.addEventListener('input',autosaveDatos);
@@ -2709,7 +2917,10 @@ window.autosaveDatos=async function(){
     p.telefono=g('d_t1');
     p.telefono2=g('d_t2');
     p.email=g('d_em');
-    p.especialidad=g('d_esp')||'general';
+    p.ocupacion=g('d_oc');
+    p.direccion=g('d_dir');
+    p.representante=g('d_rep');
+    p.referido=g('d_ref');
     return p;
   },'ss-datos');
 }
@@ -2729,6 +2940,25 @@ window.eliminarP=async function(){
 }
 
 // ─── HISTORIA CLÍNICA (3.7.1 specialty templates) ─────────────────────────
+// v7.1 (#5) — structured antecedentes & hábitos (Akel clinical-history model)
+const ANTEC_LIST=[['alergicos','Alérgicos'],['quirurgicos','Quirúrgicos'],['traumaticos','Traumáticos (accidentes)'],['infecto','Infecto-contagiosas'],['cardiovascular','Cardiovascular'],['endocrinos','Endocrinos / hormonales'],['neurologicas','Enf. neurológicas'],['respiratorios','Trastornos respiratorios']];
+const HABIT_LIST=[['fuma','Fuma'],['cafe','Café'],['drogas','Drogas'],['bruxismo','Bruxismo']];
+function _sino(id,v){return `<select id="${id}" onchange="autosaveClinico()"><option value=""${!v?' selected':''}>—</option><option value="si"${v==='si'?' selected':''}>Sí</option><option value="no"${v==='no'?' selected':''}>No</option></select>`;}
+function antecedentesCard(p){
+  const a=p.antecedentes_struct||{}; const h=p.habitos||{};
+  return `<div class="card">
+    <div class="ct-row"><div class="ct">Antecedentes personales y familiares</div></div>
+    <div class="ant-grid">
+      ${ANTEC_LIST.map(([k,l])=>`<div class="ant-row"><label>${l}</label>${_sino('ant_'+k,a[k])}</div>`).join('')}
+    </div>
+    <div class="f" style="margin-top:10px"><label>Otras</label><textarea id="ant_otras" oninput="autosaveClinico()">${e(a.otras||'')}</textarea></div>
+    <div class="ct-row" style="margin-top:16px"><div class="ct">Hábitos</div></div>
+    <div class="hab-grid">
+      ${HABIT_LIST.map(([k,l])=>`<div class="hab-row"><label>${l}</label>${_sino('hab_'+k,h[k])}<input id="hab_${k}_d" placeholder="Cantidad / tipo / frecuencia" value="${e(h[k+'_d']||'')}" oninput="autosaveClinico()"></div>`).join('')}
+    </div>
+    <div class="f" style="margin-top:10px"><label>Otros hábitos</label><input id="hab_otros" value="${e(h.otros||'')}" oninput="autosaveClinico()"></div>
+  </div>`;
+}
 function renderClinico(){
   const p=gp();
   const esp=p.especialidad||'general';
@@ -2758,12 +2988,15 @@ function renderClinico(){
       <div class="f" style="margin-bottom:10px"><label>Observaciones en la oclusión</label><textarea id="c_oc" oninput="autosaveClinico()">${e(p.oclusion||'')}</textarea></div>
       <div class="f"><label>Diagnóstico</label><textarea id="c_di" oninput="autosaveClinico()">${e(p.diagnostico||'')}</textarea></div>
     </div>
+    ${antecedentesCard(p)}
     ${specialtyHTML}`;
 }
 window.autosaveClinico=function(){
   autosave('clinico',()=>{
     const p=gp();if(!p)return null;
     p.motivo=g('c_mo');p.antecedentes=g('c_an');p.patologias=g('c_pa');p.oclusion=g('c_oc');p.diagnostico=g('c_di');
+    const _ant={};ANTEC_LIST.forEach(([k])=>{const el=document.getElementById('ant_'+k);if(el)_ant[k]=el.value;});const _ao=document.getElementById('ant_otras');if(_ao)_ant.otras=_ao.value;p.antecedentes_struct=_ant;
+    const _hab={};HABIT_LIST.forEach(([k])=>{const s=document.getElementById('hab_'+k);if(s)_hab[k]=s.value;const d=document.getElementById('hab_'+k+'_d');if(d)_hab[k+'_d']=d.value;});const _ho=document.getElementById('hab_otros');if(_ho)_hab.otros=_ho.value;p.habitos=_hab;
     const esp=p.especialidad||'general';
     const schema=SPECIALTY_SCHEMAS[esp];
     if(schema){
@@ -3647,7 +3880,7 @@ function renderCons(){
 window.modalCons=function(){
   const today=hoy();
   abrirModal('Nueva consulta',
-    `<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+    `<div class="modal-grid-2">
       <div class="mf"><label>Fecha</label><input type="date" id="m_fe" value="${today}" oninput="checkConflict()"></div>
       <div class="mf"><label>Hora</label><input type="time" id="m_ho" oninput="checkConflict()"></div>
     </div>
@@ -3681,7 +3914,7 @@ window.editCons=function(cid){
   const diVal=e(c.dientes||'');
   const noVal=e(c.notas||'');
   abrirModal('Editar consulta',
-    `<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+    `<div class="modal-grid-2">
       <div class="mf"><label>Fecha</label><input type="date" id="m_fe" value="${fechaVal}" oninput="checkConflict('${cid}')"></div>
       <div class="mf"><label>Hora</label><input type="time" id="m_ho" value="${horaVal}" oninput="checkConflict('${cid}')"></div>
     </div>
@@ -3742,10 +3975,17 @@ function abrirModal(titulo,body,fn){
   div.className='mbg';div.id='MB';
   div.innerHTML=`<div class="mbox"><h3>${titulo}</h3>${body}<div class="mact"><button class="bc" onclick="cerrarModal()">Cancelar</button><button class="bs" onclick="confirmarModal()">Guardar</button></div></div>`;
   document.body.appendChild(div);
-  setTimeout(()=>{const f=div.querySelector('input,textarea,select');if(f)f.focus();},50);
+  setTimeout(()=>{const f=div.querySelector('input,textarea,select');if(f)f.focus();initAutoGrow(div);},50);
 }
 function cerrarModal(){const m=document.getElementById('MB');if(m)m.remove();}
-function confirmarModal(){if(modalFn)modalFn();}
+async function confirmarModal(){
+  if(!modalFn)return;
+  const m=document.getElementById('MB');
+  const btn=m&&m.querySelector('.bs');
+  if(btn){ if(btn.disabled)return; btn.disabled=true; btn.dataset._t=btn.textContent; btn.textContent='Guardando…'; }
+  try{ await modalFn(); }
+  finally{ const m2=document.getElementById('MB'); const b2=m2&&m2.querySelector('.bs'); if(b2){ b2.disabled=false; b2.textContent=b2.dataset._t||'Guardar'; } }
+}
 window.cerrarModal=cerrarModal;window.confirmarModal=confirmarModal;
 window.abrirModal=abrirModal;
 
@@ -3755,11 +3995,10 @@ window.modalNuevo=function(){
     `<div class="mf"><label>Nombre completo *</label><input id="m_no" placeholder="Nombre y apellidos" required></div>
      <div class="mf"><label>Cédula *</label>${ciInputHTML('m_ci','')}</div>
      <div class="mf"><label>Teléfono *</label><input ${phoneInputAttrs('m_te','')} required></div>
-     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+     <div class="modal-grid-2">
        <div class="mf"><label>Fecha de nacimiento *</label><input type="date" id="m_na" required></div>
        <div class="mf"><label>Sexo *</label><select id="m_sx" required><option value="">—</option><option value="F">Femenino</option><option value="M">Masculino</option><option value="O">Otro</option></select></div>
      </div>
-     <div class="mf"><label>Especialidad</label><select id="m_esp">${ESPECIALIDADES.map(es=>`<option value="${es.key}">${es.label}</option>`).join('')}</select></div>
      <div id="m_err" style="font-size:12px;color:var(--terra);min-height:14px;margin-top:4px"></div>
      <p style="font-size:11px;color:var(--text3);margin-top:4px;font-style:italic">* Campos obligatorios</p>`,
     async()=>{
@@ -3788,7 +4027,7 @@ window.modalNuevo=function(){
         if(dup){errDiv.textContent=`Ya existe un paciente con la cédula ${ci}: ${dup.nombre}`;return;}
       }
       const data={
-        nombre,ci,telefono,nacimiento,sexo,especialidad:g('m_esp')||'general',
+        nombre,ci,telefono,nacimiento,sexo,
         telefono2:'',email:'',motivo:'',antecedentes:'',patologias:'',oclusion:'',diagnostico:'',
         plan:'',plan_aceptado:'',restauracion:'',material:'',color_dental:'',color_deseado:'',laboratorio:'',indicaciones_tecnico:'',obs_importantes:'',
         teeth:{},teeth_obs:'',operatorias:[],procs:{},especialistas:[],records:[],consultas:[],firmas:{}
