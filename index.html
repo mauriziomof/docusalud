@@ -119,6 +119,8 @@ body {
   padding: 40px 36px;
   width: 100%; max-width: 380px;
   text-align: center;
+  max-height: 92dvh;
+  overflow-y: auto;
 }
 .lbox h2 {
   font-family: 'DM Sans', sans-serif;
@@ -1218,8 +1220,27 @@ body:has(.dot.ing) .topbar .brand svg { animation: logoBreathe 1.5s var(--ease) 
 .esp-select { margin-bottom:12px; text-align:left; }
 .esp-select-label { font-size:12px; color:var(--text2); margin-bottom:6px; }
 .esp-chips { display:flex; flex-wrap:wrap; gap:6px; }
-.esp-chip { font:inherit; font-size:12px; padding:6px 11px; border:var(--border-default); border-radius:20px; background:var(--surface2); color:var(--text2); cursor:pointer; }
+.esp-chip { font:inherit; font-size:12px; padding:6px 11px; border:var(--border-default); border-radius:20px; background:var(--surface2); color:var(--text2); cursor:pointer; transition: background 0.12s, color 0.12s; }
 .esp-chip.on { background:var(--accent-light); color:var(--forest); border-color:var(--accent-border); font-weight:500; }
+/* ── Collapsible specialty dropdown ── */
+.esp-dropdown { margin-bottom:12px; text-align:left; }
+.esp-dropdown-trigger {
+  width:100%; padding:12px 14px; font-size:14px; font-family:'DM Sans',sans-serif;
+  border:var(--border-default); border-radius:var(--r);
+  background:var(--surface2); color:var(--text);
+  display:flex; align-items:center; justify-content:space-between;
+  cursor:pointer; text-align:left; transition:border 0.15s;
+}
+.esp-dropdown-trigger:hover { border-color:var(--forest); }
+.esp-dropdown-trigger .esp-arrow { font-size:10px; color:var(--text3); transition:transform 0.2s; }
+.esp-dropdown-trigger.open .esp-arrow { transform:rotate(180deg); }
+.esp-dropdown-panel {
+  display:none; margin-top:4px;
+  border:var(--border-default); border-radius:var(--r);
+  background:var(--surface2); padding:10px;
+  max-height:220px; overflow-y:auto;
+}
+.esp-dropdown-panel.open { display:flex; flex-wrap:wrap; gap:6px; }
 .admin-user-esp { font-size:11px; color:var(--text2); margin-top:3px; }
 </style>
 </head>
@@ -1260,7 +1281,15 @@ body:has(.dot.ing) .topbar .brand svg { animation: logoBreathe 1.5s var(--ease) 
         <input type="email" id="signupEmail" placeholder="Correo electrónico" autocomplete="email" required>
         <input type="password" id="signupPass" placeholder="Contraseña (mín. 6)" autocomplete="new-password" minlength="6" required>
         <input type="password" id="signupPassConfirm" placeholder="Confirmar contraseña" autocomplete="new-password" minlength="6" required>
-        <div class="esp-select"><div class="esp-select-label">Tus especialidades (una o más)</div><div class="esp-chips" id="signupEspChips"></div></div>
+        <div class="esp-dropdown">
+          <button type="button" class="esp-dropdown-trigger" id="signupEspTrigger" onclick="toggleEspDropdown('signupEspTrigger','signupEspPanel')">
+            <span id="signupEspLabel">Tus especialidades (una o más)</span>
+            <span class="esp-arrow">▼</span>
+          </button>
+          <div class="esp-dropdown-panel" id="signupEspPanel">
+            <div class="esp-chips" id="signupEspChips" style="display:flex;flex-wrap:wrap;gap:6px;width:100%"></div>
+          </div>
+        </div>
         <input type="text" id="signupCode" placeholder="Código de invitación" autocomplete="off" required>
         <button type="submit" id="signupBtn">Crear cuenta</button>
       </form>
@@ -1571,7 +1600,12 @@ window.showAuthView = function(name){
     if(el)el.textContent='';
   });
   // Populate the dentist-specialty chips when entering signup
-  if(name==='signup'){const c=document.getElementById('signupEspChips');if(c&&!c.children.length)c.innerHTML=espChipsHTML([]);}
+  if(name==='signup'){
+    const c=document.getElementById('signupEspChips');
+    if(c&&!c.children.length)c.innerHTML=espChipsHTML([]);
+    const dd=c?c.closest('.esp-dropdown'):null;
+    if(dd)updateEspLabel(dd);
+  }
   // Focus first input in the active view
   setTimeout(()=>{
     const f=document.querySelector(`#${name}View input, #${name}View select`);
@@ -1782,7 +1816,15 @@ function renderProfile(){
       <div class="profile-card">
         <div class="ct">Especialidades</div>
         <p style="font-size:11px;color:var(--text3);margin-bottom:8px">Tus especialidades (informativo). Puedes elegir una o más.</p>
-        <div class="esp-chips" id="profEspChips">${espChipsHTML(p.especialidades||[])}</div>
+        <div class="esp-dropdown">
+          <button type="button" class="esp-dropdown-trigger" id="profEspTrigger" onclick="toggleEspDropdown('profEspTrigger','profEspPanel')">
+            <span id="profEspLabel">${(p.especialidades&&p.especialidades.length)?p.especialidades.length+' especialidad(es) seleccionada(s)':'Selecciona tus especialidades'}</span>
+            <span class="esp-arrow">▼</span>
+          </button>
+          <div class="esp-dropdown-panel" id="profEspPanel">
+            <div class="esp-chips" id="profEspChips" style="display:flex;flex-wrap:wrap;gap:6px;width:100%">${espChipsHTML(p.especialidades||[])}</div>
+          </div>
+        </div>
         <button class="ba" onclick="saveEsp()" style="margin-top:10px">Guardar especialidades</button>
       </div>
 
@@ -2549,7 +2591,24 @@ window.generateInvite=async function(){
 window.copyInvite=function(code){ try{navigator.clipboard.writeText(code);toast('Código copiado: '+code);}catch(e){toast(code);} };
 window.deleteInvite=async function(code){ if(!isAdmin)return; if(!confirm('¿Borrar el código '+code+'?'))return; try{await deleteDoc(doc(db,'invitaciones',code));toast('Código borrado');}catch(e){} };
 // v7.1 — dentist specialties (informational, multi-select)
-function espChipsHTML(selected){const sel=selected||[];return ESP_ODONTO.map(s=>`<button type="button" class="esp-chip${sel.includes(s)?' on':''}" data-esp="${e(s)}" onclick="this.classList.toggle('on')">${e(s)}</button>`).join('');}
+function espChipsHTML(selected){const sel=selected||[];return ESP_ODONTO.map(s=>`<button type="button" class="esp-chip${sel.includes(s)?' on':''}" data-esp="${e(s)}" onclick="this.classList.toggle('on');updateEspLabel(this.closest('.esp-dropdown'))">${e(s)}</button>`).join('');}
+function toggleEspDropdown(triggerId,panelId){
+  const t=document.getElementById(triggerId);
+  const p=document.getElementById(panelId);
+  if(!t||!p)return;
+  const isOpen=p.classList.contains('open');
+  p.classList.toggle('open',!isOpen);
+  t.classList.toggle('open',!isOpen);
+}
+function updateEspLabel(dropdown){
+  if(!dropdown)return;
+  const sel=dropdown.querySelectorAll('.esp-chip.on');
+  const label=dropdown.querySelector('[id$="EspLabel"]');
+  if(!label)return;
+  if(sel.length===0)label.textContent='Selecciona tus especialidades';
+  else if(sel.length===1)label.textContent=sel[0].dataset.esp;
+  else label.textContent=sel.length+' especialidades seleccionadas';
+}
 function getEspFrom(id){const c=document.getElementById(id);if(!c)return[];return [...c.querySelectorAll('.esp-chip.on')].map(b=>b.dataset.esp);}
 window.saveEsp=async function(){if(!currentUserUid){toast('No autenticado');return;}const esp=getEspFrom('profEspChips');try{await setDoc(doc(db,'users',currentUserUid),{especialidades:esp,updatedAt:new Date().toISOString()},{merge:true});toast('Especialidades guardadas');}catch(e){toast('No se pudo guardar');}};
 
