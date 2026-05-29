@@ -1583,6 +1583,8 @@ window.cerrarSesion = async function(){
   sessionStorage.removeItem('ds_temp_bypass');
   isAdmin=false;
   viewAsUid=null;
+  pacientesListenerUid=null;
+  _lastLoginAtUpdatedForUid=null;
   try{await signOut(auth);}catch(e){}
   document.getElementById('loginBg').style.display='flex';
   showAuthView('login');
@@ -1713,8 +1715,12 @@ function bootstrapUserPerms(user){
         try{signOut(auth);}catch(e){}
         return;
       }
-      // Update lastLoginAt opportunistically (don't await)
-      try{setDoc(ref,{lastLoginAt:new Date().toISOString()},{merge:true});}catch(e){}
+      // Update lastLoginAt once per session — writing it every snapshot triggers another
+      // snapshot which would loop forever (each write changes the timestamp → new snapshot).
+      if(_lastLoginAtUpdatedForUid!==currentUserUid){
+        _lastLoginAtUpdatedForUid=currentUserUid;
+        try{setDoc(ref,{lastLoginAt:new Date().toISOString()},{merge:true});}catch(e){}
+      }
     }else{
       // First login — create with default perms (all tabs).
       // If this signup just happened, pull title + name from sessionStorage.
@@ -1741,8 +1747,13 @@ function bootstrapUserPerms(user){
     updateAdminUI();
     // Re-render current view so tab filter applies
     if(viewActual==='paciente'&&idActual)renderPaciente();
-    // Now that we know the user's uid, set up the patient listener with ownerUid filtering
-    setupPacientesListener();
+    // Only set up the pacientes listener once per user session.
+    // Without this guard, every snapshot (e.g. from lastLoginAt write) would call
+    // setupPacientesListener(), cancel the active listener, and restart it → "Conectando" forever.
+    if(pacientesListenerUid!==currentUserUid){
+      pacientesListenerUid=currentUserUid;
+      setupPacientesListener();
+    }
   });
 }
 
@@ -1771,7 +1782,18 @@ window.openProfile=function(){
 
 function renderProfile(){
   if(!currentUserPerms){
-    // Admin / bypass session has no /users doc — show a minimal panel with logout.
+    // If there IS a Firebase uid (regular user) but perms haven't loaded yet,
+    // show a loading placeholder — not "Sesión de administrador" which is confusing.
+    if(currentUserUid && !isTempBypass()){
+      document.getElementById('mainArea').innerHTML=`
+        ${impersonationBanner()}
+        <div class="phdr"><div style="flex:1"><div class="phn">Mi perfil</div><div class="phm">Cargando…</div></div><button class="ba" onclick="volverInicio()">← Inicio</button></div>
+        <div class="panel profile-panel"><div class="empty"><p style="font-family:'DM Sans',sans-serif;color:var(--text3)">Cargando información del perfil…</p></div></div>`;
+      // Retry once perms arrive (they should arrive in < 1 s)
+      setTimeout(()=>{ if(viewActual==='profile'){ if(currentUserPerms)renderProfile(); } },1200);
+      return;
+    }
+    // Pure bypass session — no /users doc exists; show minimal admin panel.
     document.getElementById('mainArea').innerHTML=`
       ${impersonationBanner()}
       <div class="phdr"><div style="flex:1"><div class="phn">Mi perfil</div><div class="phm">Sesión de administrador</div></div><button class="ba" onclick="volverInicio()">← Inicio</button></div>
@@ -1998,6 +2020,9 @@ function statusEl(formKey){
 // Patient listener: ownerUid-aware so non-admin users see only their own patients.
 // Admins see everyone unless they're impersonating a specific user via viewAsUid.
 let pacientesUnsub = null;
+// Guards to prevent infinite loops in bootstrapUserPerms snapshot handler
+let pacientesListenerUid = null;   // uid for which the pacientes listener is active
+let _lastLoginAtUpdatedForUid = null;  // uid for which lastLoginAt was already written
 function setupPacientesListener(){
   if(pacientesUnsub){pacientesUnsub();pacientesUnsub=null;}
   let q;
@@ -2610,7 +2635,11 @@ function updateEspLabel(dropdown){
   else label.textContent=sel.length+' especialidades seleccionadas';
 }
 function getEspFrom(id){const c=document.getElementById(id);if(!c)return[];return [...c.querySelectorAll('.esp-chip.on')].map(b=>b.dataset.esp);}
-window.saveEsp=async function(){if(!currentUserUid){toast('No autenticado');return;}const esp=getEspFrom('profEspChips');try{await setDoc(doc(db,'users',currentUserUid),{especialidades:esp,updatedAt:new Date().toISOString()},{merge:true});toast('Especialidades guardadas');}catch(e){toast('No se pudo guardar');}};
+window.saveEsp=async function(){if(!currentUserUid){toast('No autenticado');return;}const esp=getEspFrom('profEspChips');try{await setDoc(doc(db,'users',currentUserUid),{especialidades:esp,updatedAt:new Date().toISOString()},{merge:true});toast('Especialidades guardadas');}catch(e){toast('No se pudo guardar');};};
+// Expose dropdown helpers globally — HTML onclick attributes run in global scope,
+// so functions defined inside the module must be attached to window explicitly.
+window.toggleEspDropdown=toggleEspDropdown;
+window.updateEspLabel=updateEspLabel;
 
 // Persistent banner shown while admin is impersonating a user
 function impersonationBanner(){
@@ -2820,8 +2849,18 @@ function renderPaciente(){
     {k:'rec',l:'Récord'},
     {k:'cons',l:`Consultas <span class="badge">${(p.consultas||[]).length}</span>`}
   ];
-  // Filter by current user's allowed tabs (admins via bypass see everything).
-  if(!isAdmin && currentUserPerms && Array.isArray(currentUserPerms.tabsAllowed)){
+  // Filter tabs based on who's actually "in scope":
+  // • Admin impersonating → use impersonated user's tabsAllowed (so "Ver como" truly matches what the user sees)
+  // • Regular user        → use their own tabsAllowed
+  // • Admin (not impersonating) → no filter, see all tabs
+  const _impersonated = viewAsUid ? allUsersList.find(u=>u.uid===viewAsUid) : null;
+  if(_impersonated && Array.isArray(_impersonated.tabsAllowed)){
+    const allowed=new Set(_impersonated.tabsAllowed);
+    tabs=tabs.filter(t=>allowed.has(t.k));
+    if(tabs.length>0 && !tabs.find(t=>t.k===tabActual)){
+      tabActual=tabs[0].k;
+    }
+  } else if(!isAdmin && currentUserPerms && Array.isArray(currentUserPerms.tabsAllowed)){
     const allowed=new Set(currentUserPerms.tabsAllowed);
     tabs=tabs.filter(t=>allowed.has(t.k));
     // If active tab got filtered out, fall back to first allowed
