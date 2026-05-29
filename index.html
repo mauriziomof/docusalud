@@ -2022,6 +2022,7 @@ function statusEl(formKey){
 let pacientesUnsub = null;
 // Guards to prevent infinite loops in bootstrapUserPerms snapshot handler
 let pacientesListenerUid = null;   // uid for which the pacientes listener is active
+let _lastSelfSaveTime = 0; // timestamp of last save we initiated (used to skip redundant re-renders)
 let _lastLoginAtUpdatedForUid = null;  // uid for which lastLoginAt was already written
 function setupPacientesListener(){
   if(pacientesUnsub){pacientesUnsub();pacientesUnsub=null;}
@@ -2047,7 +2048,15 @@ function setupPacientesListener(){
     pacientes=snap.docs.map(d=>({id:d.id,...d.data()}));
     rebuildConsultasIndex();
     renderLista();
-    rerenderCurrent();
+    // Skip re-rendering the patient view when the snapshot was triggered by our
+    // own autosave — the data is already applied optimistically, so there is
+    // nothing new to show and re-rendering would reset the panel scroll position.
+    // We DO re-render for calendar/admin, and for changes arriving from other devices
+    // (those arrive well after 2500 ms from the last self-save).
+    const _selfSave = (Date.now() - _lastSelfSaveTime) < 2500;
+    if(!_selfSave || viewActual==='calendario' || viewActual==='admin'){
+      rerenderCurrent();
+    }
     ss('ok','Sincronizado');
   },err=>{
     console.warn('Pacientes listener error:',err.message);
@@ -2058,13 +2067,23 @@ function setupPacientesListener(){
 function rerenderCurrent(){
   if(viewActual==='calendario')renderCalendar();
   else if(viewActual==='admin')renderAdmin();
-  else if(idActual&&gp())renderPaciente();
+  else if(idActual&&gp()){
+    // Preserve the panel scroll position so autosave snapshots don't
+    // jump the user back to the top when they are mid-form.
+    const _panel=document.getElementById('panel');
+    const _scrollTop=_panel?_panel.scrollTop:0;
+    renderPaciente();
+    if(_scrollTop>0){
+      setTimeout(()=>{const p2=document.getElementById('panel');if(p2)p2.scrollTop=_scrollTop;},0);
+    }
+  }
   else renderEmpty();
 }
 
 async function guardar(p){
   const{id,...data}=p;
   if(!data.ownerUid&&currentUserUid)data.ownerUid=currentUserUid;
+  _lastSelfSaveTime=Date.now(); // mark that WE triggered this save
   ss('ing','Guardando...');
   // Optimistic local apply so the UI reflects the change immediately, even offline.
   const _i=pacientes.findIndex(x=>x.id===id);
@@ -3554,9 +3573,17 @@ function renderOdonto(){
       <div class="f" style="margin-top:14px"><label>Observaciones</label><textarea id="o_ob" oninput="autosaveObs()">${e(p.teeth_obs||'')}</textarea></div>
     </div>`;
 }
-window.setOdontoMode=function(m){odontoMode=m||null;renderOdonto();}
+window.setOdontoMode=function(m){odontoMode=m||null;renderOdontoKeepScroll();}
 window.toggleSurfaceMode=function(){surfaceMode=document.getElementById('surface-mode').checked;}
-window.setEst=function(st){estadoDiente=st;renderOdonto()}
+window.setEst=function(st){estadoDiente=st;renderOdontoKeepScroll()}
+// Wrapper that preserves panel scroll when re-rendering the odontogram
+// (e.g. clicking a legend chip or changing dentition mode).
+function renderOdontoKeepScroll(){
+  const _panel=document.getElementById('panel');
+  const _s=_panel?_panel.scrollTop:0;
+  renderOdonto();
+  if(_s>0)setTimeout(()=>{const p2=document.getElementById('panel');if(p2)p2.scrollTop=_s;},0);
+}
 window.mDiente=async function(n){
   vizToothN=n;
   const p=gp();if(!p.teeth)p.teeth={};
