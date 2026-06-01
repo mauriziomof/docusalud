@@ -29,7 +29,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Fraunces:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&display=swap" rel="stylesheet">
 <style>
 /* ── TOKENS ─────────────────────────────────────────────────────────── */
 :root {
@@ -500,10 +500,12 @@ body {
 
 /* ── PRINT ──────────────────────────────────────────────────────────── */
 @media print {
-  .sidebar,.topbar,.tabbar,.bs,.ba,.bnew,.bd,.tbtn,.bottom-nav { display: none !important; }
-  body,html { overflow: visible; height: auto; }
-  .layout,.main { overflow: visible; }
-  .panel { overflow: visible; padding: 0; }
+  .sidebar,.topbar,.tabbar,.bs,.ba,.bnew,.bd,.tbtn,.bottom-nav,.side-menu,.side-menu-overlay,.profile-btn,.dark-toggle,#menuBtn,.sync-wrap,.mbg,.plist-filterbar,.filter-panel,.resize-handle,.ct-row .save-status { display: none !important; }
+  body,html { overflow: visible !important; height: auto !important; background: #fff !important; }
+  .layout,.main { overflow: visible !important; display: block !important; height: auto !important; }
+  .panel { overflow: visible !important; padding: 0 !important; }
+  .phdr { position: static !important; box-shadow: none !important; }
+  .card { break-inside: avoid; }
 }
 
 /* ── PREVIEW: NEW COMPONENT STYLES (Tasks 3.x) ──────────────────────── */
@@ -1263,6 +1265,10 @@ body.no-import .imp-btn { display:none !important; }
 .bn-logo { display:block; margin:0 auto 2px; }
 .bn-inicio { color:var(--forest); font-weight:600; }
 .bn-inicio .bn-logo { filter:drop-shadow(0 1px 1px rgba(31,58,42,0.12)); }
+/* ── v7.3.1 iOS form-control normalization (Fix #1: inputs aligned to limits) ── */
+.mbox input,.mbox select,.mbox textarea,.mf input,.mf select,.mf textarea,.f input,.f select,.f textarea,.ci-input input,.ci-input select,.lbox input,.age-range input { min-width:0; max-width:100%; }
+.mbox input,.mf input,.mf textarea,.f input,.f textarea,.ci-input input,.lbox input,input[type="date"],input[type="time"] { -webkit-appearance:none; appearance:none; }
+input[type="date"],input[type="time"] { min-height:40px; }
 </style>
 </head>
 <body>
@@ -2706,7 +2712,7 @@ async function exportarPDF(){
   try{ const blob=pdf.output('blob'); const file=new File([blob],fname,{type:'application/pdf'}); if(navigator.canShare&&navigator.canShare({files:[file]})){ await navigator.share({files:[file],title:titulo}); return; } }catch(e){}
   pdf.save(fname);
 }
-window.exportarPDF=exportarPDF;
+window.exportarPDF=function(){ try{closeSideMenu();}catch(e){} setTimeout(()=>window.print(),60); };
 // ===== v7.2 presence + devices via Realtime DB (#9-12) =====
 let _presenceSet=false, presenceMap={}, presenceUnsub=null;
 function getDeviceId(){ let d=localStorage.getItem('ds_device_id'); if(!d){ d='dev-'+Math.random().toString(36).slice(2,10)+Date.now().toString(36); localStorage.setItem('ds_device_id',d);} return d; }
