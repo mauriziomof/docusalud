@@ -119,8 +119,6 @@ body {
   padding: 40px 36px;
   width: 100%; max-width: 380px;
   text-align: center;
-  max-height: 92dvh;
-  overflow-y: auto;
 }
 .lbox h2 {
   font-family: 'DM Sans', sans-serif;
@@ -449,6 +447,7 @@ body {
   .f input, .f textarea, .f select,
   .ptbl input, .otbl input,
   .ci-input input, .ci-input select,
+  #adminSearchInput, .admin-search input, .age-range input,
   #search, .lbox input {
     font-size: 16px !important;
   }
@@ -1220,28 +1219,29 @@ body:has(.dot.ing) .topbar .brand svg { animation: logoBreathe 1.5s var(--ease) 
 .esp-select { margin-bottom:12px; text-align:left; }
 .esp-select-label { font-size:12px; color:var(--text2); margin-bottom:6px; }
 .esp-chips { display:flex; flex-wrap:wrap; gap:6px; }
-.esp-chip { font:inherit; font-size:12px; padding:6px 11px; border:var(--border-default); border-radius:20px; background:var(--surface2); color:var(--text2); cursor:pointer; transition: background 0.12s, color 0.12s; }
+.esp-chip { font:inherit; font-size:12px; padding:6px 11px; border:var(--border-default); border-radius:20px; background:var(--surface2); color:var(--text2); cursor:pointer; }
 .esp-chip.on { background:var(--accent-light); color:var(--forest); border-color:var(--accent-border); font-weight:500; }
-/* ── Collapsible specialty dropdown ── */
-.esp-dropdown { margin-bottom:12px; text-align:left; }
-.esp-dropdown-trigger {
-  width:100%; padding:12px 14px; font-size:14px; font-family:'DM Sans',sans-serif;
-  border:var(--border-default); border-radius:var(--r);
-  background:var(--surface2); color:var(--text);
-  display:flex; align-items:center; justify-content:space-between;
-  cursor:pointer; text-align:left; transition:border 0.15s;
-}
-.esp-dropdown-trigger:hover { border-color:var(--forest); }
-.esp-dropdown-trigger .esp-arrow { font-size:10px; color:var(--text3); transition:transform 0.2s; }
-.esp-dropdown-trigger.open .esp-arrow { transform:rotate(180deg); }
-.esp-dropdown-panel {
-  display:none; margin-top:4px;
-  border:var(--border-default); border-radius:var(--r);
-  background:var(--surface2); padding:10px;
-  max-height:220px; overflow-y:auto;
-}
-.esp-dropdown-panel.open { display:flex; flex-wrap:wrap; gap:6px; }
 .admin-user-esp { font-size:11px; color:var(--text2); margin-top:3px; }
+/* ── v7.2 Tanda A ── */
+body.no-import .imp-btn { display:none !important; }
+.invites-toggle { background:none; border:none; cursor:pointer; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:600; color:var(--text); display:flex; align-items:center; gap:6px; padding:0; }
+.invites-toggle .chev { color:var(--text3); font-size:12px; }
+/* ── v7.2 Tanda B/C/D ── */
+.side-menu-overlay { position:fixed; inset:0; background:rgba(26,26,23,0.35); z-index:200; opacity:0; pointer-events:none; transition:opacity .2s; }
+.side-menu-overlay.on { opacity:1; pointer-events:auto; }
+.side-menu { position:fixed; top:0; left:0; bottom:0; width:82%; max-width:300px; background:var(--bg); z-index:201; transform:translateX(-100%); transition:transform .25s var(--ease,ease); box-shadow:2px 0 18px rgba(31,58,42,0.14); display:flex; flex-direction:column; padding:16px; gap:8px; }
+.side-menu.open { transform:translateX(0); }
+.side-menu-head { display:flex; align-items:center; justify-content:space-between; font-family:'Fraunces',serif; font-size:18px; color:var(--text); margin-bottom:8px; }
+.side-menu-x { background:none; border:none; font-size:26px; line-height:1; cursor:pointer; color:var(--text2); }
+.side-menu-item { text-align:left; background:var(--surface2); border:var(--border-default); border-radius:10px; padding:14px; font-family:'DM Sans',sans-serif; font-size:14px; color:var(--text); cursor:pointer; }
+.side-menu-item:hover { background:var(--accent-light); }
+.admin-presence { font-size:11px; color:var(--text2); margin-top:4px; display:flex; align-items:center; gap:6px; }
+.pres-dot { width:8px; height:8px; border-radius:50%; display:inline-block; flex-shrink:0; }
+.pres-dot.on { background:#3a9d5d; box-shadow:0 0 0 3px rgba(58,157,93,0.15); }
+.pres-dot.off { background:var(--border2); }
+.bn-logo { display:block; margin:0 auto 2px; }
+.bn-inicio { color:var(--forest); font-weight:600; }
+.bn-inicio .bn-logo { filter:drop-shadow(0 1px 1px rgba(31,58,42,0.12)); }
 </style>
 </head>
 <body>
@@ -1281,15 +1281,7 @@ body:has(.dot.ing) .topbar .brand svg { animation: logoBreathe 1.5s var(--ease) 
         <input type="email" id="signupEmail" placeholder="Correo electrónico" autocomplete="email" required>
         <input type="password" id="signupPass" placeholder="Contraseña (mín. 6)" autocomplete="new-password" minlength="6" required>
         <input type="password" id="signupPassConfirm" placeholder="Confirmar contraseña" autocomplete="new-password" minlength="6" required>
-        <div class="esp-dropdown">
-          <button type="button" class="esp-dropdown-trigger" id="signupEspTrigger" onclick="toggleEspDropdown('signupEspTrigger','signupEspPanel')">
-            <span id="signupEspLabel">Tus especialidades (una o más)</span>
-            <span class="esp-arrow">▼</span>
-          </button>
-          <div class="esp-dropdown-panel" id="signupEspPanel">
-            <div class="esp-chips" id="signupEspChips" style="display:flex;flex-wrap:wrap;gap:6px;width:100%"></div>
-          </div>
-        </div>
+        <div class="esp-select"><div class="esp-select-label">Tus especialidades (una o más)</div><div class="esp-chips" id="signupEspChips"></div></div>
         <input type="text" id="signupCode" placeholder="Código de invitación" autocomplete="off" required>
         <button type="submit" id="signupBtn">Crear cuenta</button>
       </form>
@@ -1318,7 +1310,7 @@ body:has(.dot.ing) .topbar .brand svg { animation: logoBreathe 1.5s var(--ease) 
 <!-- APP -->
 <div class="topbar">
   <div class="brand" onclick="volverInicio()" style="cursor:pointer" title="Inicio">
-    <button id="menuBtn" onclick="event.stopPropagation();toggleSidebar()" style="display:none;background:none;border:none;cursor:pointer;padding:4px;color:var(--text2)">
+    <button id="menuBtn" onclick="event.stopPropagation();openSideMenu()" style="display:none;background:none;border:none;cursor:pointer;padding:4px;color:var(--text2)">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
     </button>
     <img class="ds-logo" src="logo.svg" width="32" height="32" alt="DocuSalud">
@@ -1342,7 +1334,7 @@ body:has(.dot.ing) .topbar .brand svg { animation: logoBreathe 1.5s var(--ease) 
     <button class="tbtn" onclick="exportar()" title="Exportar" aria-label="Exportar">
       <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span class="lbl">Exportar</span>
     </button>
-    <button class="tbtn" onclick="document.getElementById('impFile').click()" title="Importar" aria-label="Importar">
+    <button class="tbtn imp-btn" onclick="document.getElementById('impFile').click()" title="Importar" aria-label="Importar">
       <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg><span class="lbl">Importar</span>
     </button>
     <input type="file" id="impFile" style="display:none" accept=".json,.csv" onchange="importar(event)">
@@ -1374,28 +1366,35 @@ body:has(.dot.ing) .topbar .brand svg { animation: logoBreathe 1.5s var(--ease) 
 </div>
 
 <div class="bottom-nav" id="bottomNav">
-  <button class="bn-btn on" id="bn-pacientes" onclick="toggleSidebar()">
+  <button class="bn-btn bn-inicio" onclick="bnInicio()">
+    <img class="bn-logo" src="logo.svg" alt="" width="23" height="23">
+    Inicio
+  </button>
+  <button class="bn-btn" id="bn-pacientes" onclick="bnPacientes()">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
     Pacientes
   </button>
-  <button class="bn-btn" onclick="modalNuevo()">
+  <button class="bn-btn" onclick="bnNuevo()">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
     Nuevo
   </button>
-  <button class="bn-btn" onclick="toggleCalendar()">
+  <button class="bn-btn" onclick="bnCalendario()">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
     Calendario
   </button>
-  <button class="bn-btn" onclick="exportar()">
+  <button class="bn-btn" onclick="exportarPDF()">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
     Exportar
   </button>
-  <button class="bn-btn" onclick="document.getElementById('impFile').click()">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-    Importar
-  </button>
 </div>
 
+<div class="side-menu-overlay" id="sideMenuOverlay" onclick="closeSideMenu()"></div>
+<div class="side-menu" id="sideMenu">
+  <div class="side-menu-head"><span>Menú</span><button class="side-menu-x" onclick="closeSideMenu()" aria-label="Cerrar">×</button></div>
+  <button class="side-menu-item" onclick="infoSoon('Guía Informativa')">Guía Informativa</button>
+  <button class="side-menu-item" onclick="infoSoon('Video Informativo')">Video Informativo</button>
+  <button class="side-menu-item" onclick="infoSoon('Soporte al cliente')">Contact Customer Service</button>
+</div>
 <div class="toast" id="toast"></div>
 <script type="application/ld+json">
 {
@@ -1411,11 +1410,12 @@ body:has(.dot.ing) .topbar .brand svg { animation: logoBreathe 1.5s var(--ease) 
 </script>
 
 <script type="module">
-import { collection, onSnapshot, doc, getDoc, setDoc, addDoc, deleteDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { collection, onSnapshot, doc, getDoc, setDoc, addDoc, deleteDoc, query, where, getDocs, increment } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged, signOut, updateProfile, updatePassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getDatabase, ref as rdbRef, onValue, onDisconnect, set as rdbSet, serverTimestamp as rdbTs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
     import { enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 const firebaseConfig = {
   apiKey: "AIzaSyCn1ELv-CLd2-C-agYGVt7dHeYlrw7T-_M",
@@ -1431,6 +1431,7 @@ const auth = getAuth(app);
     // v7.1 — offline persistence: writes are cached in IndexedDB and synced on
     // reconnect, so data is never lost and the UI keeps working without network.
     try{ enableIndexedDbPersistence(db).catch(()=>{}); }catch(e){}
+    let rtdb=null; try{ rtdb=getDatabase(app); }catch(e){ console.warn("Realtime DB no disponible:",e.message); }
 
 // ─── CONSTANTS ────────────────────────────────────────────────────────────
 const UPPER=[18,17,16,15,14,13,12,11,21,22,23,24,25,26,27,28];
@@ -1512,6 +1513,7 @@ let viewAsUid = null;
 let adminSearchQuery = '';
 let adminFilterRole = 'all';  // 'all' | 'with-patients' | 'no-patients'
 let invitacionesList = [];
+let invitesCollapsed = true;
 let invitacionesUnsub = null;
 let odontoMode=null;
 let surfaceMode=false;
@@ -1602,12 +1604,7 @@ window.showAuthView = function(name){
     if(el)el.textContent='';
   });
   // Populate the dentist-specialty chips when entering signup
-  if(name==='signup'){
-    const c=document.getElementById('signupEspChips');
-    if(c&&!c.children.length)c.innerHTML=espChipsHTML([]);
-    const dd=c?c.closest('.esp-dropdown'):null;
-    if(dd)updateEspLabel(dd);
-  }
+  if(name==='signup'){const c=document.getElementById('signupEspChips');if(c&&!c.children.length)c.innerHTML=espChipsHTML([]);}
   // Focus first input in the active view
   setTimeout(()=>{
     const f=document.querySelector(`#${name}View input, #${name}View select`);
@@ -1705,6 +1702,7 @@ if(isTempBypass()){
 function bootstrapUserPerms(user){
   if(userPermsUnsubscribe){userPermsUnsubscribe();userPermsUnsubscribe=null;}
   currentUserUid=user.uid;
+  try{setupPresence(user);}catch(e){}
   const ref=doc(db,'users',user.uid);
   userPermsUnsubscribe=onSnapshot(ref,async snap=>{
     if(snap.exists()){
@@ -1715,8 +1713,7 @@ function bootstrapUserPerms(user){
         try{signOut(auth);}catch(e){}
         return;
       }
-      // Update lastLoginAt once per session — writing it every snapshot triggers another
-      // snapshot which would loop forever (each write changes the timestamp → new snapshot).
+      // Update lastLoginAt once per session to avoid infinite snapshot loop
       if(_lastLoginAtUpdatedForUid!==currentUserUid){
         _lastLoginAtUpdatedForUid=currentUserUid;
         try{setDoc(ref,{lastLoginAt:new Date().toISOString()},{merge:true});}catch(e){}
@@ -1747,9 +1744,8 @@ function bootstrapUserPerms(user){
     updateAdminUI();
     // Re-render current view so tab filter applies
     if(viewActual==='paciente'&&idActual)renderPaciente();
-    // Only set up the pacientes listener once per user session.
-    // Without this guard, every snapshot (e.g. from lastLoginAt write) would call
-    // setupPacientesListener(), cancel the active listener, and restart it → "Conectando" forever.
+    // Only setup the pacientes listener once per user — without this guard every
+    // Firestore snapshot (e.g. from lastLoginAt) would restart the listener → "Conectando" forever
     if(pacientesListenerUid!==currentUserUid){
       pacientesListenerUid=currentUserUid;
       setupPacientesListener();
@@ -1760,6 +1756,7 @@ function bootstrapUserPerms(user){
 function updateAdminUI(){
   const btn=document.getElementById('adminBtn');
   if(btn)btn.style.display=isAdmin?'inline-flex':'none';
+  document.body.classList.toggle('no-import', !isAdmin);
   // Update profile button visibility + initials
   const profBtn=document.getElementById('profileBtn');
   const profInit=document.getElementById('profileInitials');
@@ -1782,18 +1779,16 @@ window.openProfile=function(){
 
 function renderProfile(){
   if(!currentUserPerms){
-    // If there IS a Firebase uid (regular user) but perms haven't loaded yet,
-    // show a loading placeholder — not "Sesión de administrador" which is confusing.
     if(currentUserUid && !isTempBypass()){
+      // Firebase user whose /users doc hasn't loaded yet — show loading placeholder
       document.getElementById('mainArea').innerHTML=`
         ${impersonationBanner()}
         <div class="phdr"><div style="flex:1"><div class="phn">Mi perfil</div><div class="phm">Cargando…</div></div><button class="ba" onclick="volverInicio()">← Inicio</button></div>
         <div class="panel profile-panel"><div class="empty"><p style="font-family:'DM Sans',sans-serif;color:var(--text3)">Cargando información del perfil…</p></div></div>`;
-      // Retry once perms arrive (they should arrive in < 1 s)
-      setTimeout(()=>{ if(viewActual==='profile'){ if(currentUserPerms)renderProfile(); } },1200);
+      setTimeout(()=>{ if(viewActual==='profile' && currentUserPerms) renderProfile(); }, 1200);
       return;
     }
-    // Pure bypass session — no /users doc exists; show minimal admin panel.
+    // Pure bypass session — no /users doc exists
     document.getElementById('mainArea').innerHTML=`
       ${impersonationBanner()}
       <div class="phdr"><div style="flex:1"><div class="phn">Mi perfil</div><div class="phm">Sesión de administrador</div></div><button class="ba" onclick="volverInicio()">← Inicio</button></div>
@@ -1838,15 +1833,7 @@ function renderProfile(){
       <div class="profile-card">
         <div class="ct">Especialidades</div>
         <p style="font-size:11px;color:var(--text3);margin-bottom:8px">Tus especialidades (informativo). Puedes elegir una o más.</p>
-        <div class="esp-dropdown">
-          <button type="button" class="esp-dropdown-trigger" id="profEspTrigger" onclick="toggleEspDropdown('profEspTrigger','profEspPanel')">
-            <span id="profEspLabel">${(p.especialidades&&p.especialidades.length)?p.especialidades.length+' especialidad(es) seleccionada(s)':'Selecciona tus especialidades'}</span>
-            <span class="esp-arrow">▼</span>
-          </button>
-          <div class="esp-dropdown-panel" id="profEspPanel">
-            <div class="esp-chips" id="profEspChips" style="display:flex;flex-wrap:wrap;gap:6px;width:100%">${espChipsHTML(p.especialidades||[])}</div>
-          </div>
-        </div>
+        <div class="esp-chips" id="profEspChips">${espChipsHTML(p.especialidades||[])}</div>
         <button class="ba" onclick="saveEsp()" style="margin-top:10px">Guardar especialidades</button>
       </div>
 
@@ -2020,10 +2007,9 @@ function statusEl(formKey){
 // Patient listener: ownerUid-aware so non-admin users see only their own patients.
 // Admins see everyone unless they're impersonating a specific user via viewAsUid.
 let pacientesUnsub = null;
-// Guards to prevent infinite loops in bootstrapUserPerms snapshot handler
 let pacientesListenerUid = null;   // uid for which the pacientes listener is active
-let _lastSelfSaveTime = 0; // timestamp of last save we initiated (used to skip redundant re-renders)
-let _lastLoginAtUpdatedForUid = null;  // uid for which lastLoginAt was already written
+let _lastLoginAtUpdatedForUid = null;  // written once per session to avoid snapshot loop
+let _lastSelfSaveTime = 0;  // timestamp of last save we initiated
 function setupPacientesListener(){
   if(pacientesUnsub){pacientesUnsub();pacientesUnsub=null;}
   let q;
@@ -2048,11 +2034,8 @@ function setupPacientesListener(){
     pacientes=snap.docs.map(d=>({id:d.id,...d.data()}));
     rebuildConsultasIndex();
     renderLista();
-    // Skip re-rendering the patient view when the snapshot was triggered by our
-    // own autosave — the data is already applied optimistically, so there is
-    // nothing new to show and re-rendering would reset the panel scroll position.
-    // We DO re-render for calendar/admin, and for changes arriving from other devices
-    // (those arrive well after 2500 ms from the last self-save).
+    // Skip re-rendering the patient view when the snapshot was triggered by our own autosave.
+    // The data is already applied optimistically; re-rendering would jump scroll to top.
     const _selfSave = (Date.now() - _lastSelfSaveTime) < 2500;
     if(!_selfSave || viewActual==='calendario' || viewActual==='admin'){
       rerenderCurrent();
@@ -2067,23 +2050,14 @@ function setupPacientesListener(){
 function rerenderCurrent(){
   if(viewActual==='calendario')renderCalendar();
   else if(viewActual==='admin')renderAdmin();
-  else if(idActual&&gp()){
-    // Preserve the panel scroll position so autosave snapshots don't
-    // jump the user back to the top when they are mid-form.
-    const _panel=document.getElementById('panel');
-    const _scrollTop=_panel?_panel.scrollTop:0;
-    renderPaciente();
-    if(_scrollTop>0){
-      setTimeout(()=>{const p2=document.getElementById('panel');if(p2)p2.scrollTop=_scrollTop;},0);
-    }
-  }
+  else if(idActual&&gp())renderPaciente();
   else renderEmpty();
 }
 
 async function guardar(p){
   const{id,...data}=p;
   if(!data.ownerUid&&currentUserUid)data.ownerUid=currentUserUid;
-  _lastSelfSaveTime=Date.now(); // mark that WE triggered this save
+  _lastSelfSaveTime=Date.now();
   ss('ing','Guardando...');
   // Optimistic local apply so the UI reflects the change immediately, even offline.
   const _i=pacientes.findIndex(x=>x.id===id);
@@ -2149,6 +2123,7 @@ window.exportar=function(){
   toast('Respaldo exportado');
 }
 window.importar=async function(ev){
+  if(!isAdmin){toast('Solo administradores pueden importar.');ev.target.value='';return;}
   const file=ev.target.files[0];if(!file)return;
   const isCSV=file.name.toLowerCase().endsWith('.csv');
   const reader=new FileReader();
@@ -2309,8 +2284,6 @@ function renderLista(){
     filtered.sort((a,b)=>(a.nombre||'').localeCompare(b.nombre||''));
   }else if(sidebarSortMode==='recent'){
     filtered.sort((a,b)=>patientLastConsultaDate(b).localeCompare(patientLastConsultaDate(a)));
-  }else if(sidebarSortMode==='active'){
-    filtered.sort((a,b)=>(b.consultas||[]).length-(a.consultas||[]).length);
   }
   const anyFilterActive = (sidebarAgeMin!==''||sidebarAgeMax!=='') || sidebarFilterRecency!=='all' || sidebarSortMode!=='name';
   const _savedF=JSON.parse(localStorage.getItem('ds_saved_filters')||'[]');
@@ -2325,7 +2298,7 @@ function renderLista(){
       ${[['all','Todos'],['week','Semana'],['month','Mes']].map(([k,l])=>`<button class="plist-chip${sidebarFilterRecency===k?' on':''}" onclick="setSidebarRecency('${k}')">${l}</button>`).join('')}
     </div></div>
     <div class="plist-filter-group"><span class="plist-filter-label">Orden</span><div class="plist-filter-chips">
-      ${[['name','A-Z'],['recent','Recientes'],['active','Activos']].map(([k,l])=>`<button class="plist-chip${sidebarSortMode===k?' on':''}" onclick="setSidebarSort('${k}')">${l}</button>`).join('')}
+      ${[['name','A-Z'],['recent','Recientes']].map(([k,l])=>`<button class="plist-chip${sidebarSortMode===k?' on':''}" onclick="setSidebarSort('${k}')">${l}</button>`).join('')}
     </div></div>`;
   const _panel=filterPanelOpen?`<div class="filter-panel">${_groups}
     <div class="filter-panel-actions"><button class="plist-chip" onclick="clearFilters()">Limpiar todo</button><button class="plist-chip" onclick="saveCurrentFilter()">Guardar filtro</button></div>
@@ -2453,6 +2426,7 @@ window.toggleCalendar=function(){
 function renderAdminEntry(){
   if(!isAdmin || !isAllowlistedAdmin()){ isAdmin=false; return renderEmpty(); }
   viewActual='admin';
+  setupPresenceWatch();
   if(!usersUnsubscribe){
     usersUnsubscribe=onSnapshot(collection(db,'users'),snap=>{
       allUsersList=snap.docs.map(d=>({uid:d.id,...d.data()}));
@@ -2532,6 +2506,7 @@ function renderAdmin(){
         <div style="min-width:0;flex:1">
           <div class="admin-user-name">${e(fullName)} <span class="admin-status ${status}">${status==='inactive'?'Inactivo':'Activo'}</span></div>
           <div class="admin-user-email">${e(u.email||'')} · ${patientCount} paciente${patientCount===1?'':'s'}</div>
+          ${(()=>{const pr=presenceMap[u.uid]||{};const ad=Object.keys(pr).length;const on=ad>0;const hist=u.deviceHistoryCount||0;return `<div class="admin-presence"><span class="pres-dot ${on?'on':'off'}"></span>${on?`En línea · ${ad} dispositivo${ad===1?'':'s'} activo${ad===1?'':'s'}`:'Desconectado'}${hist?` · ${hist} dispositivo${hist===1?'':'s'} histórico${hist===1?'':'s'}`:''}</div>`;})()}
           ${(u.especialidades&&u.especialidades.length)?`<div class="admin-user-esp">${u.especialidades.map(s=>e(s)).join(' · ')}</div>`:''}
         </div>
         <div class="admin-user-meta">${allowed.size}/${ALL_TABS.length}</div>
@@ -2562,9 +2537,10 @@ function renderAdmin(){
   const noMatchesState=noMatches?`<div class="admin-empty">
     <p style="font-family:'Fraunces',serif;font-size:16px;color:var(--text2);font-style:italic">Ningún usuario coincide con los filtros.</p>
   </div>`:'';
+  const invAvail=invitacionesList.filter(c=>!c.usado).length;
   const invitesHTML=`<div class="admin-invites">
-    <div class="admin-invites-head"><div class="ct">Códigos de invitación</div><button class="ba" onclick="generateInvite()">+ Generar invitación</button></div>
-    ${invitacionesList.length?`<div class="invite-list">${invitacionesList.map(c=>`
+    <div class="admin-invites-head"><button class="invites-toggle" onclick="toggleInvites()"><span class="chev">${invitesCollapsed?'▸':'▾'}</span> Códigos de invitación${invitacionesList.length?` · ${invAvail} disponible${invAvail===1?'':'s'}`:''}</button><button class="ba" onclick="generateInvite()">+ Generar invitación</button></div>
+    ${invitesCollapsed?'':(invitacionesList.length?`<div class="invite-list">${invitacionesList.map(c=>`
       <div class="invite-row ${c.usado?'used':''}">
         <code class="invite-code">${e(c.code)}</code>
         ${c.usado?`<span class="invite-status used">Usado · ${e(c.usadoPor||'')}</span>`:`<span class="invite-status free">Disponible</span>`}
@@ -2572,7 +2548,7 @@ function renderAdmin(){
           ${c.usado?'':`<button class="bc" onclick="copyInvite('${e(c.code)}')">Copiar</button>`}
           <button class="bd" onclick="deleteInvite('${e(c.code)}')">Borrar</button>
         </div>
-      </div>`).join('')}</div>`:`<p style="font-size:12px;color:var(--text3);padding:6px 2px">Aún no hay códigos. Genera uno y compártelo con el odontólogo para que pueda crear su cuenta.</p>`}
+      </div>`).join('')}</div>`:`<p style="font-size:12px;color:var(--text3);padding:6px 2px">Aún no hay códigos. Genera uno y compártelo con el odontólogo para que pueda crear su cuenta.</p>`)}
   </div>`;
 
   document.getElementById('mainArea').innerHTML=`
@@ -2634,29 +2610,75 @@ window.generateInvite=async function(){
 };
 window.copyInvite=function(code){ try{navigator.clipboard.writeText(code);toast('Código copiado: '+code);}catch(e){toast(code);} };
 window.deleteInvite=async function(code){ if(!isAdmin)return; if(!confirm('¿Borrar el código '+code+'?'))return; try{await deleteDoc(doc(db,'invitaciones',code));toast('Código borrado');}catch(e){} };
+window.toggleInvites=function(){ invitesCollapsed=!invitesCollapsed; renderAdmin(); };
+// ===== v7.2 mobile nav + side menu (#1/#5/#6) =====
+function closeSideMenu(){ const m=document.getElementById('sideMenu'),o=document.getElementById('sideMenuOverlay'); if(m)m.classList.remove('open'); if(o)o.classList.remove('on'); }
+function openSideMenu(){ const m=document.getElementById('sideMenu'),o=document.getElementById('sideMenuOverlay'); if(m)m.classList.add('open'); if(o)o.classList.add('on'); }
+function closeOverlays(){ try{cerrarModal();}catch(e){} closeSideMenu(); }
+function bnInicio(){ closeOverlays(); const sb=document.getElementById('sidebar'); if(sb)sb.classList.remove('open'); window.volverInicio(); }
+function bnPacientes(){ try{cerrarModal();}catch(e){} closeSideMenu(); const sb=document.getElementById('sidebar'); if(sb)sb.classList.add('open'); }
+function bnNuevo(){ closeOverlays(); const sb=document.getElementById('sidebar'); if(sb)sb.classList.remove('open'); window.modalNuevo(); }
+function bnCalendario(){ closeOverlays(); const sb=document.getElementById('sidebar'); if(sb)sb.classList.remove('open'); if(viewActual!=='calendario'){ window.toggleCalendar(); } }
+function infoSoon(name){ toast(name+' — Próximamente disponible'); closeSideMenu(); }
+window.bnInicio=bnInicio; window.bnPacientes=bnPacientes; window.bnNuevo=bnNuevo; window.bnCalendario=bnCalendario; window.openSideMenu=openSideMenu; window.closeSideMenu=closeSideMenu; window.infoSoon=infoSoon;
+// ===== v7.2 PDF export of current view (#2) =====
+function _loadScript(src){return new Promise((res,rej)=>{if([...document.scripts].some(s=>s.src===src)){res();return;}const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=()=>rej(new Error('load '+src));document.head.appendChild(s);});}
+async function _loadPdfLibs(){ if(!window.html2canvas) await _loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js'); if(!(window.jspdf&&window.jspdf.jsPDF)) await _loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'); }
+async function exportarPDF(){
+  const target=document.getElementById('panel')||document.getElementById('mainArea');
+  if(!target){toast('No hay nada para exportar');return;}
+  toast('Generando PDF…');
+  try{ await _loadPdfLibs(); }catch(e){ toast('No se pudieron cargar las herramientas de PDF'); return; }
+  const p=(typeof gp==='function'&&gp())||null;
+  const titulo=p&&p.nombre?p.nombre:'DocuSalud';
+  let canvas;
+  try{ canvas=await html2canvas(target,{scale:2,backgroundColor:'#ffffff',useCORS:true}); }catch(e){ toast('No se pudo generar el PDF'); return; }
+  const img=canvas.toDataURL('image/png');
+  const jsPDF=window.jspdf.jsPDF;
+  const pdf=new jsPDF('p','mm','a4');
+  const pw=pdf.internal.pageSize.getWidth(), ph=pdf.internal.pageSize.getHeight();
+  pdf.setFontSize(14); pdf.text(titulo,12,14);
+  pdf.setFontSize(9); pdf.setTextColor(120); pdf.text('DocuSalud · '+new Date().toLocaleDateString('es-VE'),pw-12,14,{align:'right'}); pdf.setTextColor(0);
+  const imgW=pw-20, imgH=canvas.height*imgW/canvas.width;
+  let pos=20, heightLeft=imgH;
+  pdf.addImage(img,'PNG',10,pos,imgW,imgH); heightLeft-=(ph-pos);
+  while(heightLeft>0){ pos=heightLeft-imgH+10; pdf.addPage(); pdf.addImage(img,'PNG',10,pos,imgW,imgH); heightLeft-=ph; }
+  const fname=(titulo.replace(/[^a-z0-9]+/gi,'_'))+'_'+new Date().toISOString().slice(0,10)+'.pdf';
+  try{ const blob=pdf.output('blob'); const file=new File([blob],fname,{type:'application/pdf'}); if(navigator.canShare&&navigator.canShare({files:[file]})){ await navigator.share({files:[file],title:titulo}); return; } }catch(e){}
+  pdf.save(fname);
+}
+window.exportarPDF=exportarPDF;
+// ===== v7.2 presence + devices via Realtime DB (#9-12) =====
+let _presenceSet=false, presenceMap={}, presenceUnsub=null;
+function getDeviceId(){ let d=localStorage.getItem('ds_device_id'); if(!d){ d='dev-'+Math.random().toString(36).slice(2,10)+Date.now().toString(36); localStorage.setItem('ds_device_id',d);} return d; }
+async function setupPresence(user){
+  if(_presenceSet||!user)return; _presenceSet=true;
+  const deviceId=getDeviceId(), ua=(navigator.userAgent||'').slice(0,160);
+  try{
+    const dref=doc(db,'users',user.uid,'devices',deviceId);
+    const dsnap=await getDoc(dref);
+    if(!dsnap.exists()){
+      await setDoc(dref,{userAgent:ua,firstSeenAt:new Date().toISOString(),lastSeenAt:new Date().toISOString(),loginCount:1});
+      try{ await setDoc(doc(db,'users',user.uid),{deviceHistoryCount:increment(1)},{merge:true}); }catch(e){}
+    }else{
+      await setDoc(dref,{lastSeenAt:new Date().toISOString(),loginCount:increment(1)},{merge:true});
+    }
+  }catch(e){ console.warn('device rec:',e.message); }
+  if(rtdb){ try{
+    const sref=rdbRef(rtdb,'status/'+user.uid+'/'+deviceId);
+    const conRef=rdbRef(rtdb,'.info/connected');
+    onValue(conRef,snap=>{ if(snap.val()===true){ onDisconnect(sref).remove(); rdbSet(sref,{online:true,since:rdbTs(),ua:ua}); } });
+  }catch(e){ console.warn('presence:',e.message); } }
+}
+function setupPresenceWatch(){
+  if(presenceUnsub||!rtdb)return;
+  try{ presenceUnsub=onValue(rdbRef(rtdb,'status'),snap=>{ presenceMap=snap.val()||{}; if(viewActual==='admin')renderAdmin(); }); }
+  catch(e){ console.warn('presence watch:',e.message); }
+}
 // v7.1 — dentist specialties (informational, multi-select)
-function espChipsHTML(selected){const sel=selected||[];return ESP_ODONTO.map(s=>`<button type="button" class="esp-chip${sel.includes(s)?' on':''}" data-esp="${e(s)}" onclick="this.classList.toggle('on');updateEspLabel(this.closest('.esp-dropdown'))">${e(s)}</button>`).join('');}
-function toggleEspDropdown(triggerId,panelId){
-  const t=document.getElementById(triggerId);
-  const p=document.getElementById(panelId);
-  if(!t||!p)return;
-  const isOpen=p.classList.contains('open');
-  p.classList.toggle('open',!isOpen);
-  t.classList.toggle('open',!isOpen);
-}
-function updateEspLabel(dropdown){
-  if(!dropdown)return;
-  const sel=dropdown.querySelectorAll('.esp-chip.on');
-  const label=dropdown.querySelector('[id$="EspLabel"]');
-  if(!label)return;
-  if(sel.length===0)label.textContent='Selecciona tus especialidades';
-  else if(sel.length===1)label.textContent=sel[0].dataset.esp;
-  else label.textContent=sel.length+' especialidades seleccionadas';
-}
+function espChipsHTML(selected){const sel=selected||[];return ESP_ODONTO.map(s=>`<button type="button" class="esp-chip${sel.includes(s)?' on':''}" data-esp="${e(s)}" onclick="this.classList.toggle('on')">${e(s)}</button>`).join('');}
 function getEspFrom(id){const c=document.getElementById(id);if(!c)return[];return [...c.querySelectorAll('.esp-chip.on')].map(b=>b.dataset.esp);}
-window.saveEsp=async function(){if(!currentUserUid){toast('No autenticado');return;}const esp=getEspFrom('profEspChips');try{await setDoc(doc(db,'users',currentUserUid),{especialidades:esp,updatedAt:new Date().toISOString()},{merge:true});toast('Especialidades guardadas');}catch(e){toast('No se pudo guardar');};};
-// Expose dropdown helpers globally — HTML onclick attributes run in global scope,
-// so functions defined inside the module must be attached to window explicitly.
+window.saveEsp=async function(){if(!currentUserUid){toast('No autenticado');return;}const esp=getEspFrom('profEspChips');try{await setDoc(doc(db,'users',currentUserUid),{especialidades:esp,updatedAt:new Date().toISOString()},{merge:true});toast('Especialidades guardadas');}catch(e){toast('No se pudo guardar');}};
 window.toggleEspDropdown=toggleEspDropdown;
 window.updateEspLabel=updateEspLabel;
 
@@ -2868,24 +2890,16 @@ function renderPaciente(){
     {k:'rec',l:'Récord'},
     {k:'cons',l:`Consultas <span class="badge">${(p.consultas||[]).length}</span>`}
   ];
-  // Filter tabs based on who's actually "in scope":
-  // • Admin impersonating → use impersonated user's tabsAllowed (so "Ver como" truly matches what the user sees)
-  // • Regular user        → use their own tabsAllowed
-  // • Admin (not impersonating) → no filter, see all tabs
+  // Tab filtering: impersonated user → their restrictions; regular user → own; admin → all
   const _impersonated = viewAsUid ? allUsersList.find(u=>u.uid===viewAsUid) : null;
   if(_impersonated && Array.isArray(_impersonated.tabsAllowed)){
     const allowed=new Set(_impersonated.tabsAllowed);
     tabs=tabs.filter(t=>allowed.has(t.k));
-    if(tabs.length>0 && !tabs.find(t=>t.k===tabActual)){
-      tabActual=tabs[0].k;
-    }
+    if(tabs.length>0 && !tabs.find(t=>t.k===tabActual)) tabActual=tabs[0].k;
   } else if(!isAdmin && currentUserPerms && Array.isArray(currentUserPerms.tabsAllowed)){
     const allowed=new Set(currentUserPerms.tabsAllowed);
     tabs=tabs.filter(t=>allowed.has(t.k));
-    // If active tab got filtered out, fall back to first allowed
-    if(tabs.length>0 && !tabs.find(t=>t.k===tabActual)){
-      tabActual=tabs[0].k;
-    }
+    if(tabs.length>0 && !tabs.find(t=>t.k===tabActual)) tabActual=tabs[0].k;
   }
   if(tabs.length===0){
     // User has no tabs allowed at all — show a friendly blocker
@@ -3573,17 +3587,9 @@ function renderOdonto(){
       <div class="f" style="margin-top:14px"><label>Observaciones</label><textarea id="o_ob" oninput="autosaveObs()">${e(p.teeth_obs||'')}</textarea></div>
     </div>`;
 }
-window.setOdontoMode=function(m){odontoMode=m||null;renderOdontoKeepScroll();}
+window.setOdontoMode=function(m){odontoMode=m||null;renderOdonto();}
 window.toggleSurfaceMode=function(){surfaceMode=document.getElementById('surface-mode').checked;}
-window.setEst=function(st){estadoDiente=st;renderOdontoKeepScroll()}
-// Wrapper that preserves panel scroll when re-rendering the odontogram
-// (e.g. clicking a legend chip or changing dentition mode).
-function renderOdontoKeepScroll(){
-  const _panel=document.getElementById('panel');
-  const _s=_panel?_panel.scrollTop:0;
-  renderOdonto();
-  if(_s>0)setTimeout(()=>{const p2=document.getElementById('panel');if(p2)p2.scrollTop=_s;},0);
-}
+window.setEst=function(st){estadoDiente=st;renderOdonto()}
 window.mDiente=async function(n){
   vizToothN=n;
   const p=gp();if(!p.teeth)p.teeth={};
