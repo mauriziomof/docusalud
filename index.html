@@ -508,9 +508,9 @@ body {
 .admin-devices-toggle{background:none;border:none;padding:0;font-size:11px;color:var(--text3);cursor:pointer;font-family:'DM Sans',sans-serif;display:flex;align-items:center;gap:4px;}
 .admin-devices-toggle:hover{color:var(--text2);}
 .admin-devices-panel{margin-top:6px;padding:8px 10px;background:var(--surface2);border-radius:var(--r);border:var(--border-default);font-size:11px;font-family:'DM Sans',sans-serif;}
-.admin-device-row{display:flex;align-items:center;gap:8px;padding:3px 0;border-bottom:.5px solid var(--border);color:var(--text2);}
+.admin-device-row{display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:.5px solid var(--border);color:var(--text2);}
 .admin-device-row:last-child{border-bottom:none;}
-.admin-device-ua{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.admin-device-ua{flex:1;min-width:0;}
 .admin-device-date{color:var(--text3);flex-shrink:0;font-size:10px;}
 @media print {
   .sidebar,.topbar,.tabbar,.bs,.ba,.bnew,.bd,.tbtn,.bottom-nav,.side-menu,.side-menu-overlay,.profile-btn,.dark-toggle,#menuBtn,.sync-wrap,.mbg,.plist-filterbar,.filter-panel,.resize-handle,.ct-row .save-status { display: none !important; }
@@ -995,7 +995,11 @@ body:has(.dot.ing) .topbar .brand svg { animation: logoBreathe 1.5s var(--ease) 
 .admin-filter-chip.on { background: var(--accent-light); color: var(--forest); border-color: var(--accent-border); font-weight: 600; }
 
 /* Per-user actions (impersonate button + tab count badge) */
-.admin-user-actions { display: flex; align-items: center; gap: 8px; flex-wrap: nowrap; justify-content: flex-start; }
+.admin-user-actions { display: flex; align-items: center; gap: 6px; flex-wrap: nowrap; justify-content: flex-start; margin-top: 8px; }
+.admin-user-actions .ba { background: var(--forest); color: white; border-color: var(--forest); }
+.admin-user-actions .ba:hover { background: var(--sage); border-color: var(--sage); }
+.admin-impersonate-btn { background: var(--forest) !important; color: white !important; border-color: var(--forest) !important; }
+.admin-impersonate-btn:hover { background: var(--sage) !important; border-color: var(--sage) !important; }
 .admin-impersonate-btn {
   font-size: 11px; padding: 5px 10px;
   background: var(--surface2); color: var(--forest);
@@ -2628,7 +2632,20 @@ function renderAdmin(){
         <div style="min-width:0;flex:1">
           <div class="admin-user-name">${e(fullName)} <span class="admin-status ${status}">${status==='inactive'?'Inactivo':'Activo'}</span></div>
           <div class="admin-user-email">${e(u.email||'')} · ${patientCount} paciente${patientCount===1?'':'s'}</div>
-          ${(()=>{const pr=presenceMap[u.uid]||{};const ad=Object.keys(pr).length;const on=ad>0;const hist=u.deviceHistoryCount||0;return `<div class="admin-presence"><span class="pres-dot ${on?'on':'off'}"></span>${on?`En línea · ${ad} dispositivo${ad===1?'':'s'} activo${ad===1?'':'s'}`:'Desconectado'}${hist?` · ${hist} dispositivo${hist===1?'':'s'} histórico${hist===1?'':'s'}`:''}</div>`;})()}
+          ${(()=>{
+            const pr=presenceMap[u.uid]||{};
+            const devices=Object.values(pr);
+            const on=devices.length>0;
+            const hist=u.deviceHistoryCount||0;
+            const deviceSummary=devices.slice(0,2).map(d=>parseUA(d.ua||'')).join(', ');
+            const since=devices[0]&&devices[0].since?timeAgo(new Date(devices[0].since).toISOString()):'';
+            return `<div class="admin-presence">
+              <span class="pres-dot ${on?'on':'off'}"></span>
+              ${on
+                ? `<span><b style="color:#2a7d4f">En línea</b> · ${devices.length} disp. · ${deviceSummary}${since?' · '+since:''}</span>`
+                : `<span style="color:var(--text3)">Desconectado${u.lastLoginAt?' · '+timeAgo(u.lastLoginAt):''}</span>`}
+            </div>`;
+          })()}
           ${(u.especialidades&&u.especialidades.length)?`<div class="admin-user-esp">${u.especialidades.map(s=>e(s)).join(' · ')}</div>`:''}
           <div class="admin-devices-row"><button class="admin-devices-toggle" onclick="adminToggleDevices('${u.uid}')"><span id="devchev-${u.uid}">▸</span> Dispositivos</button></div>
           <div class="admin-devices-panel" id="devpanel-${u.uid}" style="display:none"></div>
@@ -2638,7 +2655,7 @@ function renderAdmin(){
       <div class="admin-user-actions">
         <button class="ba admin-impersonate-btn" onclick="impersonateUser('${u.uid}')" title="Ver como este usuario">Ver como</button>
         <button class="bc" onclick="adminSetStatus('${u.uid}','${status==='inactive'?'active':'inactive'}')">${status==='inactive'?'Activar':'Desactivar'}</button>
-        <button class="ba" onclick="adminExportUserPatients('${u.uid}','${e(u.name||u.email||uid)}')" title="Exportar pacientes de este usuario en JSON">⬇ JSON</button>
+        <button class="ba" onclick="adminExportUserPatients('${u.uid}','${e(u.name||u.email||uid)}')" title="Exportar datos de este usuario">↓ Datos</button>
         <button class="bd" onclick="adminRemoveUser('${u.uid}')" title="Quitar de la lista">Quitar</button>
       </div>
       <div class="admin-tabs-grid">
@@ -2770,16 +2787,29 @@ window.adminToggleDevices=async function(uid){
       const snap=await getDocs(collection(db,'users',uid,'devices'));
       const pr=presenceMap[uid]||{};
       if(snap.empty){panel.innerHTML='<span style="color:var(--text3);font-size:11px;padding:4px 0;display:block">Sin historial de dispositivos.</span>';return;}
-      panel.innerHTML=snap.docs.map(d=>{
-        const dv=d.data();
-        const online=!!pr[d.id];
-        const ua=(dv.userAgent||'').replace(/\(.*?\)/g,'').replace(/AppleWebKit.*$/,'').trim().slice(0,55);
-        const last=dv.lastSeenAt?new Date(dv.lastSeenAt).toLocaleDateString('es-VE',{day:'2-digit',month:'2-digit',year:'numeric'}):'';
-        const first=dv.firstSeenAt?new Date(dv.firstSeenAt).toLocaleDateString('es-VE',{day:'2-digit',month:'2-digit',year:'numeric'}):'';
-        return `<div class="admin-device-row" title="${(dv.userAgent||'').slice(0,120)}">
-          <span class="pres-dot ${online?'on':'off'}" style="flex-shrink:0"></span>
-          <span class="admin-device-ua">${ua||'Dispositivo desconocido'}</span>
-          <span class="admin-device-date">${online?'<b style=\"color:#3a9d5d\">Online</b>':last}</span>
+      // Sort: online first, then most recent
+      const devList=snap.docs.map(d=>({id:d.id,...d.data()}))
+        .sort((a,b)=>{
+          const aOn=!!pr[a.id],bOn=!!pr[b.id];
+          if(aOn!==bOn)return bOn-aOn;
+          return new Date(b.lastSeenAt||0)-new Date(a.lastSeenAt||0);
+        });
+      panel.innerHTML=devList.map(dv=>{
+        const online=!!pr[dv.id];
+        const name=parseUA(dv.userAgent||'');
+        const lastSeen=timeAgo(dv.lastSeenAt);
+        const firstSeen=dv.firstSeenAt?new Date(dv.firstSeenAt).toLocaleDateString('es-VE',{day:'2-digit',month:'2-digit',year:'2-digit'}):'';
+        const logins=dv.loginCount||1;
+        return `<div class="admin-device-row" title="${(dv.userAgent||'').slice(0,200)}">
+          <span class="pres-dot ${online?'on':'off'}" style="flex-shrink:0;margin-top:3px;align-self:flex-start"></span>
+          <div style="flex:1;min-width:0">
+            <div style="font-weight:500;color:var(--text);font-size:11px">${name}</div>
+            <div style="color:var(--text3);font-size:10px;margin-top:1px">
+              ${online?'<span style="color:#2a7d4f;font-weight:600">Conectado ahora</span>':'Último acceso: '+lastSeen}
+              ${!online&&firstSeen?' &nbsp;·&nbsp; Desde: '+firstSeen:''}
+              &nbsp;·&nbsp; ${logins} acceso${logins===1?'':'s'}
+            </div>
+          </div>
         </div>`;
       }).join('');
     }catch(e){panel.innerHTML='<span style="color:var(--text3);font-size:11px">No se pudo cargar.</span>';}
@@ -2878,6 +2908,37 @@ async function exportarPDF(){
 window.exportarPDF=exportarPDF;
 // ===== v7.2 presence + devices via Realtime DB (#9-12) =====
 let _presenceSet=false, presenceMap={}, presenceUnsub=null;
+
+// ── UA PARSER: converts raw userAgent into readable "Browser · OS" ──────
+function parseUA(ua){
+  if(!ua)return 'Dispositivo desconocido';
+  let browser='Navegador', os='';
+  if(ua.includes('Edg/'))browser='Edge';
+  else if(ua.includes('OPR/')||ua.includes('Opera'))browser='Opera';
+  else if(ua.includes('Chrome/')&&!ua.includes('Chromium')&&!ua.includes('Edg'))browser='Chrome';
+  else if(ua.includes('Firefox/'))browser='Firefox';
+  else if(ua.includes('Safari/')&&!ua.includes('Chrome'))browser='Safari';
+  else if(ua.includes('Chromium/'))browser='Chromium';
+  if(ua.includes('iPhone'))os='iPhone';
+  else if(ua.includes('iPad'))os='iPad';
+  else if(ua.includes('Android'))os='Android';
+  else if(ua.includes('Windows'))os='Windows';
+  else if(ua.includes('Mac OS X')&&!ua.includes('iPhone')&&!ua.includes('iPad'))os='macOS';
+  else if(ua.includes('Linux'))os='Linux';
+  return os?`${browser} · ${os}`:browser;
+}
+// ── RELATIVE TIME: "Ahora mismo", "Hace 5 min", "Hace 2 días" ───────────
+function timeAgo(iso){
+  if(!iso)return '';
+  const diff=Date.now()-new Date(iso).getTime();
+  const m=Math.floor(diff/60000),h=Math.floor(diff/3600000),d=Math.floor(diff/86400000);
+  if(m<2)return 'Ahora mismo';
+  if(m<60)return `Hace ${m} min`;
+  if(h<24)return `Hace ${h}h`;
+  if(d===1)return 'Ayer';
+  if(d<7)return `Hace ${d} días`;
+  return new Date(iso).toLocaleDateString('es-VE',{day:'2-digit',month:'2-digit',year:'2-digit'});
+}
 function getDeviceId(){ let d=localStorage.getItem('ds_device_id'); if(!d){ d='dev-'+Math.random().toString(36).slice(2,10)+Date.now().toString(36); localStorage.setItem('ds_device_id',d);} return d; }
 async function setupPresence(user){
   if(_presenceSet||!user)return; _presenceSet=true;
@@ -2900,7 +2961,13 @@ async function setupPresence(user){
 }
 function setupPresenceWatch(){
   if(presenceUnsub||!rtdb)return;
-  try{ presenceUnsub=onValue(rdbRef(rtdb,'status'),snap=>{ presenceMap=snap.val()||{}; }); }
+  let _presRenderTimer=null;
+  try{ presenceUnsub=onValue(rdbRef(rtdb,'status'),snap=>{
+    presenceMap=snap.val()||{};
+    // Throttle renderAdmin to avoid hammering the DOM on rapid status changes
+    if(_presRenderTimer)clearTimeout(_presRenderTimer);
+    _presRenderTimer=setTimeout(()=>{ if(viewActual==='admin')renderAdmin(); },400);
+  }); }
   catch(e){ console.warn('presence watch:',e.message); }
 }
 // v7.1 — dentist specialties (informational, multi-select)
@@ -3181,7 +3248,7 @@ function renderPaciente(){
         <div class="phn">${e(p.nombre)}</div>
         <div class="phm">${edad(p.nacimiento)}${edad(p.nacimiento)&&p.ci?' · ':''}${e(p.ci||'')}${p.telefono?' · '+e(p.telefono):''}</div>
       </div>
-      ${isAdmin?`<button class="ba" style="font-size:11px;padding:5px 10px" onclick="exportarPacienteJSON()" title="Descargar JSON de este paciente">⬇ JSON</button>`:''}
+      ${isAdmin&&!viewAsUid?`<button class="ba" style="font-size:11px;padding:5px 10px" onclick="exportarPacienteJSON()" title="Exportar datos del paciente">↓ Datos</button>`:''}
       <button class="ba" onclick="volverInicio()" title="Volver al inicio">← Inicio</button>
     </div>
     <div class="tabbar">${tabs.map(t=>`<button class="tab${tabActual===t.k?' on':''}" onclick="cambiarTab('${t.k}')">${t.l}</button>`).join('')}</div>
