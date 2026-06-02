@@ -996,6 +996,9 @@ body:has(.dot.ing) .topbar .brand svg { animation: logoBreathe 1.5s var(--ease) 
 
 /* Per-user actions (impersonate button + tab count badge) */
 .admin-user-actions { display: flex; align-items: center; gap: 6px; flex-wrap: nowrap; justify-content: flex-start; margin-top: 8px; }
+.admin-user-actions .ba,
+.admin-user-actions .bc,
+.admin-user-actions .bd { padding: 6px 12px !important; font-size: 11px !important; height: 30px; box-sizing: border-box; }
 .admin-user-actions .ba { background: var(--forest); color: white; border-color: var(--forest); }
 .admin-user-actions .ba:hover { background: var(--sage); border-color: var(--sage); }
 .admin-impersonate-btn { background: var(--forest) !important; color: white !important; border-color: var(--forest) !important; }
@@ -2836,8 +2839,77 @@ async function exportarPDF(){
   const nombre=p&&p.nombre?p.nombre:'DocuSalud';
   const ci=p&&p.ci?p.ci:'';
   const fecha=new Date().toLocaleDateString('es-VE',{day:'2-digit',month:'2-digit',year:'numeric'});
+  const fname=(nombre.replace(/[^a-z0-9]+/gi,'_'))+'_'+new Date().toISOString().slice(0,10)+'.pdf';
 
-  // Temporarily override inline styles on layout containers so content expands fully
+  // ── MOBILE: html2canvas + jsPDF → real file download / Web Share ──────
+  if(isMobile()){
+    const panel=document.getElementById('panel')||document.getElementById('mainArea');
+    if(!panel){toast('No hay nada para exportar');return;}
+    toast('Generando PDF…');
+    try{
+      await _loadPdfLibs();
+      // Expand panel so html2canvas captures full content
+      const prev=panel.style.cssText;
+      panel.style.cssText='overflow:visible;height:auto;max-height:none;';
+      await new Promise(r=>requestAnimationFrame(r));
+      const canvas=await html2canvas(panel,{
+        scale:2.5,
+        backgroundColor:'#ffffff',
+        useCORS:true,
+        logging:false,
+        windowWidth:390,
+        ignoreElements:el=>{
+          const hide=['BUTTON','INPUT','SELECT','.save-status','.impersonation-banner','.admin-devices-row'];
+          return hide.some(s=>el.tagName===s||el.classList&&el.classList.contains(s.replace('.','')));
+        }
+      });
+      panel.style.cssText=prev;
+      const jsPDF=window.jspdf.jsPDF;
+      const pdf=new jsPDF('p','mm','letter');
+      const pw=pdf.internal.pageSize.getWidth();
+      const ph=pdf.internal.pageSize.getHeight();
+      const margin=12;
+      const hdrH=18;
+      // Header
+      pdf.setFont('helvetica','bold');pdf.setFontSize(14);pdf.setTextColor(31,58,42);
+      pdf.text('DocuSalud',margin,12);
+      pdf.setFont('helvetica','normal');pdf.setFontSize(10);pdf.setTextColor(68,68,68);
+      pdf.text(nombre,pw-margin,9,{align:'right'});
+      if(ci)pdf.text('C.I.: '+ci,pw-margin,14,{align:'right'});
+      pdf.text(fecha,pw-margin,19,{align:'right'});
+      pdf.setDrawColor(200,200,200);pdf.line(margin,hdrH+2,pw-margin,hdrH+2);
+      // Content image split across pages
+      const imgW=pw-margin*2;
+      const imgH=canvas.height*imgW/canvas.width;
+      const usableH=ph-hdrH-margin*2;
+      let srcY=0;
+      let firstPage=true;
+      while(srcY<canvas.height){
+        if(!firstPage)pdf.addPage();
+        const sliceH=Math.min(usableH*canvas.width/imgW, canvas.height-srcY);
+        const sliceCanvas=document.createElement('canvas');
+        sliceCanvas.width=canvas.width;
+        sliceCanvas.height=sliceH;
+        sliceCanvas.getContext('2d').drawImage(canvas,0,srcY,canvas.width,sliceH,0,0,canvas.width,sliceH);
+        pdf.addImage(sliceCanvas.toDataURL('image/png'),'PNG',margin,firstPage?hdrH+4:margin,imgW,sliceH*imgW/canvas.width);
+        srcY+=sliceH;
+        firstPage=false;
+      }
+      // Share or download
+      try{
+        const blob=pdf.output('blob');
+        const file=new File([blob],fname,{type:'application/pdf'});
+        if(navigator.canShare&&navigator.canShare({files:[file]})){
+          await navigator.share({files:[file],title:nombre});
+          return;
+        }
+      }catch(e){}
+      pdf.save(fname);
+    }catch(e){toast('Error al generar PDF: '+e.message);}
+    return;
+  }
+
+  // ── DESKTOP: window.print() with clean CSS ────────────────────────────
   const layout=document.querySelector('.layout');
   const main=document.getElementById('mainArea');
   const panel=document.getElementById('panel');
@@ -2855,7 +2927,7 @@ async function exportarPDF(){
   header.innerHTML=`
     <div style="display:flex;align-items:center;justify-content:space-between;padding-bottom:10px;border-bottom:1.5px solid #ccc;margin-bottom:14px;font-family:'DM Sans',sans-serif">
       <div>
-        <div style="font-size:18px;font-weight:700;color:#1F3A2A;letter-spacing:-0.01em">docu<span style="color:#C9A961">salud</span></div>
+        <div style="font-size:18px;font-weight:700;color:#1F3A2A">docusalud</div>
         <div style="font-size:9px;color:#888;letter-spacing:.05em;margin-top:2px">HISTORIAS CLÍNICAS · docusalud.org</div>
       </div>
       <div style="text-align:right;font-size:11px;color:#444">
@@ -2881,29 +2953,29 @@ async function exportarPDF(){
       { display:none !important; }
       body,html{ overflow:visible !important; height:auto !important; background:white !important; }
       .layout,.main{ overflow:visible !important; height:auto !important; display:block !important; }
-      .panel{ overflow:visible !important; height:auto !important; min-height:0 !important;
-              padding:8px 0 !important; }
+      .panel{ overflow:visible !important; height:auto !important; min-height:0 !important; padding:8px 0 !important; }
       .phdr{ position:static !important; box-shadow:none !important; }
       .card{ break-inside:avoid; }
-      textarea,input,select{ border:none !important; background:transparent !important;
-                             padding:0 !important; resize:none !important; }
+      textarea,input,select{ border:none !important; background:transparent !important; padding:0 !important; resize:none !important; }
       @page{ size:letter portrait; margin:14mm 16mm 18mm; }
     }`;
   document.head.appendChild(style);
 
   toast('Generando PDF…');
   await new Promise(r=>setTimeout(r,150));
-  window.print();
 
-  // Restore styles after print dialog
-  setTimeout(()=>{
+  function _restorePrint(){
+    window.removeEventListener('afterprint',_restorePrint);
     if(layout)layout.style.cssText=prevLayout;
     if(main)main.style.cssText=prevMain;
     if(panel)panel.style.cssText=prevPanel;
     const h=document.getElementById(printId);
     const s=document.getElementById(styleId);
     if(h)h.remove(); if(s)s.remove();
-  },2000);
+  }
+  window.addEventListener('afterprint',_restorePrint);
+  setTimeout(()=>_restorePrint(),8000);
+  window.print();
 }
 window.exportarPDF=exportarPDF;
 // ===== v7.2 presence + devices via Realtime DB (#9-12) =====
