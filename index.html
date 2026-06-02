@@ -3,6 +3,9 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+<script>
+(function(){var r=sessionStorage.redirect;delete sessionStorage.redirect;if(r&&r!==location.href)history.replaceState(null,null,r);})();
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>DocuSalud</title>
 <meta name="description" content="DocuSalud — Sistema de historias clínicas para odontólogos. Gestiona pacientes, consultas, odontograma y plan de tratamiento desde cualquier dispositivo. Acceso seguro y privado.">
@@ -499,13 +502,40 @@ body {
 .bn-btn svg { width: 20px; height: 20px; }
 
 /* ── PRINT ──────────────────────────────────────────────────────────── */
+
+/* ── ADMIN DEVICE DROPDOWN ───────────────────────────────────────────── */
+.admin-devices-row { margin-top: 6px; }
+.admin-devices-toggle {
+  background: none; border: none; padding: 0;
+  font-size: 11px; color: var(--text3); cursor: pointer;
+  font-family: 'DM Sans', sans-serif; letter-spacing: 0.02em;
+  display: flex; align-items: center; gap: 4px;
+}
+.admin-devices-toggle:hover { color: var(--text2); }
+.admin-devices-panel {
+  margin-top: 6px; padding: 8px 10px;
+  background: var(--surface2); border-radius: var(--r);
+  border: var(--border-default); font-size: 11px;
+  font-family: 'DM Sans', sans-serif;
+}
+.admin-device-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 3px 0; border-bottom: 0.5px solid var(--border);
+  color: var(--text2);
+}
+.admin-device-row:last-child { border-bottom: none; }
+.admin-device-ua { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.admin-device-date { color: var(--text3); flex-shrink: 0; font-size: 10px; }
+
 @media print {
   .sidebar,.topbar,.tabbar,.bs,.ba,.bnew,.bd,.tbtn,.bottom-nav,.side-menu,.side-menu-overlay,.profile-btn,.dark-toggle,#menuBtn,.sync-wrap,.mbg,.plist-filterbar,.filter-panel,.resize-handle,.ct-row .save-status { display: none !important; }
-  body,html { overflow: visible !important; height: auto !important; background: #fff !important; }
+  * { background: white !important; color: black !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body,html { overflow: visible !important; height: auto !important; background: white !important; }
   .layout,.main { overflow: visible !important; display: block !important; height: auto !important; }
   .panel { overflow: visible !important; padding: 0 !important; }
   .phdr { position: static !important; box-shadow: none !important; }
   .card { break-inside: avoid; }
+  @page { size: letter portrait; margin: 18mm 16mm 18mm; }
 }
 
 /* ── PREVIEW: NEW COMPONENT STYLES (Tasks 3.x) ──────────────────────── */
@@ -979,7 +1009,7 @@ body:has(.dot.ing) .topbar .brand svg { animation: logoBreathe 1.5s var(--ease) 
 .admin-filter-chip.on { background: var(--accent-light); color: var(--forest); border-color: var(--accent-border); font-weight: 600; }
 
 /* Per-user actions (impersonate button + tab count badge) */
-.admin-user-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.admin-user-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; flex-wrap: nowrap; justify-content: flex-start; }
 .admin-impersonate-btn {
   font-size: 11px; padding: 5px 10px;
   background: var(--surface2); color: var(--forest);
@@ -1625,6 +1655,15 @@ window.cerrarSesion = async function(){
   viewAsUid=null;
   pacientesListenerUid=null;
   _lastLoginAtUpdatedForUid=null;
+  // Force presence to offline before signing out — otherwise onDisconnect
+  // may take minutes to fire and the user keeps showing as "online" in Admin.
+  if(currentUserUid && rtdb){
+    try{
+      const deviceId=getDeviceId();
+      const sref=rdbRef(rtdb,'status/'+currentUserUid+'/'+deviceId);
+      await rdbSet(sref,null);
+    }catch(e){}
+  }
   try{await signOut(auth);}catch(e){}
   document.getElementById('loginBg').style.display='flex';
   showAuthView('login');
@@ -2184,12 +2223,34 @@ async function ciExists(ci, excludeId){
 
 // ─── EXPORT / IMPORT (3.7.3) ──────────────────────────────────────────────
 window.exportar=function(){
-  const data=JSON.stringify({pacientes,exportado:new Date().toISOString()},null,2);
+  // Admin: export full JSON backup; Regular user: export PDF of current view
+  if(isAdmin && !viewAsUid){
+    const backup={
+      exportDate:new Date().toISOString(),
+      exportedBy:(auth.currentUser&&auth.currentUser.email)||'admin',
+      totalPacientes:pacientes.length,
+      pacientes:pacientes.map(p=>({...p}))
+    };
+    const data=JSON.stringify(backup,null,2);
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(new Blob([data],{type:'application/json'}));
+    a.download=`docusalud-backup-${hoy()}.json`;
+    a.click();
+    toast('Respaldo JSON exportado ('+pacientes.length+' pacientes)');
+  } else {
+    exportarPDF();
+  }
+}
+window.exportarPacienteJSON=function(){
+  if(!isAdmin)return;
+  const p=gp();if(!p){toast('No hay paciente seleccionado');return;}
+  const data=JSON.stringify(p,null,2);
   const a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([data],{type:'application/json'}));
-  a.download=`docusalud_${hoy()}.json`;a.click();
-  toast('Respaldo exportado');
-}
+  const fname='paciente-'+(p.nombre||'datos').replace(/[^a-z0-9]+/gi,'_')+'-'+hoy()+'.json';
+  a.download=fname; a.click();
+  toast('JSON del paciente descargado');
+};
 window.importar=async function(ev){
   if(!isAdmin){toast('Solo administradores pueden importar.');ev.target.value='';return;}
   const file=ev.target.files[0];if(!file)return;
@@ -2679,6 +2740,35 @@ window.generateInvite=async function(){
 window.copyInvite=function(code){ try{navigator.clipboard.writeText(code);toast('Código copiado: '+code);}catch(e){toast(code);} };
 window.deleteInvite=async function(code){ if(!isAdmin)return; if(!confirm('¿Borrar el código '+code+'?'))return; try{await deleteDoc(doc(db,'invitaciones',code));toast('Código borrado');}catch(e){} };
 window.toggleInvites=function(){ invitesCollapsed=!invitesCollapsed; renderAdmin(); };
+window.adminToggleDevices=async function(uid){
+  const panel=document.getElementById('devpanel-'+uid);
+  const chev=document.getElementById('devchev-'+uid);
+  if(!panel)return;
+  const isOpen=panel.style.display!=='none';
+  panel.style.display=isOpen?'none':'block';
+  if(chev)chev.textContent=isOpen?'▸':'▾';
+  if(!isOpen && panel.innerHTML===''){
+    panel.innerHTML='<span style="color:var(--text3);font-size:11px">Cargando dispositivos…</span>';
+    try{
+      const snap=await getDocs(collection(db,'users',uid,'devices'));
+      const pr=presenceMap[uid]||{};
+      if(snap.empty){ panel.innerHTML='<span style="color:var(--text3);font-size:11px">Sin historial de dispositivos.</span>'; return; }
+      const rows=snap.docs.map(d=>{
+        const dv=d.data();
+        const online=!!pr[d.id];
+        const ua=(dv.userAgent||'').replace(/\(.*?\)/g,'').trim().slice(0,60);
+        const last=dv.lastSeenAt?new Date(dv.lastSeenAt).toLocaleDateString('es-VE'):'';
+        return `<div class="admin-device-row">
+          <span class="pres-dot ${online?'on':'off'}" style="flex-shrink:0"></span>
+          <span class="admin-device-ua" title="${dv.userAgent||''}">${ua||'Dispositivo desconocido'}</span>
+          <span class="admin-device-date">${last}</span>
+        </div>`;
+      }).join('');
+      panel.innerHTML=rows;
+    }catch(e){ panel.innerHTML='<span style="color:var(--text3);font-size:11px">No se pudo cargar.</span>'; }
+  }
+};
+
 // ===== v7.2 mobile nav + side menu (#1/#5/#6) =====
 function closeSideMenu(){ const m=document.getElementById('sideMenu'),o=document.getElementById('sideMenuOverlay'); if(m)m.classList.remove('open'); if(o)o.classList.remove('on'); }
 function openSideMenu(){ const m=document.getElementById('sideMenu'),o=document.getElementById('sideMenuOverlay'); if(m)m.classList.add('open'); if(o)o.classList.add('on'); }
@@ -2693,29 +2783,61 @@ window.bnInicio=bnInicio; window.bnPacientes=bnPacientes; window.bnNuevo=bnNuevo
 function _loadScript(src){return new Promise((res,rej)=>{if([...document.scripts].some(s=>s.src===src)){res();return;}const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=()=>rej(new Error('load '+src));document.head.appendChild(s);});}
 async function _loadPdfLibs(){ if(!window.html2canvas) await _loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js'); if(!(window.jspdf&&window.jspdf.jsPDF)) await _loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'); }
 async function exportarPDF(){
-  const target=document.getElementById('panel')||document.getElementById('mainArea');
-  if(!target){toast('No hay nada para exportar');return;}
-  toast('Generando PDF…');
-  try{ await _loadPdfLibs(); }catch(e){ toast('No se pudieron cargar las herramientas de PDF'); return; }
+  // Admin (not impersonating) → export full JSON backup, not PDF
+  if(isAdmin && !viewAsUid){ window.exportar(); return; }
   const p=(typeof gp==='function'&&gp())||null;
-  const titulo=p&&p.nombre?p.nombre:'DocuSalud';
-  let canvas;
-  try{ canvas=await html2canvas(target,{scale:2,backgroundColor:'#ffffff',useCORS:true}); }catch(e){ toast('No se pudo generar el PDF'); return; }
-  const img=canvas.toDataURL('image/png');
-  const jsPDF=window.jspdf.jsPDF;
-  const pdf=new jsPDF('p','mm','a4');
-  const pw=pdf.internal.pageSize.getWidth(), ph=pdf.internal.pageSize.getHeight();
-  pdf.setFontSize(14); pdf.text(titulo,12,14);
-  pdf.setFontSize(9); pdf.setTextColor(120); pdf.text('DocuSalud · '+new Date().toLocaleDateString('es-VE'),pw-12,14,{align:'right'}); pdf.setTextColor(0);
-  const imgW=pw-20, imgH=canvas.height*imgW/canvas.width;
-  let pos=20, heightLeft=imgH;
-  pdf.addImage(img,'PNG',10,pos,imgW,imgH); heightLeft-=(ph-pos);
-  while(heightLeft>0){ pos=heightLeft-imgH+10; pdf.addPage(); pdf.addImage(img,'PNG',10,pos,imgW,imgH); heightLeft-=ph; }
-  const fname=(titulo.replace(/[^a-z0-9]+/gi,'_'))+'_'+new Date().toISOString().slice(0,10)+'.pdf';
-  try{ const blob=pdf.output('blob'); const file=new File([blob],fname,{type:'application/pdf'}); if(navigator.canShare&&navigator.canShare({files:[file]})){ await navigator.share({files:[file],title:titulo}); return; } }catch(e){}
-  pdf.save(fname);
+  const nombre=p&&p.nombre?p.nombre:'DocuSalud';
+  const ci=p&&p.ci?p.ci:'';
+  const fecha=new Date().toLocaleDateString('es-VE',{day:'2-digit',month:'2-digit',year:'numeric'});
+  // Inject a print-only header and force white background, then trigger print
+  const printId='ds-print-header-'+Date.now();
+  const header=document.createElement('div');
+  header.id=printId;
+  header.innerHTML=`
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid #ccc">
+      <div style="font-family:'DM Sans',sans-serif">
+        <div style="font-size:18px;font-weight:700;color:#1F3A2A;letter-spacing:-0.01em">docu<span style="color:#C9A961">salud</span></div>
+        <div style="font-size:10px;color:#666;letter-spacing:0.04em">HISTORIAS CLÍNICAS · docusalud.org</div>
+      </div>
+      <div style="text-align:right;font-family:'DM Sans',sans-serif;font-size:11px;color:#444">
+        <div style="font-weight:600;font-size:13px">${nombre}</div>
+        ${ci?`<div>C.I.: ${ci}</div>`:''}
+        <div style="color:#888">${fecha}</div>
+      </div>
+    </div>`;
+  header.style.cssText='position:fixed;top:0;left:0;right:0;z-index:99999;background:white;padding:12px 20px 0;display:none';
+  document.body.appendChild(header);
+  // Temporarily force print styles via a style tag
+  const styleId='ds-print-force-'+Date.now();
+  const style=document.createElement('style');
+  style.id=styleId;
+  style.textContent=`
+    @media print{
+      #${printId}{ display:block !important; }
+      *{ background:white !important; color:black !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+      .topbar,.sidebar,.tabbar,.bottom-nav,.side-menu,.side-menu-overlay,
+      .dark-toggle,.profile-btn,.sync-wrap,.ba,.bd,.bc,.bnew,.tbtn,
+      .plist-filterbar,.filter-panel,.resize-handle,.save-status,
+      .admin-bar,.imp-exit-btn { display:none !important; }
+      body,html{ overflow:visible !important; height:auto !important; background:white !important; }
+      .layout,.main{ overflow:visible !important; display:block !important; height:auto !important; }
+      .panel{ overflow:visible !important; padding:8px 0 !important; margin-top:90px; }
+      .phdr{ position:static !important; box-shadow:none !important; }
+      .card{ break-inside:avoid; }
+      @page{ size:letter portrait; margin:18mm 16mm 18mm; }
+    }`;
+  document.head.appendChild(style);
+  toast('Generando PDF…');
+  await new Promise(r=>setTimeout(r,120));
+  window.print();
+  // Cleanup after print dialog closes
+  setTimeout(()=>{
+    const h=document.getElementById(printId);
+    const s=document.getElementById(styleId);
+    if(h)h.remove(); if(s)s.remove();
+  },1500);
 }
-window.exportarPDF=function(){ window.print(); };
+window.exportarPDF=exportarPDF;
 // ===== v7.2 presence + devices via Realtime DB (#9-12) =====
 let _presenceSet=false, presenceMap={}, presenceUnsub=null;
 function getDeviceId(){ let d=localStorage.getItem('ds_device_id'); if(!d){ d='dev-'+Math.random().toString(36).slice(2,10)+Date.now().toString(36); localStorage.setItem('ds_device_id',d);} return d; }
@@ -3021,6 +3143,7 @@ function renderPaciente(){
         <div class="phn">${e(p.nombre)}</div>
         <div class="phm">${edad(p.nacimiento)}${edad(p.nacimiento)&&p.ci?' · ':''}${e(p.ci||'')}${p.telefono?' · '+e(p.telefono):''}</div>
       </div>
+      ${isAdmin?`<button class="ba" style="font-size:11px;padding:5px 10px" onclick="exportarPacienteJSON()" title="Descargar JSON de este paciente">⬇ JSON</button>`:''}
       <button class="ba" onclick="volverInicio()" title="Volver al inicio">← Inicio</button>
     </div>
     <div class="tabbar">${tabs.map(t=>`<button class="tab${tabActual===t.k?' on':''}" onclick="cambiarTab('${t.k}')">${t.l}</button>`).join('')}</div>
