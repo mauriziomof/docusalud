@@ -503,30 +503,15 @@ body {
 
 /* ── PRINT ──────────────────────────────────────────────────────────── */
 
-/* ── ADMIN DEVICE DROPDOWN ───────────────────────────────────────────── */
-.admin-devices-row { margin-top: 6px; }
-.admin-devices-toggle {
-  background: none; border: none; padding: 0;
-  font-size: 11px; color: var(--text3); cursor: pointer;
-  font-family: 'DM Sans', sans-serif; letter-spacing: 0.02em;
-  display: flex; align-items: center; gap: 4px;
-}
-.admin-devices-toggle:hover { color: var(--text2); }
-.admin-devices-panel {
-  margin-top: 6px; padding: 8px 10px;
-  background: var(--surface2); border-radius: var(--r);
-  border: var(--border-default); font-size: 11px;
-  font-family: 'DM Sans', sans-serif;
-}
-.admin-device-row {
-  display: flex; align-items: center; gap: 8px;
-  padding: 3px 0; border-bottom: 0.5px solid var(--border);
-  color: var(--text2);
-}
-.admin-device-row:last-child { border-bottom: none; }
-.admin-device-ua { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.admin-device-date { color: var(--text3); flex-shrink: 0; font-size: 10px; }
-
+/* ── ADMIN DEVICE DROPDOWN ─────────────────── */
+.admin-devices-row{margin-top:6px;}
+.admin-devices-toggle{background:none;border:none;padding:0;font-size:11px;color:var(--text3);cursor:pointer;font-family:'DM Sans',sans-serif;display:flex;align-items:center;gap:4px;}
+.admin-devices-toggle:hover{color:var(--text2);}
+.admin-devices-panel{margin-top:6px;padding:8px 10px;background:var(--surface2);border-radius:var(--r);border:var(--border-default);font-size:11px;font-family:'DM Sans',sans-serif;}
+.admin-device-row{display:flex;align-items:center;gap:8px;padding:3px 0;border-bottom:.5px solid var(--border);color:var(--text2);}
+.admin-device-row:last-child{border-bottom:none;}
+.admin-device-ua{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.admin-device-date{color:var(--text3);flex-shrink:0;font-size:10px;}
 @media print {
   .sidebar,.topbar,.tabbar,.bs,.ba,.bnew,.bd,.tbtn,.bottom-nav,.side-menu,.side-menu-overlay,.profile-btn,.dark-toggle,#menuBtn,.sync-wrap,.mbg,.plist-filterbar,.filter-panel,.resize-handle,.ct-row .save-status { display: none !important; }
   * { background: white !important; color: black !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
@@ -535,7 +520,8 @@ body {
   .panel { overflow: visible !important; padding: 0 !important; }
   .phdr { position: static !important; box-shadow: none !important; }
   .card { break-inside: avoid; }
-  @page { size: letter portrait; margin: 18mm 16mm 18mm; }
+  @page { size: letter portrait; margin: 18mm 16mm 22mm; }
+  body::after { content: "DocuSalud · docusalud.org"; position: fixed; bottom: 6mm; right: 14mm; font-size: 9px; color: #999; font-family: "DM Sans", sans-serif; }
 }
 
 /* ── PREVIEW: NEW COMPONENT STYLES (Tasks 3.x) ──────────────────────── */
@@ -1009,7 +995,7 @@ body:has(.dot.ing) .topbar .brand svg { animation: logoBreathe 1.5s var(--ease) 
 .admin-filter-chip.on { background: var(--accent-light); color: var(--forest); border-color: var(--accent-border); font-weight: 600; }
 
 /* Per-user actions (impersonate button + tab count badge) */
-.admin-user-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; flex-wrap: nowrap; justify-content: flex-start; }
+.admin-user-actions { display: flex; align-items: center; gap: 8px; flex-wrap: nowrap; justify-content: flex-start; }
 .admin-impersonate-btn {
   font-size: 11px; padding: 5px 10px;
   background: var(--surface2); color: var(--forest);
@@ -1225,8 +1211,8 @@ body:has(.dot.ing) .topbar .brand svg { animation: logoBreathe 1.5s var(--ease) 
 .lbox img.ds-logo-lg { display:block; margin:6px auto 6px; }
 @media(max-width:768px){ .ant-grid { grid-template-columns:1fr; } .hab-row { flex-wrap:wrap; } }
 /* ── v7.1 Tranche 3 (review fixes) ── */
-.admin-user-actions { display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
-.admin-user-actions button { padding:5px 11px; font-size:11px; white-space:nowrap; }
+/* admin-user-actions — see main rule above */
+.admin-user-actions button { padding:5px 11px; font-size:11px; white-space:nowrap; flex-shrink:0; }
 .admin-user-name .admin-status { margin-left:6px; vertical-align:middle; }
 .filter-panel { padding:12px 10px 14px; }
 .filter-panel .plist-filter-group { margin-bottom:12px; }
@@ -1293,7 +1279,14 @@ body.no-import .imp-btn { display:none !important; }
 .pres-dot.on { background:#3a9d5d; box-shadow:0 0 0 3px rgba(58,157,93,0.15); }
 .pres-dot.off { background:var(--border2); }
 .bn-logo { display:block; margin:0 auto 2px; }
-.bn-inicio { color:var(--forest); font-weight:600; }
+.bn-inicio {
+  color: var(--forest); font-weight: 600;
+  background: var(--accent-light);
+  border-radius: 12px;
+  padding: 6px 12px !important;
+  margin: 4px 2px;
+  flex: 1.3;
+}
 .bn-inicio .bn-logo { filter:drop-shadow(0 1px 1px rgba(31,58,42,0.12)); }
 /* ── v7.3.1 iOS form-control normalization (Fix #1: inputs aligned to limits) ── */
 .mbox input,.mbox select,.mbox textarea,.mf input,.mf select,.mf textarea,.f input,.f select,.f textarea,.ci-input input,.ci-input select,.lbox input,.age-range input { min-width:0; max-width:100%; }
@@ -1434,23 +1427,23 @@ html, body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grays
 </div>
 
 <div class="bottom-nav" id="bottomNav">
-  <button class="bn-btn bn-inicio" onclick="bnInicio()">
-    <img class="bn-logo" src="logo.svg" alt="" width="23" height="23">
-    Inicio
-  </button>
   <button class="bn-btn" id="bn-pacientes" onclick="bnPacientes()">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
     Pacientes
-  </button>
-  <button class="bn-btn" onclick="bnNuevo()">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
-    Nuevo
   </button>
   <button class="bn-btn" onclick="bnCalendario()">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
     Calendario
   </button>
-  <button class="bn-btn" onclick="window.print()">
+  <button class="bn-btn bn-inicio" onclick="bnInicio()">
+    <img class="bn-logo" src="logo.svg" alt="" width="23" height="23">
+    Inicio
+  </button>
+  <button class="bn-btn" onclick="bnNuevo()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+    Nuevo
+  </button>
+  <button class="bn-btn" onclick="exportarPDF()">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
     Exportar
   </button>
@@ -1655,15 +1648,15 @@ window.cerrarSesion = async function(){
   viewAsUid=null;
   pacientesListenerUid=null;
   _lastLoginAtUpdatedForUid=null;
-  // Force presence to offline before signing out — otherwise onDisconnect
-  // may take minutes to fire and the user keeps showing as "online" in Admin.
   if(currentUserUid && rtdb){
     try{
       const deviceId=getDeviceId();
       const sref=rdbRef(rtdb,'status/'+currentUserUid+'/'+deviceId);
-      await rdbSet(sref,null);
+      await rdbSet(sref,null); // remove presence immediately on manual logout
     }catch(e){}
   }
+  _presenceSet=false; // allow setupPresence to run again on next login
+  if(presenceUnsub){try{presenceUnsub();}catch(e){} presenceUnsub=null;} // reset presence watcher
   try{await signOut(auth);}catch(e){}
   document.getElementById('loginBg').style.display='flex';
   showAuthView('login');
@@ -2203,7 +2196,6 @@ window.migrateOrphanPatients = async function(targetUid){
       count++;
     }
   }
-  console.log(`Migrados ${count} pacientes huérfanos → ${targetUid}`);
   return count;
 };
 
@@ -2223,21 +2215,20 @@ async function ciExists(ci, excludeId){
 
 // ─── EXPORT / IMPORT (3.7.3) ──────────────────────────────────────────────
 window.exportar=function(){
-  // Admin: export full JSON backup; Regular user: export PDF of current view
-  if(isAdmin && !viewAsUid){
-    const backup={
-      exportDate:new Date().toISOString(),
-      exportedBy:(auth.currentUser&&auth.currentUser.email)||'admin',
-      totalPacientes:pacientes.length,
-      pacientes:pacientes.map(p=>({...p}))
-    };
+  if(isAdmin && !viewAsUid && viewActual==='admin'){
+    // Admin en vista Admin → exportar JSON de toda la DB
+    const backup={exportDate:new Date().toISOString(),exportedBy:(auth.currentUser&&auth.currentUser.email)||'admin',totalPacientes:pacientes.length,pacientes:pacientes.map(p=>({...p}))};
     const data=JSON.stringify(backup,null,2);
     const a=document.createElement('a');
     a.href=URL.createObjectURL(new Blob([data],{type:'application/json'}));
     a.download=`docusalud-backup-${hoy()}.json`;
     a.click();
     toast('Respaldo JSON exportado ('+pacientes.length+' pacientes)');
+  } else if(isAdmin && viewActual==='paciente' && idActual && !viewAsUid){
+    // Admin viendo un paciente directamente → JSON de ese paciente
+    exportarPacienteJSON();
   } else {
+    // Usuario normal o admin impersonando → PDF de la pestaña activa
     exportarPDF();
   }
 }
@@ -2592,16 +2583,18 @@ window.impersonateUser=function(uid){
   const target=allUsersList.find(u=>u.uid===uid);
   if(!target){toast('Usuario no encontrado');return;}
   viewAsUid=uid;
-  setupPacientesListener();
+  pacientesListenerUid=null; // force listener reset for impersonated user
   viewActual='paciente';
   idActual=null;
+  setupPacientesListener(); // now set up listener with viewAsUid in scope
   renderEmpty();
   renderLista();
-  toast(`Viendo como ${target.name||target.email}`);
+  toast('Viendo como '+(target.name||target.email));
 };
 
 window.exitImpersonation=function(){
   viewAsUid=null;
+  pacientesListenerUid=null; // force listener reset back to own patients
   setupPacientesListener();
   renderAdminEntry();
 };
@@ -2637,12 +2630,15 @@ function renderAdmin(){
           <div class="admin-user-email">${e(u.email||'')} · ${patientCount} paciente${patientCount===1?'':'s'}</div>
           ${(()=>{const pr=presenceMap[u.uid]||{};const ad=Object.keys(pr).length;const on=ad>0;const hist=u.deviceHistoryCount||0;return `<div class="admin-presence"><span class="pres-dot ${on?'on':'off'}"></span>${on?`En línea · ${ad} dispositivo${ad===1?'':'s'} activo${ad===1?'':'s'}`:'Desconectado'}${hist?` · ${hist} dispositivo${hist===1?'':'s'} histórico${hist===1?'':'s'}`:''}</div>`;})()}
           ${(u.especialidades&&u.especialidades.length)?`<div class="admin-user-esp">${u.especialidades.map(s=>e(s)).join(' · ')}</div>`:''}
+          <div class="admin-devices-row"><button class="admin-devices-toggle" onclick="adminToggleDevices('${u.uid}')"><span id="devchev-${u.uid}">▸</span> Dispositivos</button></div>
+          <div class="admin-devices-panel" id="devpanel-${u.uid}" style="display:none"></div>
         </div>
         <div class="admin-user-meta">${allowed.size}/${ALL_TABS.length}</div>
       </div>
       <div class="admin-user-actions">
         <button class="ba admin-impersonate-btn" onclick="impersonateUser('${u.uid}')" title="Ver como este usuario">Ver como</button>
         <button class="bc" onclick="adminSetStatus('${u.uid}','${status==='inactive'?'active':'inactive'}')">${status==='inactive'?'Activar':'Desactivar'}</button>
+        <button class="ba" onclick="adminExportUserPatients('${u.uid}','${e(u.name||u.email||uid)}')" title="Exportar pacientes de este usuario en JSON">⬇ JSON</button>
         <button class="bd" onclick="adminRemoveUser('${u.uid}')" title="Quitar de la lista">Quitar</button>
       </div>
       <div class="admin-tabs-grid">
@@ -2739,7 +2735,28 @@ window.generateInvite=async function(){
 };
 window.copyInvite=function(code){ try{navigator.clipboard.writeText(code);toast('Código copiado: '+code);}catch(e){toast(code);} };
 window.deleteInvite=async function(code){ if(!isAdmin)return; if(!confirm('¿Borrar el código '+code+'?'))return; try{await deleteDoc(doc(db,'invitaciones',code));toast('Código borrado');}catch(e){} };
-window.toggleInvites=function(){ invitesCollapsed=!invitesCollapsed; renderAdmin(); };
+
+
+window.adminExportUserPatients=function(uid, userName){
+  if(!isAdmin)return;
+  const userPacientes=pacientes.filter(p=>p.ownerUid===uid);
+  if(userPacientes.length===0){toast('Este usuario no tiene pacientes');return;}
+  const backup={
+    exportDate:new Date().toISOString(),
+    exportedBy:(auth.currentUser&&auth.currentUser.email)||'admin',
+    userUid:uid,
+    userName:userName,
+    totalPacientes:userPacientes.length,
+    pacientes:userPacientes.map(p=>({...p}))
+  };
+  const data=JSON.stringify(backup,null,2);
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([data],{type:'application/json'}));
+  const fname='pacientes-'+(userName||uid).replace(/[^a-z0-9]+/gi,'_')+'-'+hoy()+'.json';
+  a.download=fname; a.click();
+  toast('JSON exportado: '+userPacientes.length+' pacientes de '+userName);
+};
+
 window.adminToggleDevices=async function(uid){
   const panel=document.getElementById('devpanel-'+uid);
   const chev=document.getElementById('devchev-'+uid);
@@ -2747,28 +2764,29 @@ window.adminToggleDevices=async function(uid){
   const isOpen=panel.style.display!=='none';
   panel.style.display=isOpen?'none':'block';
   if(chev)chev.textContent=isOpen?'▸':'▾';
-  if(!isOpen && panel.innerHTML===''){
-    panel.innerHTML='<span style="color:var(--text3);font-size:11px">Cargando dispositivos…</span>';
+  if(!isOpen&&panel.innerHTML===''){
+    panel.innerHTML='<span style="color:var(--text3);font-size:11px;padding:4px 0;display:block">Cargando dispositivos…</span>';
     try{
       const snap=await getDocs(collection(db,'users',uid,'devices'));
       const pr=presenceMap[uid]||{};
-      if(snap.empty){ panel.innerHTML='<span style="color:var(--text3);font-size:11px">Sin historial de dispositivos.</span>'; return; }
-      const rows=snap.docs.map(d=>{
+      if(snap.empty){panel.innerHTML='<span style="color:var(--text3);font-size:11px;padding:4px 0;display:block">Sin historial de dispositivos.</span>';return;}
+      panel.innerHTML=snap.docs.map(d=>{
         const dv=d.data();
         const online=!!pr[d.id];
-        const ua=(dv.userAgent||'').replace(/\(.*?\)/g,'').trim().slice(0,60);
-        const last=dv.lastSeenAt?new Date(dv.lastSeenAt).toLocaleDateString('es-VE'):'';
-        return `<div class="admin-device-row">
+        const ua=(dv.userAgent||'').replace(/\(.*?\)/g,'').replace(/AppleWebKit.*$/,'').trim().slice(0,55);
+        const last=dv.lastSeenAt?new Date(dv.lastSeenAt).toLocaleDateString('es-VE',{day:'2-digit',month:'2-digit',year:'numeric'}):'';
+        const first=dv.firstSeenAt?new Date(dv.firstSeenAt).toLocaleDateString('es-VE',{day:'2-digit',month:'2-digit',year:'numeric'}):'';
+        return `<div class="admin-device-row" title="${(dv.userAgent||'').slice(0,120)}">
           <span class="pres-dot ${online?'on':'off'}" style="flex-shrink:0"></span>
-          <span class="admin-device-ua" title="${dv.userAgent||''}">${ua||'Dispositivo desconocido'}</span>
-          <span class="admin-device-date">${last}</span>
+          <span class="admin-device-ua">${ua||'Dispositivo desconocido'}</span>
+          <span class="admin-device-date">${online?'<b style=\"color:#3a9d5d\">Online</b>':last}</span>
         </div>`;
       }).join('');
-      panel.innerHTML=rows;
-    }catch(e){ panel.innerHTML='<span style="color:var(--text3);font-size:11px">No se pudo cargar.</span>'; }
+    }catch(e){panel.innerHTML='<span style="color:var(--text3);font-size:11px">No se pudo cargar.</span>';}
   }
 };
 
+window.toggleInvites=function(){ invitesCollapsed=!invitesCollapsed; renderAdmin(); };
 // ===== v7.2 mobile nav + side menu (#1/#5/#6) =====
 function closeSideMenu(){ const m=document.getElementById('sideMenu'),o=document.getElementById('sideMenuOverlay'); if(m)m.classList.remove('open'); if(o)o.classList.remove('on'); }
 function openSideMenu(){ const m=document.getElementById('sideMenu'),o=document.getElementById('sideMenuOverlay'); if(m)m.classList.add('open'); if(o)o.classList.add('on'); }
@@ -2783,59 +2801,79 @@ window.bnInicio=bnInicio; window.bnPacientes=bnPacientes; window.bnNuevo=bnNuevo
 function _loadScript(src){return new Promise((res,rej)=>{if([...document.scripts].some(s=>s.src===src)){res();return;}const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=()=>rej(new Error('load '+src));document.head.appendChild(s);});}
 async function _loadPdfLibs(){ if(!window.html2canvas) await _loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js'); if(!(window.jspdf&&window.jspdf.jsPDF)) await _loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'); }
 async function exportarPDF(){
-  // Admin (not impersonating) → export full JSON backup, not PDF
-  if(isAdmin && !viewAsUid){ window.exportar(); return; }
+  // Always generate PDF — routing logic is handled by window.exportar()
   const p=(typeof gp==='function'&&gp())||null;
   const nombre=p&&p.nombre?p.nombre:'DocuSalud';
   const ci=p&&p.ci?p.ci:'';
   const fecha=new Date().toLocaleDateString('es-VE',{day:'2-digit',month:'2-digit',year:'numeric'});
-  // Inject a print-only header and force white background, then trigger print
-  const printId='ds-print-header-'+Date.now();
+
+  // Temporarily override inline styles on layout containers so content expands fully
+  const layout=document.querySelector('.layout');
+  const main=document.getElementById('mainArea');
+  const panel=document.getElementById('panel');
+  const prevLayout=layout?layout.style.cssText:'';
+  const prevMain=main?main.style.cssText:'';
+  const prevPanel=panel?panel.style.cssText:'';
+  if(layout)layout.style.cssText='overflow:visible;height:auto;display:block';
+  if(main)main.style.cssText='overflow:visible;height:auto;display:block';
+  if(panel)panel.style.cssText='overflow:visible;height:auto;padding:8px 0';
+
+  const printId='ds-ph-'+Date.now();
+  const styleId='ds-ps-'+Date.now();
   const header=document.createElement('div');
   header.id=printId;
   header.innerHTML=`
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid #ccc">
-      <div style="font-family:'DM Sans',sans-serif">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding-bottom:10px;border-bottom:1.5px solid #ccc;margin-bottom:14px;font-family:'DM Sans',sans-serif">
+      <div>
         <div style="font-size:18px;font-weight:700;color:#1F3A2A;letter-spacing:-0.01em">docu<span style="color:#C9A961">salud</span></div>
-        <div style="font-size:10px;color:#666;letter-spacing:0.04em">HISTORIAS CLÍNICAS · docusalud.org</div>
+        <div style="font-size:9px;color:#888;letter-spacing:.05em;margin-top:2px">HISTORIAS CLÍNICAS · docusalud.org</div>
       </div>
-      <div style="text-align:right;font-family:'DM Sans',sans-serif;font-size:11px;color:#444">
-        <div style="font-weight:600;font-size:13px">${nombre}</div>
-        ${ci?`<div>C.I.: ${ci}</div>`:''}
-        <div style="color:#888">${fecha}</div>
+      <div style="text-align:right;font-size:11px;color:#444">
+        <div style="font-weight:600;font-size:13px;color:#1F3A2A">${nombre}</div>
+        ${ci?`<div style="margin-top:2px">C.I.: ${ci}</div>`:''}
+        <div style="color:#999;margin-top:2px">${fecha}</div>
       </div>
     </div>`;
-  header.style.cssText='position:fixed;top:0;left:0;right:0;z-index:99999;background:white;padding:12px 20px 0;display:none';
+  header.style.cssText='display:none;padding:14px 20px 0;background:white;';
   document.body.appendChild(header);
-  // Temporarily force print styles via a style tag
-  const styleId='ds-print-force-'+Date.now();
+
   const style=document.createElement('style');
   style.id=styleId;
   style.textContent=`
     @media print{
       #${printId}{ display:block !important; }
-      *{ background:white !important; color:black !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+      *{ background:white !important; color:black !important;
+         -webkit-print-color-adjust:exact; print-color-adjust:exact; }
       .topbar,.sidebar,.tabbar,.bottom-nav,.side-menu,.side-menu-overlay,
       .dark-toggle,.profile-btn,.sync-wrap,.ba,.bd,.bc,.bnew,.tbtn,
       .plist-filterbar,.filter-panel,.resize-handle,.save-status,
-      .admin-bar,.imp-exit-btn { display:none !important; }
+      .admin-devices-row,.admin-devices-panel,.impersonation-banner
+      { display:none !important; }
       body,html{ overflow:visible !important; height:auto !important; background:white !important; }
-      .layout,.main{ overflow:visible !important; display:block !important; height:auto !important; }
-      .panel{ overflow:visible !important; padding:8px 0 !important; margin-top:90px; }
+      .layout,.main{ overflow:visible !important; height:auto !important; display:block !important; }
+      .panel{ overflow:visible !important; height:auto !important; min-height:0 !important;
+              padding:8px 0 !important; }
       .phdr{ position:static !important; box-shadow:none !important; }
       .card{ break-inside:avoid; }
-      @page{ size:letter portrait; margin:18mm 16mm 18mm; }
+      textarea,input,select{ border:none !important; background:transparent !important;
+                             padding:0 !important; resize:none !important; }
+      @page{ size:letter portrait; margin:14mm 16mm 18mm; }
     }`;
   document.head.appendChild(style);
+
   toast('Generando PDF…');
-  await new Promise(r=>setTimeout(r,120));
+  await new Promise(r=>setTimeout(r,150));
   window.print();
-  // Cleanup after print dialog closes
+
+  // Restore styles after print dialog
   setTimeout(()=>{
+    if(layout)layout.style.cssText=prevLayout;
+    if(main)main.style.cssText=prevMain;
+    if(panel)panel.style.cssText=prevPanel;
     const h=document.getElementById(printId);
     const s=document.getElementById(styleId);
     if(h)h.remove(); if(s)s.remove();
-  },1500);
+  },2000);
 }
 window.exportarPDF=exportarPDF;
 // ===== v7.2 presence + devices via Realtime DB (#9-12) =====
@@ -2862,7 +2900,7 @@ async function setupPresence(user){
 }
 function setupPresenceWatch(){
   if(presenceUnsub||!rtdb)return;
-  try{ presenceUnsub=onValue(rdbRef(rtdb,'status'),snap=>{ presenceMap=snap.val()||{}; if(viewActual==='admin')renderAdmin(); }); }
+  try{ presenceUnsub=onValue(rdbRef(rtdb,'status'),snap=>{ presenceMap=snap.val()||{}; }); }
   catch(e){ console.warn('presence watch:',e.message); }
 }
 // v7.1 — dentist specialties (informational, multi-select)
