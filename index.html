@@ -513,15 +513,51 @@ body {
 .admin-device-ua{flex:1;min-width:0;}
 .admin-device-date{color:var(--text3);flex-shrink:0;font-size:10px;}
 @media print {
+  /* ── Override dark-mode CSS variables so everything prints light ──
+     NOTE: !important is NOT valid on CSS custom properties (ignored by browsers).
+     Solution: use higher specificity. html[data-theme="dark"] beats [data-theme="dark"] ── */
+  html, html[data-theme="dark"], html[data-theme="dark"] * {
+    --bg: #F2EFE6;
+    --surface: #FAF9F6;
+    --surface2: #EDE9DF;
+    --text: #1A1A17;
+    --text2: #5C5C56;
+    --text3: #7A8A6E;
+    --border: rgba(31,58,42,0.12);
+    --border2: rgba(31,58,42,0.22);
+    --accent-light: #E3E7DA;
+    --accent-border: rgba(31,58,42,0.3);
+    --forest: #1F3A2A;
+    --mist: #E3E7DA;
+    --cream: #F2EFE6;
+    --bone: #FAF9F6;
+    --charcoal: #1A1A17;
+    --info-light: #E5EDF0;
+    --warn-light: #F7F1E0;
+    --danger-light: #FBE8E4;
+  }
   .sidebar,.topbar,.tabbar,.bs,.ba,.bnew,.bd,.tbtn,.bottom-nav,.side-menu,.side-menu-overlay,.profile-btn,.dark-toggle,#menuBtn,.sync-wrap,.mbg,.plist-filterbar,.filter-panel,.resize-handle,.ct-row .save-status { display: none !important; }
-  * { background: white !important; color: black !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  * { background: white !important; color: #1A1A17 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; border-color: #E0DDD4 !important; }
+  /* SVG fill/stroke: resolved via CSS variable override above — no fill:revert needed */
+  /* Tooth states — keep their light-mode colors */
+  .tooth { background: #EDE9DF !important; }
+  .tooth.caries { background: #FBE8E4 !important; }
+  .tooth.tratado { background: #E3E7DA !important; }
+  .tooth.corona { background: #E5EDF0 !important; }
+  .tooth.endodoncia { background: #F7F1E0 !important; }
+  .tooth.protesis { background: #F0EBF7 !important; }
+  .tooth .tn { color: #7A8A6E !important; }
+  .tooth .ts { color: #1A1A17 !important; }
   body,html { overflow: visible !important; height: auto !important; background: white !important; }
   .layout,.main { overflow: visible !important; display: block !important; height: auto !important; }
-  .panel { overflow: visible !important; padding: 0 !important; }
-  .phdr { position: static !important; box-shadow: none !important; }
-  .card { break-inside: avoid; }
-  @page { size: letter portrait; margin: 18mm 16mm 22mm; }
-  body::after { content: "DocuSalud · docusalud.org"; position: fixed; bottom: 6mm; right: 14mm; font-size: 9px; color: #999; font-family: "DM Sans", sans-serif; }
+  .panel { overflow: visible !important; padding: 8px 0 !important; }
+  .phdr { position: static !important; box-shadow: none !important; page-break-after: avoid; }
+  .card { break-inside: avoid; background: #FAF9F6 !important; }
+  /* Remove decorative backgrounds */
+  .viz-canvas { background: white !important; }
+  .viz-panel { background: white !important; box-shadow: none !important; }
+  @page { size: letter portrait; margin: 16mm 14mm 18mm; }
+  body::after { content: "DocuSalud · docusalud.org"; position: fixed; bottom: 5mm; right: 12mm; font-size: 9px; color: #999; font-family: "DM Sans", sans-serif; }
 }
 
 /* ── PREVIEW: NEW COMPONENT STYLES (Tasks 3.x) ──────────────────────── */
@@ -996,6 +1032,18 @@ body:has(.dot.ing) .topbar .brand svg { animation: logoBreathe 1.5s var(--ease) 
 
 /* Per-user actions (impersonate button + tab count badge) */
 .admin-user-actions { display: flex; align-items: center; gap: 6px; flex-wrap: nowrap; justify-content: flex-start; margin-top: 8px; }
+.admin-user-actions .ba,
+.admin-user-actions .bc,
+.admin-user-actions .bd {
+  padding: 5px 11px !important;
+  font-size: 11px !important;
+  height: 28px !important;
+  line-height: 1 !important;
+  margin: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  box-sizing: border-box !important;
+}
 .admin-user-actions .ba { background: var(--forest); color: white; border-color: var(--forest); }
 .admin-user-actions .ba:hover { background: var(--sage); border-color: var(--sage); }
 .admin-impersonate-btn { background: var(--forest) !important; color: white !important; border-color: var(--forest) !important; }
@@ -2757,21 +2805,28 @@ window.deleteInvite=async function(code){ if(!isAdmin)return; if(!confirm('¿Bor
 window.adminExportUserPatients=function(uid, userName){
   if(!isAdmin)return;
   const userPacientes=pacientes.filter(p=>p.ownerUid===uid);
-  if(userPacientes.length===0){toast('Este usuario no tiene pacientes');return;}
+  const userInfo=allUsersList.find(u=>u.uid===uid)||{};
   const backup={
     exportDate:new Date().toISOString(),
     exportedBy:(auth.currentUser&&auth.currentUser.email)||'admin',
     userUid:uid,
     userName:userName,
+    userEmail:userInfo.email||'',
+    tabsAllowed:userInfo.tabsAllowed||ALL_TABS,
+    especialidades:userInfo.especialidades||[],
     totalPacientes:userPacientes.length,
     pacientes:userPacientes.map(p=>({...p}))
   };
   const data=JSON.stringify(backup,null,2);
   const a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([data],{type:'application/json'}));
-  const fname='pacientes-'+(userName||uid).replace(/[^a-z0-9]+/gi,'_')+'-'+hoy()+'.json';
-  a.download=fname; a.click();
-  toast('JSON exportado: '+userPacientes.length+' pacientes de '+userName);
+  const safeName=(userName||uid).replace(/[^a-z0-9]+/gi,'_');
+  a.download=`docusalud-${safeName}-${hoy()}.json`;
+  a.click();
+  const msg=userPacientes.length===0
+    ? 'Configuración exportada (sin pacientes aún)'
+    : `Exportado: ${userPacientes.length} paciente${userPacientes.length===1?'':'s'} de ${userName}`;
+  toast(msg);
 };
 
 window.adminToggleDevices=async function(uid){
@@ -2836,8 +2891,150 @@ async function exportarPDF(){
   const nombre=p&&p.nombre?p.nombre:'DocuSalud';
   const ci=p&&p.ci?p.ci:'';
   const fecha=new Date().toLocaleDateString('es-VE',{day:'2-digit',month:'2-digit',year:'numeric'});
+  const fname=(nombre.replace(/[^a-z0-9]+/gi,'_'))+'_'+new Date().toISOString().slice(0,10)+'.pdf';
 
-  // Temporarily override inline styles on layout containers so content expands fully
+  // ── MOBILE: html2canvas + jsPDF → real file download / Web Share ──────
+  if(isMobile()){
+    const panel=document.getElementById('panel')||document.getElementById('mainArea');
+    if(!panel){toast('No hay nada para exportar');return;}
+    toast('Generando PDF…');
+    try{
+      await _loadPdfLibs();
+
+      // ── 1. Force white/light theme via injected CSS (safer than removing attribute,
+      //       because html2canvas resolves computed styles — we need a repaint first)
+      const forceStyleId='ds-pdf-force-'+Date.now();
+      const forceStyle=document.createElement('style');
+      forceStyle.id=forceStyleId;
+      forceStyle.textContent=`
+        #ds-pdf-capture, #ds-pdf-capture * {
+          background: white !important;
+          background-color: white !important;
+          color: #1A1A17 !important;
+          border-color: #E0DDD4 !important;
+          fill: #1A1A17 !important;
+          -webkit-print-color-adjust: exact !important;
+        }
+        #ds-pdf-capture .card { background: #FAF9F6 !important; border: 0.5px solid #E0DDD4 !important; }
+        #ds-pdf-capture .tooth { background: #F4F0E2 !important; }
+        #ds-pdf-capture .tooth.caries { background: #FBE8E4 !important; }
+        #ds-pdf-capture .tooth.tratado { background: #E3E7DA !important; }
+        #ds-pdf-capture textarea, #ds-pdf-capture input, #ds-pdf-capture select {
+          background: #F5F3EE !important; color: #1A1A17 !important; border: 0.5px solid #ccc !important;
+        }
+      `;
+      document.head.appendChild(forceStyle);
+
+      // ── 2. Expand containers so html2canvas captures FULL scrollable content
+      const layout=document.querySelector('.layout');
+      const main=document.getElementById('mainArea');
+      const prevLayoutS=layout?layout.style.cssText:'';
+      const prevMainS=main?main.style.cssText:'';
+      const prevPanelS=panel.style.cssText;
+      if(layout)layout.style.cssText='overflow:visible;height:auto;display:block';
+      if(main)main.style.cssText='overflow:visible;height:auto;display:block';
+      panel.style.cssText='overflow:visible;height:auto;max-height:none;padding:12px;background:white;';
+
+      // ── 3. Wrap panel in a capture div so forceStyle scopes correctly
+      const captureWrap=document.createElement('div');
+      captureWrap.id='ds-pdf-capture';
+      captureWrap.style.cssText='position:absolute;left:-9999px;top:0;width:800px;background:white;';
+      const panelClone=panel.cloneNode(true);
+      // Remove buttons and UI chrome from clone
+      panelClone.querySelectorAll('button,.save-status,.impersonation-banner,.admin-devices-row,.admin-devices-panel,.resize-handle,.tabbar').forEach(el=>el.remove());
+      captureWrap.appendChild(panelClone);
+      document.body.appendChild(captureWrap);
+
+      // ── 4. Wait for layout+paint
+      await new Promise(r=>setTimeout(r,300));
+
+      const canvas=await html2canvas(captureWrap,{
+        scale:2,
+        backgroundColor:'#ffffff',
+        useCORS:true,
+        logging:false,
+        scrollX:0,
+        scrollY:0
+      });
+
+      // ── 5. Restore everything
+      captureWrap.remove();
+      document.getElementById(forceStyleId)?.remove();
+      if(layout)layout.style.cssText=prevLayoutS;
+      if(main)main.style.cssText=prevMainS;
+      panel.style.cssText=prevPanelS;
+
+      // ── 6. Build PDF — single image, auto-paginate without empty pages
+      const jsPDF=window.jspdf.jsPDF;
+      const pdf=new jsPDF('p','mm','letter');
+      const pw=pdf.internal.pageSize.getWidth();
+      const ph=pdf.internal.pageSize.getHeight();
+      const margin=10;
+      const hdrH=22;
+      const usableW=pw-margin*2;
+      const usableH=ph-margin*2;
+
+      // Header on first page
+      pdf.setFont('helvetica','bold');pdf.setFontSize(13);pdf.setTextColor(31,58,42);
+      pdf.text('DocuSalud',margin,11);
+      pdf.setFont('helvetica','normal');pdf.setFontSize(9);pdf.setTextColor(80,80,80);
+      pdf.text(nombre,pw-margin,9,{align:'right'});
+      if(ci)pdf.text('C.I.: '+ci,pw-margin,14,{align:'right'});
+      pdf.text(fecha,pw-margin,19,{align:'right'});
+      pdf.setDrawColor(200,200,200);pdf.line(margin,hdrH,pw-margin,hdrH);
+
+      // Image dimensions
+      const imgRatio=canvas.width/canvas.height;
+      const imgWmm=usableW;
+      const imgHmm=imgWmm/imgRatio;
+
+      // Pixels per mm of usable page height
+      const pxPerMm=canvas.height/imgHmm;
+
+      // First page usable height is smaller (header takes space)
+      const firstPageH=usableH-(hdrH-margin);
+      const otherPageH=usableH;
+
+      let yPx=0; // current pixel position in source canvas
+      let isFirst=true;
+
+      while(yPx<canvas.height-1){
+        const availH=isFirst?firstPageH:otherPageH;
+        const slicePx=Math.min(Math.floor(availH*pxPerMm), canvas.height-yPx);
+        if(slicePx<=0)break;
+
+        const sc=document.createElement('canvas');
+        sc.width=canvas.width;
+        sc.height=slicePx;
+        sc.getContext('2d').drawImage(canvas,0,yPx,canvas.width,slicePx,0,0,canvas.width,slicePx);
+
+        const sliceHmm=slicePx/pxPerMm;
+        const yMm=isFirst?(hdrH+2):margin;
+        pdf.addImage(sc.toDataURL('image/jpeg',0.92),'JPEG',margin,yMm,imgWmm,sliceHmm);
+
+        yPx+=slicePx;
+        isFirst=false;
+        if(yPx<canvas.height-1)pdf.addPage();
+      }
+
+      // ── 7. Share or download
+      try{
+        const blob=pdf.output('blob');
+        const file=new File([blob],fname,{type:'application/pdf'});
+        if(navigator.canShare&&navigator.canShare({files:[file]})){
+          await navigator.share({files:[file],title:nombre});
+          return;
+        }
+      }catch(e){}
+      pdf.save(fname);
+
+    }catch(err){
+      toast('Error PDF: '+err.message);
+    }
+    return;
+  }
+
+  // ── DESKTOP: window.print() with clean CSS ────────────────────────────
   const layout=document.querySelector('.layout');
   const main=document.getElementById('mainArea');
   const panel=document.getElementById('panel');
@@ -2855,7 +3052,7 @@ async function exportarPDF(){
   header.innerHTML=`
     <div style="display:flex;align-items:center;justify-content:space-between;padding-bottom:10px;border-bottom:1.5px solid #ccc;margin-bottom:14px;font-family:'DM Sans',sans-serif">
       <div>
-        <div style="font-size:18px;font-weight:700;color:#1F3A2A;letter-spacing:-0.01em">docu<span style="color:#C9A961">salud</span></div>
+        <div style="font-size:18px;font-weight:700;color:#1F3A2A">docusalud</div>
         <div style="font-size:9px;color:#888;letter-spacing:.05em;margin-top:2px">HISTORIAS CLÍNICAS · docusalud.org</div>
       </div>
       <div style="text-align:right;font-size:11px;color:#444">
@@ -2872,8 +3069,11 @@ async function exportarPDF(){
   style.textContent=`
     @media print{
       #${printId}{ display:block !important; }
-      *{ background:white !important; color:black !important;
-         -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+      html,html[data-theme="dark"]{--surface:#FAF9F6;--surface2:#EDE9DF;--text:#1A1A17;--text2:#5C5C56;--text3:#7A8A6E;--border:rgba(31,58,42,0.12);--accent-light:#E3E7DA;--bg:#F2EFE6;--bone:#FAF9F6;--warn-light:#F7F1E0;--danger-light:#FBE8E4;--info-light:#E5EDF0;}
+      *{ background:white !important; color:#1A1A17 !important;
+         -webkit-print-color-adjust:exact; print-color-adjust:exact; border-color:#E0DDD4 !important; }
+      .tooth{background:#EDE9DF !important;} .tooth.caries{background:#FBE8E4 !important;} .tooth.tratado{background:#E3E7DA !important;}
+
       .topbar,.sidebar,.tabbar,.bottom-nav,.side-menu,.side-menu-overlay,
       .dark-toggle,.profile-btn,.sync-wrap,.ba,.bd,.bc,.bnew,.tbtn,
       .plist-filterbar,.filter-panel,.resize-handle,.save-status,
@@ -2881,29 +3081,29 @@ async function exportarPDF(){
       { display:none !important; }
       body,html{ overflow:visible !important; height:auto !important; background:white !important; }
       .layout,.main{ overflow:visible !important; height:auto !important; display:block !important; }
-      .panel{ overflow:visible !important; height:auto !important; min-height:0 !important;
-              padding:8px 0 !important; }
+      .panel{ overflow:visible !important; height:auto !important; min-height:0 !important; padding:8px 0 !important; }
       .phdr{ position:static !important; box-shadow:none !important; }
       .card{ break-inside:avoid; }
-      textarea,input,select{ border:none !important; background:transparent !important;
-                             padding:0 !important; resize:none !important; }
+      textarea,input,select{ border:none !important; background:transparent !important; padding:0 !important; resize:none !important; }
       @page{ size:letter portrait; margin:14mm 16mm 18mm; }
     }`;
   document.head.appendChild(style);
 
   toast('Generando PDF…');
   await new Promise(r=>setTimeout(r,150));
-  window.print();
 
-  // Restore styles after print dialog
-  setTimeout(()=>{
+  function _restorePrint(){
+    window.removeEventListener('afterprint',_restorePrint);
     if(layout)layout.style.cssText=prevLayout;
     if(main)main.style.cssText=prevMain;
     if(panel)panel.style.cssText=prevPanel;
     const h=document.getElementById(printId);
     const s=document.getElementById(styleId);
     if(h)h.remove(); if(s)s.remove();
-  },2000);
+  }
+  window.addEventListener('afterprint',_restorePrint);
+  setTimeout(()=>_restorePrint(),8000);
+  window.print();
 }
 window.exportarPDF=exportarPDF;
 // ===== v7.2 presence + devices via Realtime DB (#9-12) =====
