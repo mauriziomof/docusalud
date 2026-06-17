@@ -120,13 +120,19 @@ body {
   background: var(--bg);
   color: var(--text);
   font-size: 14px;
+  max-width: 100vw;
+  transition: background 0.3s, color 0.3s;
+}
+/* v8 — single-file merge: the app needs a fixed-height shell (internal panels
+   scroll, body never does); the landing page needs normal page scroll. Both
+   now share one document body, so this layout is gated behind a class that showApp()/
+   showLanding() toggle, instead of applying unconditionally. */
+body.app-active {
   height: 100vh;
   overflow: hidden;
   overflow-x: hidden;
-  max-width: 100vw;
   display: flex;
   flex-direction: column;
-  transition: background 0.3s, color 0.3s;
 }
 
 /* ── LOGIN ──────────────────────────────────────────────────────────── */
@@ -136,6 +142,16 @@ body {
   display: flex; align-items: center; justify-content: center;
   z-index: 9999;
 }
+.lbg-back {
+  position: absolute; top: 20px; left: 20px;
+  width: 36px; height: 36px; border-radius: 50%;
+  border: var(--border-default); background: var(--surface);
+  color: var(--text2); cursor: pointer; padding: 0;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.12s;
+}
+.lbg-back:hover { background: var(--surface2); color: var(--text); }
+.lbg-back svg { width: 18px; height: 18px; }
 .lbox {
   background: var(--surface);
   border: var(--border-default);
@@ -519,7 +535,7 @@ body {
 
 /* ── MOBILE ─────────────────────────────────────────────────────────── */
 @media(max-width:768px){
-  body { height: 100dvh; }
+  body.app-active { height: 100dvh; }
   .layout { flex-direction: column; height: calc(100dvh - 54px - 58px); }
   .sidebar { width: 100%; min-width: unset; border-right: none; border-bottom: var(--border-default); display: none; }
   .sidebar.open { display: flex; flex-direction: column; position: fixed; inset: 54px 0 58px 0; z-index: 100; background: var(--bg); }
@@ -1857,6 +1873,9 @@ window.showApp = function(opts){ window._pendingShowApp = opts || {}; };
 
 <!-- LOGIN -->
 <div class="lbg" id="loginBg">
+  <button class="lbg-back" onclick="showLanding()" title="Volver al inicio" aria-label="Volver al inicio">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+  </button>
   <div class="lbox">
     <img class="ds-logo ds-logo-lg" src="logo.svg" width="56" height="56" alt="DocuSalud">
     <h2><span>docu</span>salud</h2>
@@ -2156,6 +2175,7 @@ window.showApp=function(opts){
   const ar=document.getElementById('appRoot');
   if(lp)lp.style.display='none';
   if(ar)ar.style.display='';
+  document.body.classList.add('app-active');
   if(opts.signup){
     showAuthView('signup');
     const bg=document.getElementById('loginBg');
@@ -2177,6 +2197,7 @@ window.showLanding=function(){
   const ar=document.getElementById('appRoot');
   if(ar)ar.style.display='none';
   if(lp)lp.style.display='';
+  document.body.classList.remove('app-active');
   window.scrollTo(0,0);
 };
 
