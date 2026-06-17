@@ -1,4 +1,3 @@
-<!-- test: verificar ciclo de desarrollo - Maurizio -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -6,10 +5,14 @@
 <script>
 (function(){var r=sessionStorage.redirect;delete sessionStorage.redirect;if(r&&r!==location.href)history.replaceState(null,null,r);})();
 </script>
+<script>
+/* Evita parpadeo de tema: aplica modo oscuro antes del primer render si estaba guardado. */
+(function(){try{if(localStorage.getItem('ds_theme')==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>DocuSalud</title>
-<meta name="description" content="DocuSalud — Sistema de historias clínicas para odontólogos. Gestiona pacientes, consultas, odontograma y plan de tratamiento desde cualquier dispositivo. Acceso seguro y privado.">
-<meta name="keywords" content="historia clinica odontologica, software dental, odontologia digital, expediente dental, docusalud">
+<title>DocuSalud — Historias clínicas para odontólogos</title>
+<meta name="description" content="Sistema de historias clínicas para odontólogos: pacientes, odontograma interactivo, citas y plan de tratamiento desde cualquier dispositivo. Empieza gratis.">
+<meta name="keywords" content="historia clinica odontologica, software dental, odontologia digital, expediente dental, docusalud, odontograma digital, software para odontologos venezuela, ficha dental online">
 <meta name="robots" content="index, follow">
 <meta name="theme-color" content="#1F3A2A">
 <link rel="canonical" href="https://docusalud.org">
@@ -33,6 +36,24 @@
 <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Fraunces:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&display=swap" rel="stylesheet">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "DocuSalud",
+  "description": "Sistema de historias clínicas digitales para odontólogos: gestión de pacientes, odontograma interactivo, calendario de citas y planes de tratamiento.",
+  "url": "https://docusalud.org",
+  "applicationCategory": "MedicalApplication",
+  "operatingSystem": "Web",
+  "image": "https://docusalud.org/og-image.png",
+  "inLanguage": "es",
+  "offers": [
+    { "@type": "Offer", "name": "Free", "price": "0", "priceCurrency": "USD" },
+    { "@type": "Offer", "name": "Pro", "price": "12", "priceCurrency": "USD",
+      "priceSpecification": { "@type": "UnitPriceSpecification", "price": "12", "priceCurrency": "USD", "billingDuration": "P1M" } }
+  ]
+}
+</script>
 <style>
 /* ── TOKENS ─────────────────────────────────────────────────────────── */
 :root {
@@ -148,6 +169,19 @@ body {
 }
 .auth-title-row select:focus { border-color: var(--forest); }
 .auth-title-row input { margin-bottom: 0 !important; }
+/* Signup plan select — full-width field matching .lbox input height/padding/font */
+#signupPlan {
+  grid-column: 1 / -1; width: 100%;
+  padding: 12px 32px 12px 14px; height: auto;
+  font-size: 16px; font-family: 'DM Sans', sans-serif;
+  border: var(--border-default); border-radius: var(--r);
+  background: var(--surface2); color: var(--text);
+  outline: none; cursor: pointer; text-align: left; letter-spacing: 0.12em;
+  -webkit-appearance: none; appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%237A8A6E' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 12px center;
+}
+#signupPlan:focus { border-color: var(--forest); }
 .auth-links {
   display: flex; flex-direction: column; gap: 10px;
   margin-top: 16px; padding-top: 16px;
@@ -307,6 +341,52 @@ body {
 }
 .tab:hover { color: var(--text); }
 .tab.on { color: var(--forest); border-bottom-color: var(--forest); font-weight: 500; }
+
+/* ── IMÁGENES (design placeholder) ──────────────────────────────────── */
+.img-cats { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+.img-cat-btn {
+  font-family: 'DM Sans', sans-serif; font-size: 12px; padding: 7px 14px;
+  border: var(--border-default); border-radius: 980px; cursor: pointer;
+  background: var(--surface2); color: var(--text2); transition: all 0.15s;
+}
+.img-cat-btn:hover { color: var(--text); }
+.img-cat-btn.on { background: var(--forest); color: var(--mist); border-color: var(--forest); }
+.img-drop {
+  border: 1.5px dashed var(--border2, var(--border)); border-radius: var(--rl);
+  background: var(--surface2); padding: 28px 18px; text-align: center;
+  cursor: pointer; transition: border-color 0.15s, background 0.15s;
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+}
+.img-drop:hover, .img-drop.drag { border-color: var(--forest); background: var(--accent-light); }
+.img-drop-ico { font-size: 34px; line-height: 1; opacity: 0.9; }
+.img-drop-t { font-size: 13px; color: var(--text2); font-family: 'DM Sans', sans-serif; }
+.img-drop-btn { font-size: 12px; padding: 7px 16px; }
+.img-drop-note { font-size: 11px; color: var(--text3); font-style: italic; font-family: 'Fraunces', serif; max-width: 320px; }
+.img-grid {
+  display: grid; gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+}
+.img-thumb {
+  position: relative; margin: 0; border: var(--border-default);
+  border-radius: var(--r); overflow: hidden; background: var(--surface2);
+}
+.img-thumb img { display: block; width: 100%; height: 110px; object-fit: cover; }
+.img-thumb figcaption {
+  font-size: 10px; color: var(--text3); padding: 5px 7px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  font-family: 'DM Sans', sans-serif;
+}
+.img-thumb-del {
+  position: absolute; top: 5px; right: 5px; width: 22px; height: 22px;
+  border: none; border-radius: 50%; cursor: pointer; line-height: 1;
+  background: rgba(31,58,42,0.78); color: #fff; font-size: 12px;
+  display: flex; align-items: center; justify-content: center;
+}
+.img-thumb-del:hover { background: var(--forest); }
+@media (max-width: 600px) {
+  .img-grid { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); }
+  .img-thumb img { height: 90px; }
+}
 .panel { flex: 1; overflow-y: auto; padding: 20px; }
 
 /* ── EMPTY ──────────────────────────────────────────────────────────── */
@@ -1347,9 +1427,433 @@ input[type="date"],input[type="time"] { min-height:40px; }
 /* ── v7.3.2 font consistency (no synthesis / no distortion) ── */
 * { font-synthesis: none; }
 html, body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; text-rendering: optimizeLegibility; }
+
+
+/* ════════ LANDING (variables propias escopeadas a #landingPage donde difieren de la app) ════════ */
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --forest:#1F3A2A;--sage:#2F5D3A;--olive:#7A8A6E;
+  --mist:#E3E7DA;--charcoal:#1A1A17;--slate:#5C5C56;
+  --cream:#F2EFE6;--bone:#FAF9F6;--terra:#B8553E;--brass:#D2B385;
+  --surface2:#EDE9DF;
+  --border:rgba(31,58,42,0.12);--border2:rgba(31,58,42,0.22);
+  --r:8px;
+}
+html{scroll-behavior:smooth}
+#landingPage{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--charcoal);font-size:15px;-webkit-font-smoothing:antialiased;--rl:14px}
+
+/* ── NAV ── */
+.nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;gap:24px;padding:0 40px;height:58px;background:rgba(250,249,246,0.88);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:.5px solid var(--border)}
+.nav-links{position:absolute;left:50%;transform:translateX(-50%)}
+.nav-logo{font-size:17px;font-weight:400;letter-spacing:-.015em;text-transform:lowercase;color:var(--charcoal)}
+.nav-logo b{font-weight:700;color:var(--forest)}
+.nav-links{display:flex;gap:28px}
+.nav-links a{font-size:13px;color:var(--slate);text-decoration:none;letter-spacing:-.01em;transition:color .12s}
+.nav-links a:hover{color:var(--charcoal)}
+.nav-ctas{display:flex;align-items:center;gap:8px;margin-left:auto}
+.btn-ghost{padding:7px 16px;border:.5px solid var(--border2);border-radius:var(--r);font-size:13px;color:var(--charcoal);background:transparent;cursor:pointer;font-family:inherit;letter-spacing:-.01em;transition:background .12s}
+.btn-ghost:hover{background:var(--surface2)}
+.btn-main{padding:7px 16px;background:var(--forest);color:var(--mist);border:none;border-radius:var(--r);font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;letter-spacing:-.01em;transition:opacity .12s}
+.btn-main:hover{opacity:.88}
+
+/* ── HERO ── */
+.hero{padding:36px 40px 60px;text-align:center;max-width:700px;margin:0 auto}
+.hero-badge{display:inline-flex;align-items:center;gap:7px;background:var(--bone);border:.5px solid var(--border);border-radius:980px;padding:5px 14px;font-size:11px;color:var(--slate);letter-spacing:.05em;text-transform:uppercase;margin-bottom:28px}
+.hero-badge-dot{width:6px;height:6px;border-radius:50%;background:#4CAF7D;flex-shrink:0}
+.hero h1{font-size:52px;font-weight:700;line-height:1.06;letter-spacing:-.03em;margin-bottom:20px;color:var(--charcoal)}
+.hero h1 em{font-style:normal;color:var(--forest)}
+.hero p{font-size:17px;color:var(--slate);line-height:1.65;max-width:480px;margin:0 auto 32px;letter-spacing:-.01em}
+.hero-ctas{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap}
+.btn-hero-p{padding:13px 28px;background:var(--forest);color:var(--mist);border:none;border-radius:var(--rl);font-size:15px;font-weight:500;cursor:pointer;font-family:inherit;letter-spacing:-.01em;transition:opacity .12s}
+.btn-hero-p:hover{opacity:.88}
+.btn-hero-s{padding:13px 28px;background:transparent;border:.5px solid var(--border2);border-radius:var(--rl);font-size:15px;color:var(--charcoal);cursor:pointer;font-family:inherit;letter-spacing:-.01em;transition:background .12s}
+.btn-hero-s:hover{background:var(--surface2)}
+.hero-note{margin-top:14px;font-size:12px;color:var(--olive)}
+
+/* ── MOCKUP ── */
+.mockup-wrap{padding:0 24px 64px;max-width:700px;margin:0 auto}
+.mockup{background:var(--surface2);border-radius:18px;border:.5px solid var(--border);overflow:hidden;box-shadow:0 2px 24px rgba(31,58,42,0.06)}
+.mock-bar{display:flex;align-items:center;gap:6px;padding:11px 16px;border-bottom:.5px solid var(--border);background:var(--bone)}
+.mock-dot{width:9px;height:9px;border-radius:50%}
+.mock-url{font-size:11px;color:var(--olive);margin-left:8px}
+.mock-inner{display:grid;grid-template-columns:190px 1fr}
+.mock-sb{border-right:.5px solid var(--border);background:var(--bone);padding:12px 8px}
+.sb-head{padding:4px 10px 12px;border-bottom:.5px solid var(--border);margin-bottom:10px}
+.sb-count{font-size:24px;font-weight:700;color:var(--forest);letter-spacing:-.03em}
+.sb-lbl{font-size:9px;color:var(--olive);letter-spacing:.07em;text-transform:uppercase;margin-top:1px}
+.sb-item{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:var(--r);font-size:12px;color:var(--slate);cursor:pointer;margin-bottom:2px;transition:background .1s}
+.sb-item.on{background:var(--mist);color:var(--forest);font-weight:500}
+.sb-item:hover:not(.on){background:var(--surface2)}
+.av{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;flex-shrink:0}
+.mock-main{padding:16px 18px}
+.m-lbl{font-size:9px;color:var(--olive);letter-spacing:.08em;text-transform:uppercase;margin-bottom:11px}
+.m-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.m-field{background:var(--bone);border:.5px solid var(--border);border-radius:var(--r);padding:7px 11px}
+.m-fl{font-size:9px;color:var(--olive);letter-spacing:.07em;text-transform:uppercase;margin-bottom:2px}
+.m-fv{font-size:12px;font-weight:500}
+.m-tag{display:inline-flex;align-items:center;font-size:10px;padding:2px 9px;border-radius:980px;font-weight:500;background:var(--mist);color:var(--forest)}
+.m-tag.gold{background:#F7F1E0;color:#7a6030}
+
+/* ── STATS ── */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:.5px;background:var(--border);border-top:.5px solid var(--border);border-bottom:.5px solid var(--border);margin-bottom:72px}
+.stat{background:var(--bone);padding:28px 20px;text-align:center}
+.stat-n{font-size:32px;font-weight:700;letter-spacing:-.03em;color:var(--forest)}
+.stat-l{font-size:13px;color:var(--slate);margin-top:4px}
+
+/* ── FEATURES ── */
+.features{padding:0 24px;max-width:700px;margin:0 auto 72px}
+.feat{display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:center;padding:36px 0;border-top:.5px solid var(--border)}
+.feat:last-child{border-bottom:.5px solid var(--border)}
+.feat-tag{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--sage);font-weight:600;margin-bottom:9px}
+.feat-h{font-size:22px;font-weight:700;letter-spacing:-.02em;margin-bottom:10px;line-height:1.18;color:var(--charcoal)}
+.feat-p{font-size:14px;color:var(--slate);line-height:1.65;letter-spacing:-.01em}
+.feat-vis{background:var(--surface2);border-radius:14px;border:.5px solid var(--border);padding:16px}
+.tooth-row{display:flex;gap:3px;justify-content:center}
+.tooth{width:21px;height:27px;border-radius:4px;border:.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:6.5px;font-weight:700;background:var(--bone);color:var(--olive)}
+.tooth.c{background:#FBE8E4;border-color:rgba(184,85,62,.3);color:var(--terra)}
+.tooth.t{background:var(--mist);border-color:rgba(31,58,42,.25);color:var(--forest)}
+.tooth.a{opacity:.4}
+.cal-grid{display:flex;gap:4px}
+.cal-col{flex:1;border-radius:6px;padding:6px 5px;border:.5px solid var(--border);background:var(--bone)}
+.cal-day{font-size:8px;color:var(--olive);text-align:center;margin-bottom:4px;letter-spacing:.04em;text-transform:uppercase}
+.ev{border-radius:3px;padding:2px 4px;font-size:7px;font-weight:500;margin-bottom:2px}
+.ev-g{background:var(--mist);color:var(--forest)}
+.ev-r{background:#FBE8E4;color:var(--terra)}
+.pdf-mock{background:var(--bone);border-radius:8px;border:.5px solid var(--border);padding:12px}
+.pdf-head{display:flex;justify-content:space-between;padding-bottom:8px;border-bottom:.5px solid var(--border);margin-bottom:8px}
+.pdf-logo-text{font-size:12px;font-weight:700;color:var(--forest)}
+.pdf-pat{font-size:8px;text-align:right;color:var(--slate);line-height:1.6}
+.pdf-line{height:5px;background:var(--surface2);border-radius:2px;margin-bottom:5px}
+
+/* ── PRICING ── */
+.pricing{padding:0 24px 72px;max-width:700px;margin:0 auto}
+.pricing-head{text-align:center;margin-bottom:32px}
+.pricing-head h2{font-size:30px;font-weight:700;letter-spacing:-.025em;margin-bottom:7px}
+.pricing-head p{font-size:15px;color:var(--slate)}
+.plans{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.plan{border-radius:var(--rl);padding:22px;border:.5px solid var(--border);background:var(--bone);display:flex;flex-direction:column}
+.plan.pro{background:var(--forest);border-color:var(--forest)}
+.plan-name{font-size:15px;font-weight:600;letter-spacing:-.01em;color:var(--charcoal);margin-bottom:3px}
+.plan.pro .plan-name{color:var(--mist)}
+.plan-desc{font-size:12px;color:var(--slate);margin-bottom:16px;line-height:1.55;letter-spacing:-.01em}
+.plan.pro .plan-desc{color:rgba(227,231,218,.65)}
+.plan-price{font-size:34px;font-weight:700;letter-spacing:-.03em;color:var(--charcoal);line-height:1}
+.plan.pro .plan-price{color:var(--mist)}
+.plan-price sup{font-size:15px;font-weight:500;vertical-align:top;margin-top:5px;display:inline-block}
+.plan-period{font-size:11px;color:var(--olive);margin:4px 0 18px}
+.plan.pro .plan-period{color:rgba(227,231,218,.5)}
+.plan-ul{list-style:none;flex:1;display:flex;flex-direction:column;gap:9px;margin-bottom:20px}
+.plan-ul li{font-size:12px;display:flex;align-items:flex-start;gap:7px;line-height:1.45;color:var(--charcoal)}
+.plan.pro .plan-ul li{color:var(--mist)}
+.chk-ico{color:var(--forest);flex-shrink:0;font-size:14px;margin-top:-1px}
+.plan.pro .chk-ico{color:var(--mist)}
+.li-dim{color:var(--olive);opacity:.6}
+.plan.pro .li-dim{opacity:.45}
+.plan-btn{padding:11px;border-radius:var(--r);font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;letter-spacing:-.01em;text-align:center;border:none;transition:opacity .12s}
+.plan-btn:hover{opacity:.88}
+.btn-green{background:var(--forest);color:var(--mist)}
+.btn-mist{background:var(--mist);color:var(--forest)}
+.btn-outline{background:transparent;border:.5px solid var(--border2)!important;color:var(--charcoal)}
+
+/* ── QUOTE ── */
+.quote-section{padding:0 24px 64px;max-width:700px;margin:0 auto}
+#landingPage blockquote{padding:24px 28px;background:var(--bone);border-radius:var(--rl);border:.5px solid var(--border);border-left:3px solid var(--forest)}
+#landingPage blockquote p{font-family:'Fraunces',serif;font-size:16px;font-weight:300;font-style:italic;line-height:1.65;color:var(--slate);margin-bottom:12px}
+#landingPage blockquote footer{font-size:12px;font-weight:500;color:var(--forest)}
+
+/* ── FOOTER ── */
+.footer{padding:20px 40px;border-top:.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--bone)}
+.footer-logo{font-size:14px;font-weight:400;color:var(--olive)}
+.footer-logo b{font-weight:700;color:var(--forest)}
+.footer-links{display:flex;gap:20px}
+.footer-links a{font-size:12px;color:var(--olive);text-decoration:none;transition:color .1s}
+.footer-links a:hover{color:var(--charcoal)}
+
+/* ── MOBILE ── */
+/* ── DARK THEME ── */
+[data-theme="dark"] #landingPage{
+  --forest:#2F5D3A;--sage:#3C7049;--olive:#8FA084;
+  --mist:#E3E7DA;--charcoal:#EDEAE0;--slate:#9A9A8E;
+  --cream:#141410;--bone:#1E1E19;--terra:#C46A52;--brass:#D2B385;
+  --surface2:#252520;
+  --border:rgba(220,227,210,0.10);--border2:rgba(220,227,210,0.18);
+}
+[data-theme="dark"] .nav{background:rgba(20,20,16,0.88)}
+[data-theme="dark"] #landingPage blockquote p{color:var(--slate)}
+[data-theme="dark"] .m-tag.gold{background:#33301F;color:var(--brass)}
+[data-theme="dark"] .plan.pro{background:var(--forest);border-color:var(--forest)}
+[data-theme="dark"] .tooth.c{background:#3A211B}
+[data-theme="dark"] .ev-r{background:#3A211B}
+[data-theme="dark"] .mock-dot{opacity:.9}
+
+/* ── NAV LOGO + THEME TOGGLE ── */
+.nav-brand{display:flex;align-items:center;gap:9px}
+.nav-brand img{width:28px;height:28px;display:block;flex-shrink:0}
+.nav-theme{display:flex;align-items:center;justify-content:center;width:34px;height:34px;border:.5px solid var(--border2);border-radius:var(--r);background:transparent;cursor:pointer;color:var(--charcoal);transition:background .12s;padding:0}
+.nav-theme:hover{background:var(--surface2)}
+.nav-theme svg{width:16px;height:16px}
+.footer-logo img{width:22px;height:22px;vertical-align:middle;margin-right:6px}
+
+@media(max-width:768px){
+  .nav{padding:0 16px}
+  .nav-links{display:none}
+  .hero{padding:24px 20px 40px}
+  .hero h1{font-size:34px}
+  .hero p{font-size:15px}
+  .mockup-wrap{padding:0 16px 48px}
+  .mock-inner{grid-template-columns:1fr}
+  .mock-sb{display:none}
+  .stats{grid-template-columns:1fr}
+  .features{padding:0 16px}
+  .feat{grid-template-columns:1fr;gap:20px;padding:28px 0}
+  .plans{grid-template-columns:1fr}
+  .pricing{padding:0 16px 48px}
+  .quote-section{padding:0 16px 48px}
+  .footer{padding:16px 20px;flex-direction:column;gap:12px;text-align:center}
+}
+
 </style>
 </head>
 <body>
+
+<script>
+/* Defensive bridge — the real window.showApp is defined ~2000 lines down,
+   once the app module's Firebase imports finish loading over the network.
+   On a slow connection there's a brief window, right after the page paints,
+   where a click on a landing button would otherwise hit "showApp is not a
+   function" and silently do nothing. This stub catches that click and
+   replays it the instant the real showApp takes over below. */
+window.showApp = function(opts){ window._pendingShowApp = opts || {}; };
+</script>
+
+<div id="landingPage">
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-brand">
+    <img src="logo.svg" alt="DocuSalud">
+    <div class="nav-logo"><b>docu</b>salud</div>
+  </div>
+  <div class="nav-links">
+    <a href="#funciones">Funciones</a>
+    <a href="#precios">Precios</a>
+    <a href="mailto:hola@docusalud.org">Soporte</a>
+  </div>
+  <div class="nav-ctas">
+    <button class="nav-theme" id="themeToggle" onclick="toggleTheme()" aria-label="Cambiar tema" title="Modo claro / oscuro">
+      <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    </button>
+    <button class="btn-ghost" onclick="showApp()">Entrar</button>
+    <button class="btn-main" onclick="showApp({plan:'free',signup:true})">Empezar gratis</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <h1>Tu consultorio.<br>En el bolsillo.<br><em>Siempre listo.</em></h1>
+  <p>DocuSalud centraliza las historias clínicas de tus pacientes — odontograma, consultas, plan de tratamiento y firmas — desde cualquier dispositivo.</p>
+  <div class="hero-ctas">
+    <button class="btn-hero-p" onclick="showApp({plan:'free',signup:true})">Crear cuenta gratis →</button>
+    <button class="btn-hero-s" onclick="document.getElementById('funciones').scrollIntoView({behavior:'smooth'})">Ver cómo funciona</button>
+  </div>
+  <p class="hero-note">Hasta 30 pacientes gratis · Acceso inmediato</p>
+</section>
+
+<!-- MOCKUP -->
+<div class="mockup-wrap">
+  <div class="mockup">
+    <div class="mock-bar">
+      <div class="mock-dot" style="background:#ff5f57"></div>
+      <div class="mock-dot" style="background:#febc2e"></div>
+      <div class="mock-dot" style="background:#28c840"></div>
+      <span class="mock-url">docusalud.org</span>
+    </div>
+    <div class="mock-inner">
+      <div class="mock-sb">
+        <div class="sb-head">
+          <div class="sb-count">31</div>
+          <div class="sb-lbl">Pacientes</div>
+        </div>
+        <div class="sb-item on"><div class="av" style="background:var(--mist);color:var(--forest)">AM</div>Andrea Moreno</div>
+        <div class="sb-item"><div class="av" style="background:#F7F1E0;color:#7a6030">JC</div>Juan Castillo</div>
+        <div class="sb-item"><div class="av" style="background:#E5EDF0;color:#4A6B7C">LP</div>Laura Pérez</div>
+        <div class="sb-item"><div class="av" style="background:#FBE8E4;color:var(--terra)">MV</div>Miguel Vargas</div>
+        <div style="margin-top:12px;padding:6px 10px;font-size:11px;color:var(--forest);font-weight:500;cursor:pointer">+ Nuevo paciente</div>
+      </div>
+      <div class="mock-main">
+        <div class="m-lbl">Andrea Moreno · Historia clínica</div>
+        <div class="m-grid">
+          <div class="m-field"><div class="m-fl">Cédula</div><div class="m-fv">V-14.562.908</div></div>
+          <div class="m-field"><div class="m-fl">Edad</div><div class="m-fv">31 años</div></div>
+          <div class="m-field"><div class="m-fl">Teléfono</div><div class="m-fv">0414-123-4567</div></div>
+          <div class="m-field"><div class="m-fl">Estado</div><div class="m-fv"><span class="m-tag">Activo</span></div></div>
+        </div>
+        <div class="m-field" style="margin-bottom:8px"><div class="m-fl">Última consulta</div><div class="m-fv" style="font-size:12px">14 may 2026 · Limpieza + Fotopolimerización</div></div>
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <span style="font-size:11px;color:var(--sage);font-weight:500">✓ Guardado automáticamente</span>
+          <span class="m-tag gold">Cita: lun 16 jun</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="stats">
+  <div class="stat"><div class="stat-n" id="statDentists">+20</div><div class="stat-l">Odontólogos registrados</div></div>
+  <div class="stat"><div class="stat-n" id="statPatients">+300</div><div class="stat-l">Pacientes registrados</div></div>
+  <div class="stat"><div class="stat-n">100%</div><div class="stat-l">Datos privados y seguros</div></div>
+</div>
+
+<!-- FEATURES -->
+<div class="features" id="funciones">
+  <div class="feat">
+    <div>
+      <div class="feat-tag">Odontograma</div>
+      <div class="feat-h">Cada diente.<br>Cada superficie.</div>
+      <p class="feat-p">Dentición permanente, decidua y mixta. Marca caries, tratamientos y coronas por superficie, con vista oclusal interactiva. Sin papel, sin lápiz rojo.</p>
+    </div>
+    <div class="feat-vis">
+      <div style="font-size:8px;color:var(--olive);letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px">Superior · Permanente</div>
+      <div class="tooth-row" style="margin-bottom:3px">
+        <div class="tooth">18</div><div class="tooth">17</div><div class="tooth t">16</div><div class="tooth">15</div><div class="tooth c">14</div><div class="tooth">13</div><div class="tooth">12</div><div class="tooth">11</div>
+      </div>
+      <div class="tooth-row">
+        <div class="tooth">21</div><div class="tooth">22</div><div class="tooth t">23</div><div class="tooth c">24</div><div class="tooth">25</div><div class="tooth">26</div><div class="tooth t">27</div><div class="tooth a">28</div>
+      </div>
+      <div style="margin-top:11px;display:flex;gap:6px;flex-wrap:wrap">
+        <span style="font-size:9px;background:#FBE8E4;color:var(--terra);padding:3px 9px;border-radius:980px;font-weight:500">Caries</span>
+        <span style="font-size:9px;background:var(--mist);color:var(--forest);padding:3px 9px;border-radius:980px;font-weight:500">Tratado</span>
+        <span style="font-size:9px;background:var(--surface2);color:var(--slate);padding:3px 9px;border-radius:980px">Ausente</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="feat">
+    <div class="feat-vis">
+      <div style="font-size:8px;color:var(--olive);letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px">Semana actual</div>
+      <div class="cal-grid">
+        <div class="cal-col"><div class="cal-day">Lun</div><div class="ev ev-g">9:00 · Limpieza</div></div>
+        <div class="cal-col"><div class="cal-day">Mar</div></div>
+        <div class="cal-col"><div class="cal-day">Mié</div><div class="ev ev-r">10:00 · Ext.</div><div class="ev ev-g">14:00 · Plan</div></div>
+        <div class="cal-col"><div class="cal-day">Jue</div></div>
+        <div class="cal-col"><div class="cal-day">Vie</div><div class="ev ev-g">9:30 · Resina</div></div>
+      </div>
+      <div style="margin-top:9px;padding:6px 9px;background:#FBE8E4;border-radius:6px;font-size:9px;color:var(--terra);font-weight:500">⚠ Conflicto detectado · Miérc 10:00</div>
+    </div>
+    <div>
+      <div class="feat-tag">Calendario</div>
+      <div class="feat-h">No más conflictos de horario.</div>
+      <p class="feat-p">Vista mensual y diaria con detección automática de citas superpuestas. Agenda desde el teléfono y ve el día siguiente antes de salir del consultorio.</p>
+    </div>
+  </div>
+
+  <div class="feat">
+    <div>
+      <div class="feat-tag">Exportar</div>
+      <div class="feat-h">El PDF que sí puedes firmar y entregar.</div>
+      <p class="feat-p">Historia clínica en formato carta — con encabezado, datos del paciente y firma — lista para imprimir o enviar en segundos.</p>
+    </div>
+    <div class="feat-vis">
+      <div class="pdf-mock">
+        <div class="pdf-head">
+          <div class="pdf-logo-text"><b>docu</b>salud</div>
+          <div class="pdf-pat"><div style="font-weight:600;color:var(--charcoal);font-size:9px">Andrea Moreno</div><div>C.I.: V-14.562.908</div><div>14/06/2026</div></div>
+        </div>
+        <div class="pdf-line"></div>
+        <div class="pdf-line" style="width:72%"></div>
+        <div class="pdf-line" style="width:88%"></div>
+        <div class="pdf-line" style="width:55%"></div>
+        <div style="margin-top:9px;display:flex;gap:6px">
+          <div style="flex:1;height:30px;background:var(--surface2);border-radius:4px"></div>
+          <div style="flex:1;height:30px;background:var(--surface2);border-radius:4px"></div>
+        </div>
+        <div style="text-align:right;margin-top:8px;font-size:7px;color:var(--olive)">DocuSalud · docusalud.org</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PRICING -->
+<div class="pricing" id="precios">
+  <div class="pricing-head">
+    <h2>Precio justo. Sin sorpresas.</h2>
+    <p>Empieza gratis. Paga solo cuando lo necesites.</p>
+  </div>
+  <div class="plans">
+    <div class="plan">
+      <div class="plan-name">Free</div>
+      <div class="plan-desc">Para empezar o llevar un consultorio pequeño.</div>
+      <div class="plan-price"><sup>$</sup>0</div>
+      <div class="plan-period">Gratis para siempre</div>
+      <ul class="plan-ul">
+        <li><span class="chk-ico">✓</span>Hasta 30 pacientes</li>
+        <li><span class="chk-ico">✓</span>Odontograma completo</li>
+        <li><span class="chk-ico">✓</span>Exportar PDF</li>
+        <li><span class="chk-ico">✓</span>Calendario de citas</li>
+        <li class="li-dim"><span class="chk-ico" style="opacity:.35">✕</span>Imágenes clínicas</li>
+        <li class="li-dim"><span class="chk-ico" style="opacity:.35">✕</span>Pacientes ilimitados</li>
+        <li class="li-dim"><span class="chk-ico" style="opacity:.35">✕</span>Automatización por WhatsApp con agente AI</li>
+      </ul>
+      <button class="plan-btn btn-green" onclick="showApp({plan:'free',signup:true})">Empezar gratis</button>
+    </div>
+    <div class="plan pro">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px">
+        <div class="plan-name">Pro</div>
+        <span style="font-size:10px;background:var(--mist);color:var(--forest);padding:2px 10px;border-radius:980px;font-weight:600">Popular</span>
+      </div>
+      <div class="plan-desc">Para el consultorio activo que no quiere límites.</div>
+      <div class="plan-price"><sup>$</sup>12</div>
+      <div class="plan-period">por mes · cancela cuando quieras</div>
+      <ul class="plan-ul">
+        <li><span class="chk-ico">✓</span><strong>Pacientes ilimitados</strong></li>
+        <li><span class="chk-ico">✓</span>Odontograma completo</li>
+        <li><span class="chk-ico">✓</span>Exportar PDF</li>
+        <li><span class="chk-ico">✓</span>Calendario de citas</li>
+        <li><span class="chk-ico">✓</span><strong>Imágenes clínicas</strong></li>
+        <li><span class="chk-ico">✓</span><span><strong>Automatización por WhatsApp con agente AI</strong><br><span style="opacity:.7;font-size:11px">recordatorios y reagendamiento de citas</span></span></li>
+        <li><span class="chk-ico">✓</span>Soporte prioritario</li>
+      </ul>
+      <button class="plan-btn btn-mist" onclick="showApp({plan:'pro',signup:true})">Empezar con Pro →</button>
+    </div>
+    <div class="plan">
+      <div class="plan-name">Clínica</div>
+      <div class="plan-desc">Para equipos con más de un odontólogo bajo el mismo techo.</div>
+      <div class="plan-price" style="font-size:20px;color:var(--slate);margin-top:10px;font-weight:500">A tu medida</div>
+      <div class="plan-period">precio según el equipo</div>
+      <ul class="plan-ul">
+        <li><span class="chk-ico">✓</span>Todo lo de Pro</li>
+        <li><span class="chk-ico">✓</span>Múltiples usuarios</li>
+        <li><span class="chk-ico">✓</span>Panel de administración</li>
+        <li><span class="chk-ico">✓</span>Factura empresarial</li>
+        <li><span class="chk-ico">✓</span>Onboarding dedicado</li>
+      </ul>
+      <button class="plan-btn btn-outline" onclick="window.location.href='mailto:hola@docusalud.org'">Hablar con nosotros</button>
+    </div>
+  </div>
+</div>
+
+<!-- QUOTE -->
+<div class="quote-section">
+  <blockquote>
+    <p>"DocuSalud me permitió dejar los archivadores físicos. Ahora accedo a la historia de cualquier paciente desde el celular antes de que entren al consultorio."</p>
+    <footer>— Dra. Giannina Jiménez · Odontología General · Caracas</footer>
+  </blockquote>
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-logo"><img src="logo.svg" alt="DocuSalud"><b>docu</b>salud · 2026</div>
+  <div class="footer-links">
+    <a href="#">Privacidad</a>
+    <a href="#">Términos</a>
+    <a href="mailto:hola@docusalud.org">Contacto</a>
+  </div>
+</footer>
+
+</div>
+
+<div id="appRoot" style="display:none">
 
 <!-- LOGIN -->
 <div class="lbg" id="loginBg">
@@ -1395,6 +1899,13 @@ html, body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grays
             <div class="esp-chips" id="signupEspChips" style="display:flex;flex-wrap:wrap;gap:6px;width:100%"></div>
           </div>
         </div>
+        <div class="signup-plan-row" style="margin-bottom:12px">
+          <select id="signupPlan" aria-label="Plan" onchange="onSignupPlanChange()">
+            <option value="free">Plan Gratis · 30 pacientes</option>
+            <option value="pro">Plan $12 (Pro) · ilimitado</option>
+            <option value="clinica">Plan Clínica · multiusuario</option>
+          </select>
+        </div>
         <input type="text" id="signupCode" placeholder="Código de invitación" autocomplete="off" required>
         <button type="submit" id="signupBtn">Crear cuenta</button>
       </form>
@@ -1422,7 +1933,7 @@ html, body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grays
 
 <!-- APP -->
 <div class="topbar">
-  <div class="brand" onclick="volverInicio()" style="cursor:pointer" title="Inicio">
+  <div class="brand" onclick="showLanding()" style="cursor:pointer" title="Inicio">
     <button id="menuBtn" onclick="event.stopPropagation();openSideMenu()" style="display:none;background:none;border:none;cursor:pointer;padding:4px;color:var(--text2)">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
     </button>
@@ -1509,18 +2020,6 @@ html, body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grays
   <button class="side-menu-item" onclick="infoSoon('Soporte al cliente')">Contact Customer Service</button>
 </div>
 <div class="toast" id="toast"></div>
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": "DocuSalud",
-  "description": "Sistema de historias clínicas para odontólogos",
-  "url": "https://docusalud.org",
-  "applicationCategory": "MedicalApplication",
-  "operatingSystem": "Web",
-  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
-}
-</script>
 
 <script type="module">
 import { collection, onSnapshot, doc, getDoc, setDoc, addDoc, deleteDoc, query, where, getDocs, increment } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -1536,7 +2035,8 @@ const firebaseConfig = {
   projectId: "docusalud-4b215",
   storageBucket: "docusalud-4b215.firebasestorage.app",
   messagingSenderId: "1061568032939",
-  appId: "1:1061568032939:web:8bc330818071ea15bf87ee"
+  appId: "1:1061568032939:web:8bc330818071ea15bf87ee",
+  databaseURL: "https://docusalud-4b215-default-rtdb.firebaseio.com"
 };
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
@@ -1645,6 +2145,41 @@ window.toggleDark=function(){
 const savedTheme=localStorage.getItem('ds_theme');
 if(savedTheme==='dark'){document.documentElement.setAttribute('data-theme','dark');}
 
+// ─── LANDING ⇄ APP (v8 — single-file merge) ────────────────────────────────
+// Landing and app now live in one document. showApp()/showLanding() swap
+// which half is visible; nothing is ever unmounted, so app state (loaded
+// pacientes, current panel, etc.) survives a round-trip back to the landing.
+const _AUTO_APP_HASHES=['', '#signup', '#app'];
+window.showApp=function(opts){
+  opts=opts||{};
+  const lp=document.getElementById('landingPage');
+  const ar=document.getElementById('appRoot');
+  if(lp)lp.style.display='none';
+  if(ar)ar.style.display='';
+  if(opts.signup){
+    showAuthView('signup');
+    const bg=document.getElementById('loginBg');
+    if(bg)bg.style.display='flex';
+    if(opts.plan==='free'||opts.plan==='pro'||opts.plan==='clinica'){
+      const sel=document.getElementById('signupPlan');
+      if(sel){ sel.value=opts.plan; if(typeof onSignupPlanChange==='function')onSignupPlanChange(); }
+    }
+  }
+};
+// Replay a click caught by the early stub (near the top of the page) now that the
+// real showApp above is live.
+if(window._pendingShowApp){
+  const _pending=window._pendingShowApp; delete window._pendingShowApp;
+  window.showApp(_pending);
+}
+window.showLanding=function(){
+  const lp=document.getElementById('landingPage');
+  const ar=document.getElementById('appRoot');
+  if(ar)ar.style.display='none';
+  if(lp)lp.style.display='';
+  window.scrollTo(0,0);
+};
+
 // ─── AUTH ─────────────────────────────────────────────────────────────────
 // TEMP: emergency-access bypass while Firebase Auth setup pending.
 // Anyone who types TEMP_BYPASS_PASS gets in; remove these three TEMP blocks
@@ -1731,12 +2266,32 @@ window.showAuthView = function(name){
     if(c&&!c.children.length)c.innerHTML=espChipsHTML([]);
     const dd=c?c.closest('.esp-dropdown'):null;
     if(dd)updateEspLabel(dd);
+    onSignupPlanChange();
   }
   // Focus first input in the active view
   setTimeout(()=>{
     const f=document.querySelector(`#${name}View input, #${name}View select`);
     if(f)f.focus();
   },50);
+};
+
+// v7.6f — Free plan signups don't need an invitation code; paid plans still do.
+window.onSignupPlanChange = function(){
+  const sel=document.getElementById('signupPlan');
+  const code=document.getElementById('signupCode');
+  if(!sel||!code)return;
+  if(sel.value==='free'){
+    code.required=false;
+    code.disabled=true;
+    code.value='';
+    code.placeholder='Código de invitación (no requerido en Plan Gratis)';
+    code.style.display='none';
+  }else{
+    code.required=true;
+    code.disabled=false;
+    code.placeholder='Código de invitación';
+    code.style.display='';
+  }
 };
 
 window.doSignup = async function(){
@@ -1752,36 +2307,45 @@ window.doSignup = async function(){
   if(!email){err.textContent='Ingresa tu correo electrónico.';return;}
   if(pass.length<6){err.textContent='La contraseña debe tener al menos 6 caracteres.';return;}
   if(pass!==passConfirm){err.textContent='Las contraseñas no coinciden.';return;}
+  // v7.6f — plan selection. Free signups skip the invitation code; paid plans require it.
+  const plan=(document.getElementById('signupPlan')&&document.getElementById('signupPlan').value)||'free';
   const codigo=(document.getElementById('signupCode').value||'').trim().toUpperCase();
-  if(!codigo){err.textContent='Ingresa tu código de invitación.';return;}
-  btn.disabled=true;btn.textContent='Verificando código…';
-  // v7.1 — require a valid, unused invitation code (one-time use).
-  const invRef=doc(db,'invitaciones',codigo);
-  try{
-    const invSnap=await getDoc(invRef);
-    if(!invSnap.exists()||invSnap.data().usado===true){
-      err.textContent='Código de invitación inválido o ya utilizado.';
+  let invRef=null;
+  if(plan==='free'){
+    btn.disabled=true;btn.textContent='Creando cuenta…';
+  }else{
+    if(!codigo){err.textContent='Ingresa tu código de invitación.';return;}
+    btn.disabled=true;btn.textContent='Verificando código…';
+    // v7.1 — require a valid, unused invitation code (one-time use).
+    invRef=doc(db,'invitaciones',codigo);
+    try{
+      const invSnap=await getDoc(invRef);
+      if(!invSnap.exists()||invSnap.data().usado===true){
+        err.textContent='Código de invitación inválido o ya utilizado.';
+        btn.disabled=false;btn.textContent='Crear cuenta';return;
+      }
+    }catch(ev){
+      err.textContent='No se pudo validar el código. Revisa tu conexión e intenta de nuevo.';
       btn.disabled=false;btn.textContent='Crear cuenta';return;
     }
-  }catch(ev){
-    err.textContent='No se pudo validar el código. Revisa tu conexión e intenta de nuevo.';
-    btn.disabled=false;btn.textContent='Crear cuenta';return;
+    btn.textContent='Creando cuenta…';
   }
-  btn.textContent='Creando cuenta…';
   // Stash title + name so bootstrapUserPerms can save them when /users/{uid} is created
   sessionStorage.setItem('ds_pending_title',titulo||'');
   sessionStorage.setItem('ds_pending_name',nombre);
   sessionStorage.setItem('ds_pending_esp',JSON.stringify(getEspFrom('signupEspChips')));
+  sessionStorage.setItem('ds_pending_plan',plan);
   try{
     const cred=await createUserWithEmailAndPassword(auth,email,pass);
     const displayName=titulo?`${titulo} ${nombre}`:nombre;
     try{await updateProfile(cred.user,{displayName});}catch(e){console.warn('updateProfile failed:',e.message);}
-    try{await setDoc(invRef,{usado:true,usadoPor:email,usadoEn:new Date().toISOString()},{merge:true});}catch(e){}
+    if(invRef){try{await setDoc(invRef,{usado:true,usadoPor:email,usadoEn:new Date().toISOString()},{merge:true});}catch(e){}}
     // onAuthStateChanged will fire and bootstrap perms with the pending title/name
   }catch(e){
     sessionStorage.removeItem('ds_pending_title');
     sessionStorage.removeItem('ds_pending_name');
     sessionStorage.removeItem('ds_pending_esp');
+    sessionStorage.removeItem('ds_pending_plan');
     let msg='No se pudo crear la cuenta.';
     if(e.code==='auth/email-already-in-use')msg='Este correo ya tiene una cuenta. Usa "Volver al login".';
     else if(e.code==='auth/invalid-email')msg='Correo electrónico inválido.';
@@ -1855,6 +2419,9 @@ function bootstrapUserPerms(user){
       sessionStorage.removeItem('ds_pending_name');
       const pendingEsp=JSON.parse(sessionStorage.getItem('ds_pending_esp')||'[]');
       sessionStorage.removeItem('ds_pending_esp');
+      // v7.6f — capture chosen plan from signup (defaults to free)
+      const pendingPlan=sessionStorage.getItem('ds_pending_plan')||'free';
+      sessionStorage.removeItem('ds_pending_plan');
       const initial={
         email:user.email||'',
         name:pendingName,
@@ -1863,6 +2430,8 @@ function bootstrapUserPerms(user){
         tabOrder:[...ALL_TABS],
         especialidades:pendingEsp,
         status:'active',
+        plan:pendingPlan,
+        planExpiresAt:null,
         createdAt:new Date().toISOString(),
         lastLoginAt:new Date().toISOString()
       };
@@ -1986,7 +2555,15 @@ function renderProfile(){
 
       <div class="profile-card">
         <div class="ct">Sesión</div>
-        <button class="bd" onclick="cerrarSesion()">Cerrar sesión</button>
+        ${(()=>{
+          const planLabel={free:'Free',pro:'Pro ✦',clinica:'Clínica'}[p.plan||'free']||'Free';
+          const planColor=p.plan==='pro'?'var(--forest)':(p.plan==='clinica'?'var(--forest)':'var(--text2)');
+          return `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:.5px solid var(--border)">
+            <span style="font-size:13px;color:var(--text2)">Plan actual</span>
+            <span style="font-size:13px;font-weight:500;color:${planColor}">${planLabel}</span>
+          </div>`;
+        })()}
+        <button class="bd" onclick="cerrarSesion()" style="margin-top:10px">Cerrar sesión</button>
       </div>
     </div>`;
 }
@@ -2035,6 +2612,7 @@ try{
     if(isTempBypass()){
       isAdmin=true;
       document.getElementById('loginBg').style.display='none';
+      showApp();
       updateAdminUI();
       return;
     }
@@ -2044,6 +2622,10 @@ try{
       // Otherwise this is a regular user.
       isAdmin = isTempBypass() || ADMIN_EMAILS.includes((user.email||'').toLowerCase());
       bootstrapUserPerms(user);
+      // v8 — a returning logged-in user skips the landing page automatically,
+      // unless they followed a link meant to stay on the marketing page
+      // (e.g. #precios from the upgrade modal, or #funciones).
+      if(_AUTO_APP_HASHES.includes(window.location.hash)) showApp();
     }else{
       isAdmin = isTempBypass();  // bypass keeps admin even without Firebase user
       currentUserUid=null;
@@ -2061,6 +2643,15 @@ try{
 
 // Initial UI sync (in case bypass set the flag before button exists in DOM)
 document.addEventListener('DOMContentLoaded',updateAdminUI);
+
+// v8 — single-file merge: a #signup deep-link switches THIS page into the
+// app view (no more navigating to a separate app.html, which no longer exists).
+document.addEventListener('DOMContentLoaded',()=>{
+  if(window.location.hash==='#signup' && !isTempBypass()){
+    const _plan=new URLSearchParams(location.search).get('plan');
+    showApp({signup:true, plan:_plan});
+  }
+});
 
 // ─── MOBILE ───────────────────────────────────────────────────────────────
 window.toggleSidebar=function(){document.getElementById('sidebar').classList.toggle('open')}
@@ -2222,6 +2813,14 @@ async function guardar(p){
   return id;
 }
 async function crear(data){
+  // v7.6f — Free plan limit: 30 patients. Admin and paid plans are unlimited.
+  if(!isAdmin && currentUserPerms && currentUserPerms.plan!=='pro' && currentUserPerms.plan!=='clinica'){
+    if(pacientes.length>=30){
+      toast('Alcanzaste el límite de 30 pacientes del plan Free. Actualiza a Pro para continuar.');
+      showUpgradeModal();
+      return null;
+    }
+  }
   data.ownerUid = viewAsUid || currentUserUid || 'orphan';
   ss('ing','Guardando...');
   // Generate the doc id locally so we can return immediately (offline-safe).
@@ -2232,6 +2831,23 @@ async function crear(data){
   return ref.id;
 }
 async function borrar(id){try{await deleteDoc(doc(db,'pacientes',id));}catch(err){}}
+
+// v7.6f — upgrade prompt when a Free user hits the 30-patient limit.
+window.showUpgradeModal=function(){
+  abrirModal('Actualizar a Pro',
+    `<div style="text-align:center;padding:8px 0">
+      <div style="font-size:32px;margin-bottom:12px">✦</div>
+      <p style="font-size:14px;color:var(--text);margin-bottom:6px;font-weight:500">Alcanzaste el límite del plan Free (30 pacientes)</p>
+      <p style="font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:18px">
+        Con el plan <strong>Pro ($12/mes)</strong> tienes pacientes ilimitados, imágenes clínicas y automatización por WhatsApp con agente AI.
+      </p>
+      <a href="#precios" target="_blank"
+         style="display:inline-block;padding:10px 24px;background:var(--forest);color:var(--mist);border-radius:8px;font-size:13px;font-weight:500;text-decoration:none">
+        Ver planes →
+      </a>
+    </div>`,
+    null);
+};
 
 // Admin-only one-shot migration helper. Maurizio runs from browser console:
 //   await window.migrateOrphanPatients('hisUidFromAdminView')
@@ -2492,6 +3108,7 @@ function renderLista(){
 }
 
 window.seleccionar=function(id){
+  if(idActual!==id){_imgPreviews={rad:[],intra:[],doc:[]};_imgActiveCat='rad';}
   idActual=id;tabActual='datos';viewActual='paciente';
   logAccess(id);
   renderLista();renderPaciente();
@@ -2571,6 +3188,7 @@ function renderEmpty(){
 }
 
 window.abrirPacienteConsultas=function(id){
+  if(idActual!==id){_imgPreviews={rad:[],intra:[],doc:[]};_imgActiveCat='rad';}
   viewActual='paciente';idActual=id;tabActual='cons';
   logAccess(id);
   renderLista();renderPaciente();
@@ -2700,6 +3318,16 @@ function renderAdmin(){
         </div>
         <div class="admin-user-meta">${allowed.size}/${ALL_TABS.length}</div>
       </div>
+      <div class="admin-plan-row" style="display:flex;align-items:center;gap:8px;margin:8px 0;flex-wrap:wrap">
+        <span style="font-size:11px;color:var(--text3)">Plan:</span>
+        <span class="admin-plan-badge" style="font-size:11px;font-weight:600;padding:2px 9px;border-radius:980px;background:${(u.plan==='pro'||u.plan==='clinica')?'var(--accent-light)':'var(--surface2)'};color:${(u.plan==='pro'||u.plan==='clinica')?'var(--forest)':'var(--text2)'}">${({free:'Free',pro:'Pro',clinica:'Clínica'}[u.plan||'free'])||'Free'}</span>
+        <select onchange="adminSetPlan('${u.uid}',this.value)" style="font-size:11px;padding:3px 7px;border:var(--border-default);border-radius:6px;background:var(--surface2);color:var(--text);font-family:'DM Sans',sans-serif">
+          <option value="free" ${(u.plan||'free')==='free'?'selected':''}>Free</option>
+          <option value="pro" ${u.plan==='pro'?'selected':''}>Pro</option>
+          <option value="clinica" ${u.plan==='clinica'?'selected':''}>Clínica</option>
+        </select>
+        <button class="bc" onclick="adminSetPlan('${u.uid}','free')" title="Desactivar el plan de pago (vuelve a Free)" ${(u.plan||'free')==='free'?'disabled style=\"opacity:.45;cursor:not-allowed;font-size:11px;padding:3px 9px\"':'style=\"font-size:11px;padding:3px 9px\"'}>Desactivar plan</button>
+      </div>
       <div class="admin-user-actions">
         <button class="ba admin-impersonate-btn" onclick="impersonateUser('${u.uid}')" title="Ver como este usuario">Ver como</button>
         <button class="bc" onclick="adminSetStatus('${u.uid}','${status==='inactive'?'active':'inactive'}')">${status==='inactive'?'Activar':'Desactivar'}</button>
@@ -2783,6 +3411,14 @@ window.adminSetStatus=async function(uid,status){
   if(!isAdmin)return;
   try{ await setDoc(doc(db,'users',uid),{status,statusUpdatedAt:new Date().toISOString()},{merge:true}); toast(status==='inactive'?'Usuario desactivado':'Usuario activado'); }
   catch(e){ toast('No se pudo actualizar'); }
+};
+// v7.6f — admin changes a user's plan. Setting 'free' = deactivate paid features.
+window.adminSetPlan=async function(uid,plan){
+  if(!isAdmin)return;
+  try{
+    await setDoc(doc(db,'users',uid),{plan,planUpdatedAt:new Date().toISOString(),planUpdatedBy:(auth.currentUser&&auth.currentUser.email)||'admin'},{merge:true});
+    toast(plan==='free'?'Plan desactivado (Free)':'Plan actualizado a '+plan);
+  }catch(e){ toast('Error al actualizar plan'); }
 };
 window.adminRemoveUser=async function(uid){
   if(!isAdmin)return;
@@ -2942,6 +3578,30 @@ async function exportarPDF(){
       const panelClone=panel.cloneNode(true);
       // Remove buttons and UI chrome from clone
       panelClone.querySelectorAll('button,.save-status,.impersonation-banner,.admin-devices-row,.admin-devices-panel,.resize-handle,.tabbar').forEach(el=>el.remove());
+      // html2canvas cannot resolve CSS custom properties in SVG presentation attributes
+      // e.g. fill="var(--surface)" becomes black. Fix: replace var() refs with hex values.
+      const _lv={
+        'var(--surface)':'#FAF9F6','var(--surface2)':'#EDE9DF',
+        'var(--bg)':'#F2EFE6','var(--bone)':'#FAF9F6','var(--cream)':'#F2EFE6',
+        'var(--text)':'#1A1A17','var(--text2)':'#5C5C56','var(--text3)':'#7A8A6E',
+        'var(--border)':'rgba(31,58,42,0.12)','var(--border2)':'rgba(31,58,42,0.22)',
+        'var(--forest)':'#1F3A2A','var(--sage)':'#2F5D3A','var(--mist)':'#E3E7DA',
+        'var(--accent-light)':'#E3E7DA','var(--accent-border)':'rgba(31,58,42,0.3)',
+        'var(--danger-light)':'#FBE8E4','var(--terra)':'#B8553E',
+        'var(--warn-light)':'#F7F1E0','var(--brass)':'#D2B385',
+        'var(--info-light)':'#E5EDF0','var(--petrol)':'#4A6B7C',
+      };
+      panelClone.querySelectorAll('*').forEach(el=>{
+        ['fill','stroke','stop-color'].forEach(attr=>{
+          const v=el.getAttribute(attr);
+          if(v&&v.startsWith('var(')){el.setAttribute(attr,_lv[v]||'#FAF9F6');}
+        });
+        if(el.style&&el.style.cssText&&el.style.cssText.includes('var(')){
+          let css=el.style.cssText;
+          for(const[k,v] of Object.entries(_lv))css=css.replaceAll(k,v);
+          el.style.cssText=css;
+        }
+      });
       captureWrap.appendChild(panelClone);
       document.body.appendChild(captureWrap);
 
@@ -3378,6 +4038,7 @@ window.calVerDia=function(ds){
   calendarView='dia';renderCalendar();
 };
 window.editConsFromCalendar=function(pid,cid){
+  if(idActual!==pid){_imgPreviews={rad:[],intra:[],doc:[]};_imgActiveCat='rad';}
   viewActual='paciente';idActual=pid;tabActual='cons';
   logAccess(pid);
   renderLista();renderPaciente();
@@ -3404,6 +4065,10 @@ function renderPaciente(){
     {k:'rec',l:'Récord'},
     {k:'cons',l:`Consultas <span class="badge">${(p.consultas||[]).length}</span>`}
   ];
+  // Imágenes tab — paid plans only (Pro/Clínica or admin). Design placeholder; not part of ALL_TABS (per-user tabsAllowed) so it's gated purely by plan.
+  if(isAdmin || currentUserPerms?.plan==='pro' || currentUserPerms?.plan==='clinica'){
+    tabs.splice(tabs.findIndex(t=>t.k==='cons')+1, 0, {k:'img',l:'Imágenes'});
+  }
   // Filter tabs based on who's actually "in scope":
   // • Admin impersonating → use impersonated user's tabsAllowed (so "Ver como" truly matches what the user sees)
   // • Regular user        → use their own tabsAllowed
@@ -3411,13 +4076,13 @@ function renderPaciente(){
   const _impersonated = viewAsUid ? allUsersList.find(u=>u.uid===viewAsUid) : null;
   if(_impersonated && Array.isArray(_impersonated.tabsAllowed)){
     const allowed=new Set(_impersonated.tabsAllowed);
-    tabs=tabs.filter(t=>allowed.has(t.k));
+    tabs=tabs.filter(t=>t.k==='img'||allowed.has(t.k));
     if(tabs.length>0 && !tabs.find(t=>t.k===tabActual)){
       tabActual=tabs[0].k;
     }
   } else if(!isAdmin && currentUserPerms && Array.isArray(currentUserPerms.tabsAllowed)){
     const allowed=new Set(currentUserPerms.tabsAllowed);
-    tabs=tabs.filter(t=>allowed.has(t.k));
+    tabs=tabs.filter(t=>t.k==='img'||allowed.has(t.k));
     // If active tab got filtered out, fall back to first allowed
     if(tabs.length>0 && !tabs.find(t=>t.k===tabActual)){
       tabActual=tabs[0].k;
@@ -3469,8 +4134,80 @@ window.cambiarTab=function(tab){
   renderTab();
 }
 function tabLabel(k){
-  return{datos:'Datos',clinico:'Historia',odonto:'Odontograma',plan:'Plan',ops:'Operatorias',est:'Proc',rec:'Récord',cons:'Consultas'}[k]||k;
+  return{datos:'Datos',clinico:'Historia',odonto:'Odontograma',plan:'Plan',ops:'Operatorias',est:'Proc',rec:'Récord',cons:'Consultas',img:'Imágenes'}[k]||k;
 }
+
+// ─── IMÁGENES (DESIGN PLACEHOLDER — paid plans only) ──────────────────────
+// In-memory only. Firebase Storage no existe aún; las imágenes NO se persisten.
+let _imgPreviews = { rad:[], intra:[], doc:[] };  // { name, url } por categoría — se limpia al cambiar de paciente
+let _imgActiveCat = 'rad';
+const IMG_CATS = [
+  {k:'rad',   l:'Radiografías'},
+  {k:'intra', l:'Fotografías intraorales'},
+  {k:'doc',   l:'Documentos'}
+];
+function renderImagenes(){
+  const hasAny = IMG_CATS.some(c=>(_imgPreviews[c.k]||[]).length>0);
+  const catBtns = IMG_CATS.map(c=>
+    `<button type="button" class="img-cat-btn${_imgActiveCat===c.k?' on':''}" onclick="imgSetCat('${c.k}')">${e(c.l)}</button>`
+  ).join('');
+  let grids='';
+  IMG_CATS.forEach(c=>{
+    const items=_imgPreviews[c.k]||[];
+    if(items.length===0)return;
+    grids+=`<div class="card">
+      <div class="ct">${e(c.l)} · ${items.length}</div>
+      <div class="img-grid">
+        ${items.map((it,i)=>`<figure class="img-thumb">
+          <img src="${it.url}" alt="${e(it.name)}">
+          <button type="button" class="img-thumb-del" title="Quitar" onclick="imgRemove('${c.k}',${i})">✕</button>
+          <figcaption>${e(it.name)}</figcaption>
+        </figure>`).join('')}
+      </div>
+    </div>`;
+  });
+  const html=`
+    <div class="ct-row"><div class="ct">Imágenes clínicas</div></div>
+    <div class="card">
+      <input type="file" id="imgFileInput" accept="image/*" multiple style="display:none" onchange="imgOnFiles(this.files)">
+      <div class="img-cats">${catBtns}</div>
+      <div class="img-drop" onclick="document.getElementById('imgFileInput').click()"
+           ondragover="event.preventDefault();this.classList.add('drag')"
+           ondragleave="this.classList.remove('drag')"
+           ondrop="event.preventDefault();this.classList.remove('drag');imgOnFiles(event.dataTransfer.files)">
+        <div class="img-drop-ico">🖼️</div>
+        <div class="img-drop-t">Arrastra imágenes aquí o toca para subir</div>
+        <button type="button" class="ba img-drop-btn" onclick="event.stopPropagation();document.getElementById('imgFileInput').click()">Subir imágenes</button>
+        <div class="img-drop-note">Vista previa — el guardado en la nube estará disponible próximamente.</div>
+      </div>
+    </div>
+    ${grids}
+    ${!hasAny?`<div class="card"><div class="empty" style="height:auto;padding:28px 0">
+      <p style="font-family:'Fraunces',serif;font-style:italic;color:var(--text2);margin:0">Aún no hay imágenes para este paciente.</p>
+    </div></div>`:''}`;
+  document.getElementById('panel').innerHTML=html;
+}
+window.imgSetCat=function(k){ _imgActiveCat=k; renderImagenes(); };
+window.imgOnFiles=function(files){
+  if(!files||!files.length)return;
+  const arr=Array.from(files).filter(f=>f.type.startsWith('image/'));
+  if(!arr.length){ if(typeof toast==='function')toast('Selecciona archivos de imagen.'); return; }
+  let pending=arr.length;
+  arr.forEach(f=>{
+    const reader=new FileReader();
+    reader.onload=ev=>{
+      (_imgPreviews[_imgActiveCat]=_imgPreviews[_imgActiveCat]||[]).push({name:f.name,url:ev.target.result});
+      if(--pending===0)renderImagenes();
+    };
+    reader.onerror=()=>{ if(--pending===0)renderImagenes(); };
+    reader.readAsDataURL(f);
+  });
+};
+window.imgRemove=function(cat,i){
+  if(_imgPreviews[cat])_imgPreviews[cat].splice(i,1);
+  renderImagenes();
+};
+
 function renderTab(){
   const t=tabActual;
   if(t==='datos')renderDatos();
@@ -3481,6 +4218,7 @@ function renderTab(){
   else if(t==='est')renderEst();
   else if(t==='rec')renderRec();
   else if(t==='cons')renderCons();
+  else if(t==='img')renderImagenes();
 }
 
 // ─── CI INPUT (3.2.1) ─────────────────────────────────────────────────────
@@ -4780,5 +5518,76 @@ ss('ing','Conectando...');
 initSidebarResize();
 
 </script>
+
+</div>
+
+<script>
+/* ── Tema (modo oscuro) ──
+   El atributo data-theme ya se aplicó arriba, en el head del documento
+   (evita parpadeo). Aquí solo sincronizamos el ícono sol/luna y delegamos
+   el toggle real a toggleDark(), ya definido por la app — una sola fuente
+   de verdad para el tema. */
+function _setThemeIcon(){
+  var dark=document.documentElement.getAttribute('data-theme')==='dark';
+  var ic=document.getElementById('themeIcon');
+  if(!ic)return;
+  /* sol cuando está oscuro (para volver a claro), luna cuando está claro */
+  ic.innerHTML=dark
+    ? '<circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/><line x1="4.5" y1="4.5" x2="6.6" y2="6.6"/><line x1="17.4" y1="17.4" x2="19.5" y2="19.5"/><line x1="4.5" y1="19.5" x2="6.6" y2="17.4"/><line x1="17.4" y1="6.6" x2="19.5" y2="4.5"/>'
+    : '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+}
+function toggleTheme(){
+  if(typeof window.toggleDark==='function'){
+    window.toggleDark();   /* single source of truth, defined by the app */
+  }else{
+    /* App module still loading (slow connection) — toggle directly so the
+       button never feels broken; same two lines as toggleDark, kept in sync. */
+    const isDark=document.documentElement.getAttribute('data-theme')==='dark';
+    document.documentElement.setAttribute('data-theme',isDark?'':'dark');
+    try{localStorage.setItem('ds_theme',isDark?'':'dark');}catch(e){}
+  }
+  _setThemeIcon();
+}
+_setThemeIcon();
+
+/* ── Estadísticas dinámicas (deterministas por fecha) ── */
+(function(){
+  var BASE=new Date('2026-06-16T00:00:00');
+  var now=new Date();
+  var daysSince=Math.max(0,Math.floor((now-BASE)/86400000));
+  /* Odontólogos: empieza en 20, +1 cada 2 semanas */
+  var dentists=20+Math.floor(daysSince/14);
+  /* Pacientes: crecimiento orgánico y proporcional (~15–22 por odontólogo).
+     Pseudoaleatorio determinista sembrado por día → estable dentro del día,
+     algunos días +0, otros +1 o varios, sin saltos irreales. */
+  function rnd(seed){var x=Math.sin(seed*12.9898+78.233)*43758.5453;return x-Math.floor(x);}
+  /* base orgánica al lanzamiento: ~2.5 pacientes por cada odontólogo inicial → día-0 ≈ 50 */
+  var patients=50, d=0;
+  for(d=1;d<=daysSince;d++){
+    /* odontólogos vigentes ese día */
+    var dentThatDay=20+Math.floor(d/14);
+    var r=rnd(d+1);
+    /* incremento diario proporcional al nº de odontólogos (~0.09/odont/día prom.),
+       con varianza: muchos días 0, algunos varios. */
+    var lambda=dentThatDay*0.03;
+    var add=Math.floor(lambda)+(rnd(d*7+3)<(lambda-Math.floor(lambda))?1:0);
+    /* dispersión: días tranquilos (+0) y días ocasionalmente intensos */
+    if(r<0.20)add=0;
+    else if(r>0.92)add+=Math.round(dentThatDay*0.03);
+    patients+=add;
+  }
+  /* salvaguarda de proporción: 2–6 pacientes por odontólogo (día-0 ≈ 50) */
+  var minP=dentists*2, maxP=dentists*6;
+  if(patients<minP)patients=minP;
+  if(patients>maxP)patients=maxP;
+  function fmt(n){return n.toLocaleString('es-VE');}
+  var ed=document.getElementById('statDentists');
+  var ep=document.getElementById('statPatients');
+  if(ed)ed.textContent='+'+fmt(dentists);
+  if(ep)ep.textContent='+'+fmt(patients);
+})();
+
+</script>
+
 </body>
 </html>
