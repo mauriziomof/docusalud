@@ -134,6 +134,19 @@ body.app-active {
   display: flex;
   flex-direction: column;
 }
+/* v8 — single-file merge: app.html's whole body used to be a direct flex child
+   of the document body (topbar + layout siblings, sized by body's height:100vh). Now
+   they're wrapped in this div instead, so it needs the same flex/height
+   behavior passed through — otherwise it sizes to its content instead of the
+   viewport, and everything below the fold (inside .panel etc.) gets clipped
+   by body's overflow:hidden with no way to scroll to it.   */
+#appRoot {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
 
 /* ── LOGIN ──────────────────────────────────────────────────────────── */
 .lbg {
