@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- DocuSalud v9 · tanda jul-2026 (base: docusalud para angelo.html de Maurizio) -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -2258,6 +2259,344 @@ html{scroll-behavior:smooth}
   .footer{padding:16px 20px;flex-direction:column;gap:12px;text-align:center}
 }
 
+
+/* ════════════════════════════════════════════════════════════════════════
+   v9 · DARK MODE — FIX RAÍZ + refinamientos
+   Causa raíz: el bloque :root del LANDING (arriba) re-declara --surface2,
+   --forest, --mist, --border, etc. DESPUÉS del bloque [data-theme="dark"]
+   original; con igual especificidad, el último gana → media app quedaba con
+   paneles/inputs CLAROS y texto claro (invisible) en modo noche.
+   Solución aditiva: re-afirmar aquí (al final del CSS, solo en pantalla)
+   los valores dark con html[data-theme="dark"]. @media screen evita pisar
+   el reset claro de impresión/export. ═══════════════════════════════════ */
+@media screen {
+  html[data-theme="dark"]{
+    --forest:#2F5D3A; --sage:#3C7049; --olive:#8FA084;
+    --mist:#E3E7DA; --charcoal:#EDEAE0; --slate:#9A9A8E;
+    --cream:#141410; --bone:#1E1E19; --terra:#C46A52; --brass:#D2B385;
+    --surface2:#252520;
+    --border:rgba(220,227,210,0.10); --border2:rgba(220,227,210,0.18);
+    --bg:#141410; --surface:#1E1E19;
+    --text:#EDEAE0; --text2:#9A9A8E; --text3:#7A8A6E;
+    --accent:#2F5D3A; --accent-light:rgba(31,58,42,0.25); --accent-border:rgba(47,93,58,0.5);
+    --danger:#C46A52; --danger-light:rgba(184,85,62,0.15);
+    --warn-light:rgba(201,169,97,0.15); --info-light:rgba(74,107,124,0.15);
+  }
+}
+/* Controles nativos (dropdowns de select, date/time, scrollbars) siguen el tema */
+html{ color-scheme: light; }
+html[data-theme="dark"]{ color-scheme: dark; }
+/* Autofill de Chrome/Safari: sin fondo amarillo/claro que rompa el contraste */
+input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:focus{
+  -webkit-box-shadow: 0 0 0 1000px var(--surface2) inset !important;
+  -webkit-text-fill-color: var(--text) !important;
+  caret-color: var(--text);
+  transition: background-color 99999s ease-in-out 0s;
+}
+/* Wordmark "docu" legible en noche (forest oscuro se perdía sobre fondo oscuro) */
+html[data-theme="dark"] .lbox h2 span,
+html[data-theme="dark"] .brand-name span,
+html[data-theme="dark"] .empty h3 span,
+html[data-theme="dark"] .nav-logo b,
+html[data-theme="dark"] .dash-header-brand h3 span{ color:#9CC8A8; }
+/* Placeholders del login siempre visibles */
+html[data-theme="dark"] .lbox input::placeholder{ color:#8A8A7E; opacity:1; }
+/* Campos deshabilitados (rayado) — versión noche coherente */
+html[data-theme="dark"] .card input:disabled,html[data-theme="dark"] .card select:disabled,html[data-theme="dark"] .card textarea:disabled,
+html[data-theme="dark"] .mf input:disabled,html[data-theme="dark"] .mf textarea:disabled,html[data-theme="dark"] .mf select:disabled{
+  background:repeating-linear-gradient(135deg, #23231e 0px, #23231e 8px, #1a1a15 8px, #1a1a15 16px);
+  color:var(--text2);
+}
+/* Zona de subida de imágenes/documentos en noche */
+html[data-theme="dark"] .img-drop{ background:var(--surface2); border-color:var(--border2); }
+html[data-theme="dark"] .img-drop:hover, html[data-theme="dark"] .img-drop.drag{ background:var(--accent-light); border-color:var(--accent-border); }
+/* Avatar del perfil (iniciales) con contraste en noche */
+html[data-theme="dark"] .profile-btn{ background:var(--mist); color:var(--forest); }
+
+/* ════════ v9 · DASHBOARD — saludo, S/M/L, tipografía por widget ════════ */
+.dash-greeting{ display:flex; flex-direction:column; gap:3px; min-width:0; }
+.dash-greet-main{ font-family:'DM Sans',sans-serif; font-size:25px; font-weight:700; letter-spacing:-0.015em; color:var(--text); margin:0; line-height:1.15; }
+.dash-greet-sub{ font-size:13.5px; color:var(--text2); margin:0; }
+.dash-customize-btn{ font-size:13px; padding:8px 15px; }
+/* Tamaños preconfigurados por widget */
+.dash-widget{ zoom:var(--wz,1); }
+.dash-widgets .dash-widget.dw-s{ flex:1 1 215px; min-width:195px; }
+.dash-widgets .dash-widget.dw-m{ flex:1 1 300px; min-width:240px; }
+.dash-widgets .dash-widget.dw-l{ flex-basis:100%; }
+.dash-widget.dw-s .dash-card{ padding:16px 18px; border-radius:16px; }
+.dash-widget.dw-l .dash-card{ padding:28px 32px; }
+.dash-widget.dw-s .dash-clock-time{ font-size:30px; }
+.dash-widget.dw-s .dash-weather-temp{ font-size:26px; }
+.dash-widget.dw-s .dash-row,.dash-widget.dw-m .dash-row{ grid-template-columns:1fr; gap:12px; }
+.dash-widget.dw-s .dash-qbtn{ padding:16px 8px; }
+/* Controles del widget (aparecen al pasar el mouse; siempre visibles en táctil) */
+.dash-wctl{ position:absolute; top:9px; right:36px; display:flex; align-items:center; gap:1px; z-index:3; opacity:0; transition:opacity .2s var(--ease,ease); background:rgba(26,26,23,0.55); border-radius:980px; padding:2px 7px; backdrop-filter:blur(5px); -webkit-backdrop-filter:blur(5px); }
+.dash-widget:hover .dash-wctl{ opacity:1; }
+.dash-wctl button{ background:none; border:none; color:rgba(255,255,255,.85); font-size:10px; font-weight:700; cursor:pointer; padding:3px 5px; border-radius:6px; font-family:'DM Sans',sans-serif; line-height:1; letter-spacing:0.02em; }
+.dash-wctl button.on{ background:rgba(255,255,255,.25); color:#fff; }
+.dash-wctl button:hover{ background:rgba(255,255,255,.14); }
+.dash-wctl .sep{ width:1px; height:11px; background:rgba(255,255,255,.28); margin:0 3px; }
+@media (hover:none){ .dash-wctl{ opacity:.9; } .dash-drag{ opacity:.55; } }
+/* "+N más" del widget de consultas */
+.today-more{ font-size:12px; color:var(--mist); opacity:.75; padding:9px 0 0; cursor:pointer; font-family:'DM Sans',sans-serif; }
+.today-more:hover{ opacity:1; text-decoration:underline; }
+.dc-today-empty + .today-more{ color:var(--text2); }
+/* Móvil: dashboard compacto y estable (sin auto-escala, sin scroll horizontal) */
+@media (max-width:768px){
+  .dash-greet-main{ font-size:21px; }
+  .dash-greet-sub{ font-size:13px; }
+  .dash-widgets{ gap:10px; }
+  .dash-widget{ min-width:0 !important; flex-basis:100% !important; }
+  .dash-wctl{ right:32px; }
+  .dash-widget .dash-row{ grid-template-columns:1fr 1fr; gap:10px; }
+  .landing-grid{ overflow-x:hidden; }
+}
+
+/* ════════ v9 · AJUSTES + ACCESIBILIDAD + OFFLINE ════════ */
+.aj-row{ display:flex; align-items:center; justify-content:space-between; gap:16px; padding:12px 0; border-top:0.5px solid var(--border); }
+.aj-row:first-of-type{ border-top:none; padding-top:2px; }
+.aj-info{ min-width:0; }
+.aj-name{ font-size:14px; font-weight:600; color:var(--text); font-family:'DM Sans',sans-serif; }
+.aj-desc{ font-size:12px; color:var(--text2); margin-top:2px; line-height:1.5; }
+.aj-note{ font-size:11.5px; color:var(--text3); margin-top:8px; font-style:italic; }
+.aj-switch{ position:relative; width:46px; height:26px; border-radius:980px; border:none; background:var(--border2); cursor:pointer; flex-shrink:0; transition:background .18s var(--ease,ease); padding:0; }
+.aj-switch .aj-knob{ position:absolute; top:3px; left:3px; width:20px; height:20px; border-radius:50%; background:var(--bone); box-shadow:0 1px 3px rgba(26,26,23,0.25); transition:left .18s var(--ease,ease); }
+.aj-switch.on{ background:var(--forest); }
+.aj-switch.on .aj-knob{ left:23px; }
+html[data-theme="dark"] .aj-switch.on{ background:#3C7049; }
+/* Indicador de sincronización: estado offline (ámbar, no alarmista) */
+.dot.off{ background:var(--brass); animation:pu 1.6s infinite; }
+/* ── Modo "Optimizar lectura" (data-access en <html>) ── */
+html[data-access="1"] body{ zoom:1.12; letter-spacing:0.005em; }
+html[data-access="1"]{ --text2:#41413B; --text3:#535B4B; }
+html[data-access="1"][data-theme="dark"]{ --text2:#C6C6BA; --text3:#A8B49F; }
+html[data-access="1"] .f label,html[data-access="1"] .mf label{ font-size:11px; font-weight:700; }
+html[data-access="1"] .tab{ font-size:14px; padding:14px 16px; }
+html[data-access="1"] .pi{ padding:14px 12px; }
+html[data-access="1"] .ba,html[data-access="1"] .bs,html[data-access="1"] .bc{ font-weight:600; }
+html[data-access="1"] .aj-desc,html[data-access="1"] .dash-greet-sub{ font-size:13px; }
+html[data-access="1"] .f input,html[data-access="1"] .f select,html[data-access="1"] .mf input,html[data-access="1"] .mf select{ height:42px; font-size:14px; }
+html[data-access="1"] .f textarea,html[data-access="1"] .mf textarea{ font-size:14px; }
+html[data-access="1"] .side-menu-item{ padding:16px; font-size:15px; }
+html[data-access="1"] .bn-btn{ font-size:11px; }
+@media (max-width:768px){ html[data-access="1"] body{ zoom:1.08; } }
+
+/* ════════ v9 · DOCUMENTOS + ARCHIVOS (admin) ════════ */
+.doc-list{ display:flex; flex-direction:column; gap:0; padding:8px 10px; }
+.doc-row{ display:flex; align-items:center; gap:12px; padding:11px 10px; border-top:0.5px solid var(--border); cursor:pointer; border-radius:8px; transition:background .12s; min-width:0; }
+.doc-row:first-child{ border-top:none; }
+.doc-row:hover{ background:var(--surface2); }
+.doc-row-body{ flex:1; min-width:0; }
+.doc-row-name{ font-size:13.5px; font-weight:500; color:var(--text); font-family:'DM Sans',sans-serif; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.doc-row-sub{ font-size:11.5px; color:var(--text3); margin-top:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.doc-row-dl{ flex-shrink:0; font-size:11.5px; text-decoration:none; }
+.doc-row-del{ flex-shrink:0; padding:5px 9px; font-size:11px; }
+.doc-badge{ flex-shrink:0; font-size:9.5px; font-weight:700; letter-spacing:0.06em; padding:5px 8px; border-radius:7px; font-family:'DM Sans',sans-serif; }
+.doc-badge-pdf{ background:rgba(184,85,62,0.14); color:var(--terra); }
+.doc-badge-word{ background:rgba(74,107,124,0.14); color:var(--petrol); }
+.doc-badge-img{ background:var(--accent-light); color:var(--forest); }
+html[data-theme="dark"] .doc-badge-pdf{ color:#E39A87; }
+html[data-theme="dark"] .doc-badge-word{ color:#9CC0D2; }
+html[data-theme="dark"] .doc-badge-img{ color:var(--mist); }
+.doc-up-row{ display:flex; align-items:center; gap:10px; padding:6px 0; }
+.doc-up-name{ flex:1; min-width:0; font-size:12.5px; color:var(--text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.doc-up-size{ font-size:11px; color:var(--text3); flex-shrink:0; }
+/* Preview de PDF */
+.doc-pv-box{ width:min(920px,94vw); height:min(86vh,900px); background:var(--surface); border-radius:14px; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 24px 70px rgba(0,0,0,0.4); }
+.doc-pv-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 14px; border-bottom:var(--border-default); }
+.doc-pv-title{ font-size:13.5px; font-weight:600; color:var(--text); font-family:'DM Sans',sans-serif; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.doc-pv-frame{ flex:1; border:none; width:100%; background:#525659; }
+/* Admin: archivos subidos */
+.admin-files-bar{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:10px; }
+.admin-files-bar select,.admin-files-bar input{ font-family:'DM Sans',sans-serif; font-size:12.5px; padding:7px 9px; border:var(--border-default); border-radius:var(--r); background:var(--surface2); color:var(--text); }
+.admin-files-bar input{ flex:1; min-width:180px; }
+.admin-files-count{ font-size:11.5px; color:var(--text3); flex-shrink:0; }
+.admin-files-list{ display:flex; flex-direction:column; }
+.admin-file-cat{ font-size:10px; color:var(--text3); font-weight:400; margin-left:4px; }
+@media (max-width:768px){
+  .doc-row{ flex-wrap:wrap; }
+  .doc-row-dl{ order:5; }
+}
+
+/* ════════ v9 · CALENDARIOS ════════ */
+.cal-add-btn{ margin-left:auto; font-size:12.5px; padding:8px 16px; }
+@media (max-width:768px){
+  .cal-add-btn{ padding:8px 12px; }
+  /* Date-picker propio: objetivos táctiles cómodos y sin cortes */
+  .ds-dp-pop{ width:302px; padding:14px; max-height:82vh; overflow:auto; }
+  .ds-dp-head button{ font-size:20px; padding:8px 14px; min-width:44px; min-height:40px; border-radius:9px; }
+  .ds-dp-head button:active{ background:var(--accent-light); }
+  .ds-dp-day{ font-size:13px; padding:10px 0; min-height:36px; }
+  .ds-dp-wd{ font-size:10px; }
+  .ds-dp-year{ font-size:14px; padding:5px 6px; min-height:34px; }
+  .ds-dp-month{ font-size:14px; }
+  .ds-dp-foot button{ font-size:13px; padding:9px 12px; }
+}
+/* Nav del calendario: botones de mes/día con buen objetivo táctil también */
+@media (max-width:768px){
+  .cal-nav .ba{ min-width:40px; min-height:38px; }
+  .cal-nav{ flex-wrap:wrap; row-gap:8px; }
+}
+
+/* ════════ v9 · FOOTER DE LA APP (solo web) ════════ */
+.app-footer{ margin-top:48px; border-top:0.5px solid var(--border); padding:26px 4px 18px; }
+.app-footer-inner{ max-width:1400px; margin:0 auto; }
+.app-footer-cols{ display:grid; grid-template-columns:repeat(3,minmax(140px,1fr)); gap:24px; margin-bottom:20px; }
+.app-footer-col{ display:flex; flex-direction:column; align-items:flex-start; gap:2px; }
+.app-footer .aft{ font-size:10.5px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--text3); margin:0 0 8px; }
+.app-footer-col button{ display:flex; align-items:center; gap:7px; background:none; border:none; cursor:pointer; font-family:'DM Sans',sans-serif; font-size:13px; color:var(--text2); padding:5px 0; transition:color .12s; }
+.app-footer-col button:hover{ color:var(--forest); }
+html[data-theme="dark"] .app-footer-col button:hover{ color:var(--mist); }
+.app-footer-col button svg{ color:var(--text3); flex-shrink:0; }
+.app-footer-note{ display:flex; align-items:center; gap:8px; font-size:11.5px; color:var(--text3); margin:0; padding-top:14px; border-top:0.5px solid var(--border); }
+.app-footer-note .afb{ font-weight:400; color:var(--text2); }
+.app-footer-note .afb span{ font-weight:700; color:var(--forest); }
+html[data-theme="dark"] .app-footer-note .afb span{ color:#9CC8A8; }
+@media (max-width:768px){ .app-footer{ display:none; } }
+@media print{ .app-footer{ display:none !important; } }
+
+/* ════════ v9 · WHATSAPP + PAPELERA + LANDING BADGE ════════ */
+.today-wa-off{ opacity:.35; cursor:pointer; background:none; border:none; padding:0; }
+.phdr-wa{ display:inline-flex; align-items:center; gap:5px; font-size:11.5px; text-decoration:none; color:#1E7A46; border-color:rgba(30,122,70,0.35); }
+.phdr-wa:hover{ background:rgba(30,122,70,0.08); }
+html[data-theme="dark"] .phdr-wa{ color:#5FC98B; border-color:rgba(95,201,139,0.35); }
+.phdr-wa-off{ opacity:.45; color:var(--text3) !important; border-color:var(--border) !important; }
+.mock-demo-tag{ margin-left:auto; font-size:9.5px; letter-spacing:0.05em; text-transform:uppercase; }
+@media (max-width:768px){ .phdr-wa .lbl{ display:none; } }
+
+/* ════════ v9 · PULIDO RESPONSIVE FINAL ════════ */
+/* Sin scroll horizontal accidental en la app */
+.main{ overflow-x:hidden; }
+.panel{ overscroll-behavior:contain; }
+@media (max-width:768px){
+  /* Header del paciente: los botones (WhatsApp, Datos, Inicio) envuelven sin cortarse */
+  .phdr{ flex-wrap:wrap; row-gap:8px; }
+  /* Inputs de barras nuevas a 16px (evita el auto-zoom de iOS) */
+  .admin-files-bar input, .admin-files-bar select, .aj-row select, #qc_pac{ font-size:16px; }
+  /* Preview de PDF a pantalla completa en el teléfono */
+  .doc-pv-box{ width:100vw; height:100dvh; border-radius:0; }
+  /* Fila de documento: botones con buen objetivo táctil */
+  .doc-row .ba,.doc-row .bd{ min-height:36px; }
+  /* Tarjetas de Ajustes cómodas */
+  .aj-row{ gap:10px; }
+}
+/* El footer de la app nunca aparece dentro del PDF/print */
+@media print{ .dash-wctl,.cal-add-btn,.phdr-wa{ display:none !important; } }
+
+/* ════════════════════════════════════════════════════════════════════════
+   v9.1 · PULIDO AESTHETIC (benchmark: Jane, Cliniko, Dentally, tab32)
+   Patrones aplicados: avatares con color por paciente, selección con acento
+   brass, microinteracciones sutiles, detalles nativos (scrollbar, selection,
+   focus), profundidad suave en modales/toast, y calidez en login y landing.
+   ══════════════════════════════════════════════════════════════════════ */
+/* Avatares de paciente — 6 tintes estables, coherentes con la paleta */
+.pi-av-c0{ background:var(--mist); color:var(--forest); }
+.pi-av-c1{ background:#F1E7D6; color:#7A5F33; border-color:rgba(122,95,51,0.25); }
+.pi-av-c2{ background:#E5EDF0; color:#3E606F; border-color:rgba(62,96,111,0.25); }
+.pi-av-c3{ background:#F0E9E1; color:#8A5B47; border-color:rgba(138,91,71,0.25); }
+.pi-av-c4{ background:#E9EAE0; color:#5C6B45; border-color:rgba(92,107,69,0.25); }
+.pi-av-c5{ background:#ECE7F0; color:#5F5378; border-color:rgba(95,83,120,0.25); }
+html[data-theme="dark"] .pi-av-c0{ background:rgba(47,93,58,0.3); color:#B9D4BE; }
+html[data-theme="dark"] .pi-av-c1{ background:rgba(122,95,51,0.3); color:#DFC9A3; }
+html[data-theme="dark"] .pi-av-c2{ background:rgba(62,96,111,0.3); color:#B4CDD8; }
+html[data-theme="dark"] .pi-av-c3{ background:rgba(138,91,71,0.3); color:#DDB8A8; }
+html[data-theme="dark"] .pi-av-c4{ background:rgba(92,107,69,0.32); color:#C4CFAF; }
+html[data-theme="dark"] .pi-av-c5{ background:rgba(95,83,120,0.32); color:#C8BEDD; }
+/* Fila seleccionada: indicador brass a la izquierda (jerarquía inmediata) */
+.pi.on{ box-shadow:inset 3px 0 0 var(--brass); }
+.pi:active{ transform:scale(0.995); }
+/* Scrollbars finas y del tema (también Firefox) */
+::-webkit-scrollbar{ width:6px; height:6px; }
+::-webkit-scrollbar-thumb{ background:var(--border2); border-radius:10px; }
+::-webkit-scrollbar-thumb:hover{ background:var(--text3); }
+::-webkit-scrollbar-track{ background:transparent; }
+*{ scrollbar-width:thin; scrollbar-color:var(--border2) transparent; }
+/* Selección de texto con identidad */
+::selection{ background:var(--mist); color:var(--forest); }
+html[data-theme="dark"] ::selection{ background:#2F5D3A; color:var(--mist); }
+/* Focus visible consistente (teclado) sin ensuciar los inputs */
+button:focus-visible, a:focus-visible, [role="switch"]:focus-visible, .tab:focus-visible{
+  outline:2px solid var(--accent-border); outline-offset:2px; border-radius:6px;
+}
+/* Botón principal con volumen sutil */
+.bs{ background:linear-gradient(180deg, var(--sage), var(--forest)); }
+/* Toast con acento brass y elevación */
+.toast{ border-left:3px solid var(--brass); border-radius:10px; padding:11px 18px;
+  box-shadow:0 8px 24px rgba(26,26,23,0.28); transform:translateY(6px);
+  transition:opacity .2s var(--ease,ease), transform .25s var(--ease,ease); }
+.toast.show{ transform:translateY(0); }
+/* Tablas: hover de fila silencioso */
+.otbl tbody tr:hover td, .rtbl tbody tr:hover td{ background:rgba(31,58,42,0.035); }
+html[data-theme="dark"] .otbl tbody tr:hover td, html[data-theme="dark"] .rtbl tbody tr:hover td{ background:rgba(220,227,210,0.05); }
+/* Calendario mes: hover con anillo suave */
+.mes-cell:not(.hoy):hover{ box-shadow:inset 0 0 0 1px var(--accent-border); }
+/* Login: calidez de marca (halo mist arriba + hairline brass en la tarjeta) */
+.lbg{ background:radial-gradient(90% 55% at 50% 0%, rgba(227,231,218,0.55), transparent 70%), var(--bg); }
+html[data-theme="dark"] .lbg{ background:radial-gradient(90% 55% at 50% 0%, rgba(47,93,58,0.16), transparent 70%), var(--bg); }
+.lbox{ border-top:3px solid var(--brass); box-shadow:0 10px 34px rgba(26,26,23,0.08); }
+/* Landing: plan Pro con presencia + CTAs con vida */
+.plan.pro{ box-shadow:0 14px 36px rgba(31,58,42,0.16); }
+.btn-main{ transition:opacity .12s, transform .15s var(--ease,ease), box-shadow .15s; }
+.btn-main:hover{ transform:translateY(-1px); box-shadow:0 6px 16px rgba(31,58,42,0.22); }
+/* Tab bar en móvil: fade al borde derecho como pista de scroll */
+@media (max-width:768px){
+  .tabbar{ -webkit-mask-image:linear-gradient(90deg,#000 0,#000 calc(100% - 26px),transparent);
+           mask-image:linear-gradient(90deg,#000 0,#000 calc(100% - 26px),transparent); }
+}
+/* Motion sutil al entrar cada view (se respeta reduced-motion; nunca en print) */
+@media screen and (prefers-reduced-motion:no-preference){
+  @keyframes dsViewIn{ from{ opacity:0; transform:translateY(4px); } to{ opacity:1; transform:none; } }
+  .main > .panel, .main .profile-panel, .main .cal-panel, .main .admin-panel{ animation:dsViewIn .22s var(--ease,ease); }
+  @keyframes dsMboxIn{ from{ opacity:0; transform:translateY(6px) scale(0.98); } to{ opacity:1; transform:none; } }
+  .mbg{ backdrop-filter:blur(5px); -webkit-backdrop-filter:blur(5px); }
+  .mbox{ animation:dsMboxIn .2s var(--ease,ease); }
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   v9.2 · SISTEMA DE BOTONES — alineación y consistencia global
+   Antes: .ba (~32px), .bc (~34px) y .bd (~36px) tenían alturas distintas y
+   las filas mixtas de botones nunca quedaban alineadas. Ahora TODOS los
+   controles secundarios comparten 34px de alto (los primarios .bs, 40px),
+   centrado flex, sin saltos de línea y con el mismo radio.
+   ══════════════════════════════════════════════════════════════════════ */
+.ba,.bc,.bd{
+  display:inline-flex; align-items:center; justify-content:center; gap:6px;
+  padding-top:0; padding-bottom:0; min-height:34px;
+  white-space:nowrap; line-height:1.2; border-radius:9px;
+}
+.bs{
+  display:inline-flex; align-items:center; justify-content:center; gap:6px;
+  padding-top:0; padding-bottom:0; min-height:40px;
+  white-space:nowrap; line-height:1.2; border-radius:9px;
+}
+.ba svg,.bs svg,.bc svg,.bd svg{ flex-shrink:0; display:block; }
+.bc:hover{ background:var(--surface2); color:var(--text); }
+/* Chips y toggles a la misma altura de los .ba con los que conviven */
+.rec-chip,.plist-chip,.filter-toggle-btn,.cal-view-btn,.img-cat-btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:5px; white-space:nowrap;
+}
+.rec-chip{ min-height:34px; }
+.filter-toggle-btn{ gap:6px; }
+/* Selector de fecha propio: nunca se rompe en dos líneas, ícono fijo a la derecha */
+.ds-dp-btn{ white-space:nowrap; }
+.ds-dp-btn .ic{ flex-shrink:0; display:inline-flex; margin-left:8px; }
+.ds-dp-btn .ic svg{ display:block; }
+.ds-dp-btn > span:first-child{ overflow:hidden; text-overflow:ellipsis; }
+/* Toolbar del Récord: fecha alineada con los botones vecinos */
+.rec-toolbar{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:14px; }
+.rec-toolbar .ds-dp{ flex:0 0 auto; }
+.rec-toolbar .ds-dp-btn{ width:auto; min-height:34px; padding:0 12px; border-radius:9px; }
+/* Filas de acciones (admin, modales, papelera): botones ya no "bailan" */
+.admin-user-actions .ba,.admin-user-actions .bc,.admin-user-actions .bd{ min-height:32px; font-size:11.5px; }
+.invite-actions button{ min-height:30px; display:inline-flex; align-items:center; }
+.mact .ba,.mact .bc,.mact .bs,.mact .bd{ min-height:36px; }
+/* Enlaces-botón (WhatsApp, Descargar) sin subrayado y centrados como botones */
+a.ba{ text-decoration:none; }
+@media (max-width:768px){
+  .rec-toolbar{ gap:6px; }
+  .rec-toolbar .ds-dp{ flex:1 1 100%; }
+  .rec-toolbar .ds-dp-btn{ width:100%; justify-content:space-between; }
+}
 </style>
 </head>
 <body>
@@ -2313,6 +2652,7 @@ window.showApp = function(opts){ window._pendingShowApp = opts || {}; };
       <div class="mock-dot" style="background:#febc2e"></div>
       <div class="mock-dot" style="background:#28c840"></div>
       <span class="mock-url">docusalud.org</span>
+      <span class="m-tag mock-demo-tag">Vista de ejemplo</span>
     </div>
     <div class="mock-inner">
       <div class="mock-sb">
@@ -2483,7 +2823,7 @@ window.showApp = function(opts){ window._pendingShowApp = opts || {}; };
 <div class="quote-section">
   <blockquote>
     <p>"DocuSalud me permitió dejar los archivadores físicos. Ahora accedo a la historia de cualquier paciente desde el celular antes de que entren al consultorio."</p>
-    <footer>— Dra. Giannina Jiménez · Odontología General · Caracas</footer>
+    <footer>— Oda. Giannina Jiménez · Odontología General · Caracas</footer>
   </blockquote>
 </div>
 
@@ -2531,8 +2871,8 @@ window.showApp = function(opts){ window._pendingShowApp = opts || {}; };
         <div class="auth-title-row">
           <select id="signupTitle" aria-label="Título">
             <option value="">Sin título</option>
-            <option value="Dr.">Dr.</option>
-            <option value="Dra.">Dra.</option>
+            <option value="Od.">Od.</option>
+            <option value="Oda.">Oda.</option>
           </select>
           <input type="text" id="signupName" placeholder="Nombre completo" autocomplete="name" required>
         </div>
@@ -2596,6 +2936,9 @@ window.showApp = function(opts){ window._pendingShowApp = opts || {}; };
   <div style="display:flex;gap:6px;align-items:center">
     <button class="tbtn tbtn-admin" id="adminBtn" style="display:none" onclick="toggleAdmin()" title="Administración de usuarios" aria-label="Administración">
       <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><span class="lbl">Admin</span>
+    </button>
+    <button class="tbtn" onclick="openAjustes()" title="Ajustes" aria-label="Ajustes">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg><span class="lbl">Ajustes</span>
     </button>
     <button class="dark-toggle" onclick="toggleDark()" id="darkBtn" title="Modo oscuro" aria-label="Cambiar tema">
       <svg class="dark-icon dark-icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
@@ -2664,9 +3007,10 @@ window.showApp = function(opts){ window._pendingShowApp = opts || {}; };
 <div class="side-menu-overlay" id="sideMenuOverlay" onclick="closeSideMenu()"></div>
 <div class="side-menu" id="sideMenu">
   <div class="side-menu-head"><span>Menú</span><button class="side-menu-x" onclick="closeSideMenu()" aria-label="Cerrar">×</button></div>
-  <button class="side-menu-item" onclick="openGuiaInformativa()">Guía Informativa</button>
-  <button class="side-menu-item" onclick="openVideoInformativo()">Video Informativo</button>
-  <button class="side-menu-item" onclick="openSoporte()">Contact Customer Service</button>
+  <button class="side-menu-item" onclick="closeSideMenu();openAjustes()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg> Ajustes</button>
+  <button class="side-menu-item" onclick="openGuiaInformativa()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M9 4H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-3"/></svg> Guía Informativa</button>
+  <button class="side-menu-item" onclick="openVideoInformativo()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="10 8 16 12 10 16 10 8"/><circle cx="12" cy="12" r="10"/></svg> Video Informativo</button>
+  <button class="side-menu-item" onclick="openSoporte()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Soporte</button>
 </div>
 <div class="toast" id="toast"></div>
 
@@ -2785,13 +3129,18 @@ function imagenesDisabledFor(_impersonated){
   if(_impersonated) return !!_impersonated.imagenesDisabled;
   return !!(currentUserPerms && currentUserPerms.imagenesDisabled);
 }
+// v9 — Documentos replica el gating de Imágenes (plan Pro/Clínica + toggle admin).
+function documentosDisabledFor(_impersonated){
+  if(_impersonated) return !!_impersonated.documentosDisabled;
+  return !!(currentUserPerms && currentUserPerms.documentosDisabled);
+}
 // ─── Item 3: admin-configurable GLOBAL patient-tab order ───────────────────
 // Persisted in Firestore at /config/tabOrder { order:[...tab keys] }. Loaded
 // into globalTabOrder via an onSnapshot listener (setupTabOrderListener).
 // Only admins can change it; it applies to every user's patient tab bar.
 let globalTabOrder = null;        // array of tab keys, or null until loaded
 let tabOrderUnsubscribe = null;
-const TAB_LABELS_IMG = Object.assign({}, TAB_LABELS, {img:'Imágenes'});
+const TAB_LABELS_IMG = Object.assign({}, TAB_LABELS, {img:'Imágenes', doc:'Documentos'});
 // Reorders the given tab list according to globalTabOrder. Tabs not listed keep
 // their default relative order, appended after the ordered ones.
 function applyTabOrder(tabs){
@@ -2821,6 +3170,9 @@ let adminFilterStatus = 'all';  // 'all' | 'active' | 'inactive'
 let adminSortBy = 'name';       // 'name' | 'created-desc' | 'created-asc'
 let invitacionesList = [];
 let invitesCollapsed = true;
+let adminFilesCollapsed = true;   // v9 — sección "Archivos subidos" del admin
+let adminFilesTipo = '';          // ''|'imagen'|'pdf'|'word'
+let adminFilesQ = '';
 let tabOrderCollapsed = true;
 let adminFilterPanelOpen = false;
 let invitacionesUnsub = null;
@@ -2864,6 +3216,11 @@ function titleCase(str){
   if(!str)return str;
   return str.toLowerCase().split(' ').map(w=>w?w.charAt(0).toUpperCase()+w.slice(1):w).join(' ');
 }
+// ── v9: título del odontólogo — el público son odontólogos: "Od."/"Oda.", nunca "Dr./Dra.".
+// Los valores legacy guardados en Firestore ('Dr.'/'Dra.') NO se tocan (additive-only);
+// solo se mapean al mostrarse. Los registros nuevos guardan ya 'Od.'/'Oda.'.
+function dispTitle(t){ return t==='Dr.'?'Od.':(t==='Dra.'?'Oda.':(t||'')); }
+
 // ── Botón de información ("?") con explicación corta, para el título de cada pestaña ──
 function infoBtn(text){
   const id='info_'+Math.random().toString(36).slice(2,9);
@@ -2903,7 +3260,15 @@ function icon(name,size){
     thermo:'<path d="M14 14.76V3.5a2 2 0 0 0-4 0v11.26a4 4 0 1 0 4 0Z"/>',
     image:'<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/>',
     eye:'<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>',
-    drag:'<circle cx="9" cy="6" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="18" r="1"/><circle cx="15" cy="6" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="18" r="1"/>'
+    drag:'<circle cx="9" cy="6" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="18" r="1"/><circle cx="15" cy="6" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="18" r="1"/>',
+    gear:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/>',
+    trash:'<path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14Z"/><path d="M10 11v6M14 11v6"/>',
+    file:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/>',
+    filetext:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M9 13h6M9 17h6"/>',
+    home:'<path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/>',
+    moon:'<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>',
+    restore:'<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 3"/>',
+    filter:'<path d="M22 4H2l8 9.2V19l4 2v-7.8Z"/>'
   }[name]||'';
   return `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${P}</svg>`;
 }
@@ -2939,7 +3304,7 @@ function _dsDpPosition(id){
   const pop=document.getElementById(id+'_pop');
   if(!btn||!pop)return;
   const r=btn.getBoundingClientRect();
-  const popW=248;
+  const popW=(pop&&pop.offsetWidth)||264;
   let left=r.left;
   if(left+popW>window.innerWidth-10)left=window.innerWidth-popW-10;
   let top=r.bottom+6;
@@ -2954,6 +3319,7 @@ function _dsDpOutside(ev){
   const pop=document.getElementById(_dpOpen+'_pop');
   if(wrap&&!wrap.contains(ev.target)&&pop&&!pop.contains(ev.target))dsDpClose();
 }
+window.dsDpClose=dsDpClose; // v9 fix — el botón "Cerrar" del popover la llama desde onclick global
 function dsDpClose(){
   if(_dpOpen){const pop=document.getElementById(_dpOpen+'_pop');if(pop)pop.remove();}
   _dpOpen=null;
@@ -3026,7 +3392,7 @@ function pillFecha(f){ return `<span class="ds-pill ds-pill-hist">${ff(f)||'sin 
 // Banner que se muestra en la parte superior de los tabs fijos cuando están bloqueados.
 function roBanner(){
   if(!isReadOnly())return '';
-  return `<div class="ds-note ro-banner">${icon('lock',13)} <strong>Solo lectura</strong> — esta es la información consolidada del paciente. Para modificarla, activa <em>“Habilitar edición”</em> en la barra superior.</div>`;
+  return `<div class="ds-note ro-banner">${icon('lock',13)} <strong>Solo lectura</strong> — esta es la información consolidada del paciente. Para modificarla, pulsa <em>“Editar”</em> en el control de arriba.</div>`;
 }
 
 // ─── v8 TRIAL: RECORD / BITÁCORA DE CAMBIOS ────────────────────────────────
@@ -3061,9 +3427,20 @@ window.toggleDark=function(){
   const isDark=document.documentElement.getAttribute('data-theme')==='dark';
   document.documentElement.setAttribute('data-theme',isDark?'':'dark');
   localStorage.setItem('ds_theme',isDark?'':'dark');
+  // v9 — si Ajustes está abierto, refrescar para que el switch refleje el estado
+  try{ if(viewActual==='ajustes'&&typeof renderAjustes==='function')renderAjustes(); }catch(e){}
 }
 const savedTheme=localStorage.getItem('ds_theme');
 if(savedTheme==='dark'){document.documentElement.setAttribute('data-theme','dark');}
+// v9 — modo de accesibilidad visual ("Optimizar lectura"): más tamaño, contraste y aire.
+if(localStorage.getItem('ds_access')==='1'){document.documentElement.setAttribute('data-access','1');}
+window.toggleAccess=function(on){
+  if(on===undefined)on=document.documentElement.getAttribute('data-access')!=='1';
+  document.documentElement.setAttribute('data-access',on?'1':'');
+  localStorage.setItem('ds_access',on?'1':'');
+  toast(on?'Optimizar lectura activado':'Optimizar lectura desactivado');
+  if(viewActual==='ajustes')renderAjustes();
+};
 
 // ─── LANDING ⇄ APP (v8 — single-file merge) ────────────────────────────────
 // Landing and app now live in one document. showApp()/showLanding() swap
@@ -3313,6 +3690,19 @@ window.doForgot = async function(){
   }
 };
 
+// ── Estado del listener de pacientes ─────────────────────────────────────
+// v9 FIX (TDZ): estas declaraciones DEBEN vivir antes del bloque bypass de abajo.
+// Antes estaban junto a setupPacientesListener() (más abajo); al recargar con
+// sesión bypass activa, el bloque top-level llamaba setupPacientesListener()
+// mientras pacientesUnsub aún estaba en la zona muerta temporal (TDZ) →
+// ReferenceError durante la evaluación del módulo → app rota ("Conectando…").
+let pacientesUnsub = null;
+let _pacientesTrash = [];          // v9 — pacientes en papelera (deleted:true)
+const _purgedIds = new Set();      // v9 — evita purgar dos veces en la misma sesión
+let pacientesListenerUid = null;   // uid for which the pacientes listener is active
+let _lastSelfSaveTime = 0; // timestamp of last save we initiated (used to skip redundant re-renders)
+let _lastLoginAtUpdatedForUid = null;  // uid for which lastLoginAt was already written
+
 // If bypass is already set, hide login immediately (don't wait for Firebase auth listener)
 if(isTempBypass()){
   const bg=document.getElementById('loginBg');
@@ -3417,6 +3807,63 @@ function updateAdminUI(){
   }
 }
 
+// ─── v9 · AJUSTES ───────────────────────────────────────────────────────────
+window.openAjustes=function(){
+  viewActual='ajustes';
+  renderAjustes();
+};
+function ajSwitch(id,on,onchange){
+  return `<button type="button" role="switch" aria-checked="${on?'true':'false'}" class="aj-switch${on?' on':''}" id="${id}" onclick="${onchange}"><span class="aj-knob"></span></button>`;
+}
+function renderAjustes(){
+  const isDark=document.documentElement.getAttribute('data-theme')==='dark';
+  const isAccess=document.documentElement.getAttribute('data-access')==='1';
+  const cityPref=weatherCityPref();
+  const cityOpts=[`<option value="auto" ${cityPref==='auto'?'selected':''}>Automática (usa tu ubicación)</option>`]
+    .concat(Object.keys(WEATHER_CITIES).map(k=>`<option value="${k}" ${cityPref===k?'selected':''}>${WEATHER_CITIES[k].n}</option>`)).join('');
+  document.getElementById('mainArea').innerHTML=`
+    ${impersonationBanner()}
+    <div class="phdr">
+      <div style="flex:1"><div class="phn">Ajustes</div><div class="phm">Preferencias de este dispositivo</div></div>
+      <button class="ba" onclick="volverInicio()">← Inicio</button>
+    </div>
+    <div class="panel profile-panel">
+      <div class="profile-card">
+        <div class="ct">${icon('eye',14)} Lectura y accesibilidad</div>
+        <div class="aj-row">
+          <div class="aj-info">
+            <div class="aj-name">Optimizar lectura</div>
+            <div class="aj-desc">Textos más grandes, mayor contraste y más separación entre elementos. Ideal si la letra te resulta pequeña, especialmente en el teléfono.</div>
+          </div>
+          ${ajSwitch('ajAccess',isAccess,'toggleAccess()')}
+        </div>
+        <div class="aj-row">
+          <div class="aj-info">
+            <div class="aj-name">Modo noche</div>
+            <div class="aj-desc">Colores oscuros para ambientes con poca luz.</div>
+          </div>
+          ${ajSwitch('ajDark',isDark,'toggleDark()')}
+        </div>
+      </div>
+      <div class="profile-card">
+        <div class="ct">${icon('cloudsun',14)} Clima del dashboard</div>
+        <div class="mf"><label>Ciudad</label>
+          <select onchange="setWeatherCity(this.value)">${cityOpts}</select>
+        </div>
+        <p class="aj-note">Con "Automática", el navegador te pedirá permiso de ubicación una sola vez; si no lo das, se usa Valencia.</p>
+      </div>
+      <div class="profile-card" id="ajExtraCards"></div>
+      <div class="profile-card">
+        <div class="ct">${icon('gear',14)} Cuenta</div>
+        <button class="ba" onclick="openProfile()" style="margin-right:8px">Mi perfil</button>
+        <button class="bd" onclick="cerrarSesion()">Cerrar sesión</button>
+      </div>
+    </div>`;
+  const extra=document.getElementById('ajExtraCards');
+  if(extra && typeof ajustesExtraHTML==='function'){ const x=ajustesExtraHTML(); if(x)extra.outerHTML=x; else extra.remove(); }
+  else if(extra)extra.remove();
+}
+
 // ─── PROFILE PAGE ──────────────────────────────────────────────────────────
 window.openProfile=function(){
   if(!currentUserPerms && !isAdmin && !isTempBypass()){toast('Inicia sesión primero');return;}
@@ -3448,7 +3895,7 @@ function renderProfile(){
   }
   const p=currentUserPerms;
   const initials=(p.name||p.email||'D').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
-  const fullName=p.title?`${p.title} ${titleCase(p.name)||''}`.trim():(titleCase(p.name)||'(sin nombre)');
+  const fullName=p.title?`${dispTitle(p.title)} ${titleCase(p.name)||''}`.trim():(titleCase(p.name)||'(sin nombre)');
   document.getElementById('mainArea').innerHTML=`
     ${impersonationBanner()}
     <div class="phdr">
@@ -3471,8 +3918,8 @@ function renderProfile(){
         <div class="ct">Información personal</div>
         <div class="mf"><label>Título</label><select id="prof_title">
           <option value="" ${!p.title?'selected':''}>Sin título</option>
-          <option value="Dr." ${p.title==='Dr.'?'selected':''}>Dr.</option>
-          <option value="Dra." ${p.title==='Dra.'?'selected':''}>Dra.</option>
+          <option value="Od." ${(p.title==='Od.'||p.title==='Dr.')?'selected':''}>Od.</option>
+          <option value="Oda." ${(p.title==='Oda.'||p.title==='Dra.')?'selected':''}>Oda.</option>
         </select></div>
         <div class="mf"><label>Nombre completo</label><input id="prof_name" value="${e(p.name||'')}" placeholder="Nombre y apellidos"></div>
         <div class="mf"><label>Correo electrónico</label><input value="${e(p.email||'')}" disabled style="opacity:0.6;cursor:not-allowed"></div>
@@ -3492,6 +3939,12 @@ function renderProfile(){
           </div>
         </div>
         <button class="ba" onclick="saveEsp()" style="margin-top:10px">Guardar especialidades</button>
+      </div>
+
+      <div class="profile-card">
+        <div class="ct">Ajustes</div>
+        <p style="font-size:12px;color:var(--text2);margin-bottom:10px">Modo noche, optimizar lectura, ciudad del clima y más.</p>
+        <button class="ba" onclick="openAjustes()">Abrir Ajustes</button>
       </div>
 
       <div class="profile-card">
@@ -3606,6 +4059,62 @@ document.addEventListener('DOMContentLoaded',()=>{
   }
 });
 
+// ─── v9 · MENÚ FOOTER EN WEB ─────────────────────────────────────────────────
+// Las opciones del menú principal de móvil (bottom-nav + menú lateral) también
+// existen en web: como pie de página al final de cada view — aparece al hacer
+// scroll hasta el fondo, no es una barra fija. Se inyecta automáticamente tras
+// cada render mediante un MutationObserver sobre #mainArea.
+function appFooterHTML(){
+  return `<div class="app-footer-inner">
+    <div class="app-footer-cols">
+      <div class="app-footer-col">
+        <p class="aft">Navegación</p>
+        <button type="button" onclick="volverInicio()">${icon('home',13)} Inicio</button>
+        <button type="button" onclick="bnCalendario()">${icon('calendar',13)} Calendario</button>
+        <button type="button" onclick="modalNuevo()">${icon('plus',13)} Nuevo paciente</button>
+        <button type="button" onclick="exportar()">${icon('download',13)} Exportar</button>
+      </div>
+      <div class="app-footer-col">
+        <p class="aft">Tu cuenta</p>
+        <button type="button" onclick="openProfile()">Mi perfil</button>
+        <button type="button" onclick="openAjustes()">${icon('gear',13)} Ajustes</button>
+        <button type="button" onclick="toggleDark()">${icon('moon',13)} Día / Noche</button>
+      </div>
+      <div class="app-footer-col">
+        <p class="aft">Ayuda</p>
+        <button type="button" onclick="openGuiaInformativa()">Guía Informativa</button>
+        <button type="button" onclick="openVideoInformativo()">Video Informativo</button>
+        <button type="button" onclick="openSoporte()">Soporte</button>
+      </div>
+    </div>
+    <p class="app-footer-note">${logoSVG(18)} <span class="afb">docu<span>salud</span></span> · Historias clínicas para odontólogos</p>
+  </div>`;
+}
+function injectAppFooter(){
+  try{
+    if(typeof isMobile==='function'&&isMobile())return; // móvil ya tiene bottom-nav + menú
+    const ma=document.getElementById('mainArea'); if(!ma)return;
+    if(ma.querySelector('.app-footer'))return;
+    const panels=ma.querySelectorAll('.panel');
+    const host=panels.length?panels[panels.length-1]:ma;
+    const div=document.createElement('div');
+    div.className='app-footer';
+    div.innerHTML=appFooterHTML();
+    host.appendChild(div);
+  }catch(e){}
+}
+const _footObs=new MutationObserver(muts=>{
+  // Ignorar la mutación que produce el propio footer (evita bucles)
+  if(muts.every(m=>[...m.addedNodes].every(n=>n.nodeType===1&&n.classList&&n.classList.contains('app-footer'))&&m.removedNodes.length===0))return;
+  requestAnimationFrame(injectAppFooter);
+});
+document.addEventListener('DOMContentLoaded',()=>{
+  const ma=document.getElementById('mainArea');
+  if(ma)_footObs.observe(ma,{childList:true,subtree:true});
+  injectAppFooter();
+});
+window.addEventListener('resize',()=>requestAnimationFrame(injectAppFooter));
+
 // ─── MOBILE ───────────────────────────────────────────────────────────────
 window.toggleSidebar=function(){document.getElementById('sidebar').classList.toggle('open')}
 function isMobile(){return window.innerWidth<=768}
@@ -3630,7 +4139,8 @@ window.initAutoGrow=initAutoGrow;
 const _agObs=new MutationObserver(()=>initAutoGrow(document));
 document.addEventListener('DOMContentLoaded',()=>{ const ma=document.getElementById('mainArea'); if(ma)_agObs.observe(ma,{childList:true,subtree:true}); initAutoGrow(document); });
 // ── v7.1 connection state hints (#10) ─────────────────────────────────────
-window.addEventListener('offline',()=>ss('err','Sin conexión · los cambios se guardan localmente'));
+window.addEventListener('offline',()=>ss('off','Sin conexión · los cambios se guardan localmente'));
+if(!navigator.onLine){ ss('off','Sin conexión · los cambios se guardan localmente'); }
 window.addEventListener('online',()=>{ ss('ing','Reconectando…'); setTimeout(()=>ss('ok','Sincronizado'),1500); });
 function gp(){return pacientes.find(p=>p.id===idActual)}
 function g(id){const el=document.getElementById(id);return el?el.value:''}
@@ -3642,6 +4152,7 @@ function edadAnios(nac){if(!nac)return null;const h=new Date(),n=new Date(nac);l
 function hoy(){return new Date().toISOString().split('T')[0]}
 function ahora(){const d=new Date();return d.toTimeString().slice(0,5)}
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200)}
+window.toast=toast; // v9 — usada también desde handlers inline (p. ej. WhatsApp sin número)
 
 // ─── AUTOSAVE (3.5.1, 3.5.2, 3.5.3, 3.6.8) ────────────────────────────────
 function getDebounce(){return isMobile()?3000:1000}
@@ -3690,11 +4201,8 @@ function statusEl(formKey){
 // ─── FIRESTORE ────────────────────────────────────────────────────────────
 // Patient listener: ownerUid-aware so non-admin users see only their own patients.
 // Admins see everyone unless they're impersonating a specific user via viewAsUid.
-let pacientesUnsub = null;
-// Guards to prevent infinite loops in bootstrapUserPerms snapshot handler
-let pacientesListenerUid = null;   // uid for which the pacientes listener is active
-let _lastSelfSaveTime = 0; // timestamp of last save we initiated (used to skip redundant re-renders)
-let _lastLoginAtUpdatedForUid = null;  // uid for which lastLoginAt was already written
+// (v9) pacientesUnsub / pacientesListenerUid / _lastSelfSaveTime /
+// _lastLoginAtUpdatedForUid se declaran arriba, ANTES del bloque bypass (fix TDZ).
 function setupPacientesListener(){
   if(pacientesUnsub){pacientesUnsub();pacientesUnsub=null;}
   let q;
@@ -3716,7 +4224,12 @@ function setupPacientesListener(){
   }
   ss('ing','Conectando...');
   pacientesUnsub = onSnapshot(q, snap=>{
-    pacientes=snap.docs.map(d=>({id:d.id,...d.data()}));
+    const _all=snap.docs.map(d=>({id:d.id,...d.data()}));
+    // v9 — papelera (soft-delete): los eliminados no aparecen en la app; viven
+    // 30 días en Ajustes → Papelera y luego se purgan definitivamente.
+    _pacientesTrash=_all.filter(pp=>pp.deleted===true);
+    pacientes=_all.filter(pp=>pp.deleted!==true);
+    _purgeTrash();
     rebuildConsultasIndex();
     renderLista();
     // Skip re-rendering the patient view when the snapshot was triggered by our
@@ -3738,6 +4251,7 @@ function setupPacientesListener(){
 function rerenderCurrent(){
   if(viewActual==='calendario')renderCalendar();
   else if(viewActual==='admin')renderAdmin();
+  else if(viewActual==='ajustes')return; // Ajustes no depende de data de pacientes
   else if(idActual&&gp()){
     // Preserve the panel scroll position so autosave snapshots don't
     // jump the user back to the top when they are mid-form.
@@ -3755,7 +4269,7 @@ async function guardar(p){
   const{id,...data}=p;
   if(!data.ownerUid&&currentUserUid)data.ownerUid=currentUserUid;
   _lastSelfSaveTime=Date.now(); // mark that WE triggered this save
-  ss('ing','Guardando...');
+  if(!navigator.onLine){ ss('off','Guardado local · se sincronizará al reconectar'); } else { ss('ing','Guardando...'); }
   // Optimistic local apply so the UI reflects the change immediately, even offline.
   const _i=pacientes.findIndex(x=>x.id===id);
   if(_i>=0)pacientes[_i]={id,...data};
@@ -3777,7 +4291,7 @@ async function crear(data){
   }
   data.ownerUid = viewAsUid || currentUserUid || 'orphan';
   data.creadoEn = new Date().toISOString();
-  ss('ing','Guardando...');
+  if(!navigator.onLine){ ss('off','Guardado local · se sincronizará al reconectar'); } else { ss('ing','Guardando...'); }
   // Generate the doc id locally so we can return immediately (offline-safe).
   const ref=doc(collection(db,'pacientes'));
   setDoc(ref,data)
@@ -3786,6 +4300,49 @@ async function crear(data){
   return ref.id;
 }
 async function borrar(id){try{await deleteDoc(doc(db,'pacientes',id));}catch(err){}}
+// v9 — purga silenciosa de la papelera: >30 días → borrado definitivo.
+function _purgeTrash(){
+  try{
+    const cutoff=Date.now()-30*86400000;
+    for(const pp of _pacientesTrash){
+      if(pp.deletedEn && new Date(pp.deletedEn).getTime()<cutoff && !_purgedIds.has(pp.id)){
+        _purgedIds.add(pp.id);
+        borrar(pp.id);
+      }
+    }
+  }catch(e){}
+}
+// Tarjeta extra de Ajustes (hook ajustesExtraHTML): la Papelera.
+function ajustesExtraHTML(){
+  const list=_pacientesTrash||[];
+  return `<div class="profile-card">
+    <div class="ct">${icon('trash',14)} Papelera${list.length?` · ${list.length}`:''}</div>
+    <p style="font-size:12px;color:var(--text2);margin-bottom:${list.length?'10px':'0'}">${list.length?'Pacientes eliminados. Puedes restaurarlos; a los 30 días se borran definitivamente.':'No hay pacientes eliminados. Cuando elimines uno, tendrás 30 días para restaurarlo desde aquí.'}</p>
+    ${list.map(pp=>{
+      const days=pp.deletedEn?Math.max(0,30-Math.floor((Date.now()-new Date(pp.deletedEn).getTime())/86400000)):30;
+      return `<div class="aj-row"><div class="aj-info"><div class="aj-name">${e(titleCase(pp.nombre)||'—')}</div><div class="aj-desc">${e(pp.ci||'Sin cédula')} · se borra definitivamente en ${days} día${days===1?'':'s'}</div></div>
+        <div style="display:flex;gap:6px;flex-shrink:0"><button class="ba" onclick="papeleraRestore('${e(pp.id)}')">Restaurar</button><button class="bd" onclick="papeleraPurge('${e(pp.id)}')">Borrar ya</button></div></div>`;
+    }).join('')}
+  </div>`;
+}
+window.papeleraRestore=async function(id){
+  const rec=(_pacientesTrash||[]).find(x=>x.id===id); if(!rec)return;
+  rec.deleted=false; rec.deletedEn=null;
+  _pacientesTrash=_pacientesTrash.filter(x=>x.id!==id);
+  if(!pacientes.find(x=>x.id===id))pacientes.push(rec);
+  await guardar(rec);
+  rebuildConsultasIndex(); renderLista();
+  if(viewActual==='ajustes')renderAjustes();
+  toast((titleCase(rec.nombre)||'Paciente')+' restaurado');
+};
+window.papeleraPurge=async function(id){
+  const rec=(_pacientesTrash||[]).find(x=>x.id===id); if(!rec)return;
+  if(!confirm(`¿Borrar DEFINITIVAMENTE a "${rec.nombre}"?\n\nEsta acción no se puede deshacer.`))return;
+  _pacientesTrash=_pacientesTrash.filter(x=>x.id!==id);
+  await borrar(id);
+  if(viewActual==='ajustes')renderAjustes();
+  toast('Paciente borrado definitivamente');
+};
 
 // v7.6f — upgrade prompt when a Free user hits the 30-patient limit.
 window.showUpgradeModal=function(){
@@ -4016,6 +4573,14 @@ function patientMatchesRecencyFilter(p,f){
 }
 
 // ─── LIST ─────────────────────────────────────────────────────────────────
+// v9.1 — avatar de paciente: iniciales + color estable derivado del id (6 tintes de marca).
+function pAvatar(pt){
+  const nm=titleCase(pt.nombre||'?');
+  const ini=nm.split(' ').filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase()||'?';
+  let hash=0; const s=pt.id||nm;
+  for(let i=0;i<s.length;i++){ hash=(hash*31+s.charCodeAt(i))>>>0; }
+  return `<div class="pi-av pi-av-c${hash%6}">${e(ini)}</div>`;
+}
 function renderLista(){
   const q=currentFilter;
   let filtered=pacientes.filter(p=>
@@ -4047,12 +4612,13 @@ function renderLista(){
     <div class="filter-panel-actions"><button class="plist-chip" onclick="clearFilters()">Limpiar todo</button><button class="plist-chip" onclick="saveCurrentFilter()">Guardar filtro</button></div>
     ${_savedF.length?`<div class="filter-saved">${_savedF.map((f,i)=>`<span class="saved-chip"><button class="plist-chip" onclick="applySavedFilter(${i})">★ ${e(f.name)}</button><button class="saved-del" onclick="deleteSavedFilter(${i})" title="Borrar filtro guardado">×</button></span>`).join('')}</div>`:''}
   </div>`:'';
-  const chipBar=`<div class="plist-filterbar"><button class="filter-toggle-btn${(_active||filterPanelOpen)?' on':''}" onclick="toggleFilterPanel()">⚙ Filtros${_active?` · ${_active}`:''}</button>${_active?`<button class="filter-clear-link" onclick="clearFilters()">Limpiar</button>`:''}</div>${_panel}`;
+  const chipBar=`<div class="plist-filterbar"><button class="filter-toggle-btn${(_active||filterPanelOpen)?' on':''}" onclick="toggleFilterPanel()">${icon('filter',12)} Filtros${_active?` · ${_active}`:''}</button>${_active?`<button class="filter-clear-link" onclick="clearFilters()">Limpiar</button>`:''}</div>${_panel}`;
   const itemsHtml = filtered.length===0?
     `<p style="font-size:12px;color:var(--text3);padding:10px 8px">${pacientes.length===0?'Sin pacientes aún':'Sin resultados con los filtros'}</p>`:
     filtered.map(p=>{
       const yrs=edadAnios(p.nacimiento);
       return `<div class="pi${p.id===idActual?' on':''}" onclick="seleccionar('${p.id}')">
+        ${pAvatar(p)}
         <div class="pi-body">
           <div class="pn">${highlight(titleCase(p.nombre),q)}</div>
           <div class="pm">${highlight(p.ci||'Sin CI',q)}${yrs!==null?` · ${yrs}a`:''} · ${(p.consultas||[]).length} consulta${(p.consultas||[]).length!==1?'s':''}</div>
@@ -4065,7 +4631,7 @@ function renderLista(){
 }
 
 window.seleccionar=function(id){
-  if(idActual!==id){_imgActiveCat='rad';_imgFilters={cat:'',user:'',cons:'',fecha:''};_imgLightboxId=null;}
+  if(idActual!==id){_imgActiveCat='rad';_imgFilters={cat:'',user:'',cons:'',fecha:''};_imgLightboxId=null;_docFilters={tipo:'',user:'',cons:'',fecha:''};}
   idActual=id;tabActual='datos';viewActual='paciente';consultaView=null;editUnlocked=false;odontoView=null;planView=null;
   logAccess(id);
   renderLista();renderPaciente();
@@ -4107,19 +4673,21 @@ function renderEmpty(){
     }
   }
   todayConsultas.sort((a,b)=>(a.hora||'00:00').localeCompare(b.hora||'00:00'));
-  // Personal greeting with título Dr./Dra. if set
-  let greeting='Selecciona un paciente o crea uno nuevo.';
+  // Personal greeting con título Od./Oda. si existe (legacy Dr./Dra. se mapea al mostrar)
+  // v9 — saludo protagonista (sin branding repetido: logo y nombre ya viven en la topbar)
+  let greetMain='Hola', greetSub='Selecciona un paciente o crea uno nuevo.';
   if(currentUserPerms&&currentUserPerms.name){
-    const fullName=currentUserPerms.title?`${currentUserPerms.title} ${titleCase(currentUserPerms.name).split(' ')[0]}`:titleCase(currentUserPerms.name).split(' ')[0];
-    greeting=pacientes.length===0
-      ?`Hola ${fullName}, tu consultorio empieza aquí.`
-      :`Hola ${fullName}, selecciona un paciente o crea uno nuevo.`;
+    const fullName=currentUserPerms.title?`${dispTitle(currentUserPerms.title)} ${titleCase(currentUserPerms.name).split(' ')[0]}`:titleCase(currentUserPerms.name).split(' ')[0];
+    greetMain=`Hola ${fullName}`;
+    greetSub=pacientes.length===0?'Tu consultorio empieza aquí.':'Selecciona un paciente o crea uno nuevo.';
+  }else if(isAdmin&&!viewAsUid){
+    greetMain='Hola, Admin';
   }else if(pacientes.length===0){
-    greeting='Tu consultorio empieza aquí.';
+    greetSub='Tu consultorio empieza aquí.';
   }
   let html=`${impersonationBanner()}<div class="panel"><div class="landing-grid"><div class="dash-fit-spacer" id="dashFitSpacer"><div class="dash-scalable" id="dashScalable">
     <div class="dash-header">
-      <div class="dash-header-brand">${logoSVG(28)}<div><h3>docu<span>salud</span></h3><p>${e(greeting)}</p></div></div>
+      <div class="dash-greeting"><h2 class="dash-greet-main">${e(greetMain)}</h2><p class="dash-greet-sub">${e(greetSub)}</p></div>
       ${(()=>{
         const _impD=viewAsUid?allUsersList.find(u=>u.uid===viewAsUid):null;
         const _epD=effectivePlanFor(_impD);
@@ -4147,6 +4715,16 @@ function renderEmpty(){
 }
 // ── Dashboard: orden de widgets reordenable por arrastre, guardado por usuario ──
 function _dashOrderKey(){ return 'ds_dash_order_'+(currentUserUid||'anon'); }
+// v9 — tamaño preconfigurado (S/M/L) y escala tipográfica por widget, por usuario/dispositivo.
+function _dashSizeKey(){ return 'ds_dash_sizes_'+(currentUserUid||'anon'); }
+function _dashFontKey(){ return 'ds_dash_fonts_'+(currentUserUid||'anon'); }
+const DASH_DEFAULT_SIZE={clock_weather:'l',today:'l',quick:'l',minical:'m',tratamientos_chart:'l'};
+function _dashSizes(){ try{ return JSON.parse(localStorage.getItem(_dashSizeKey())||'{}')||{}; }catch(e){ return {}; } }
+function _dashSizeFor(k,w){ const s=_dashSizes()[k]; if(s==='s'||s==='m'||s==='l')return s; if(w&&w.full)return 'l'; return DASH_DEFAULT_SIZE[k]||'m'; }
+function _dashFonts(){ try{ return JSON.parse(localStorage.getItem(_dashFontKey())||'{}')||{}; }catch(e){ return {}; } }
+function _dashFontFor(k){ const v=parseFloat(_dashFonts()[k]); return (v>=0.8&&v<=1.4)?v:1; }
+window.dashSetSize=function(k,s){ const m=_dashSizes(); m[k]=s; try{localStorage.setItem(_dashSizeKey(),JSON.stringify(m));}catch(e){} renderEmpty(); };
+window.dashFont=function(k,d){ const m=_dashFonts(); let v=parseFloat(m[k])||1; v=Math.min(1.4,Math.max(0.8,Math.round((v+d*0.1)*10)/10)); m[k]=v; try{localStorage.setItem(_dashFontKey(),JSON.stringify(m));}catch(e){} renderEmpty(); };
 const DASH_DEFAULT_ORDER=['clock_weather','today','quick','minical'];
 // Devuelve el orden + selección de widgets del usuario, filtrando los que ya
 // no aplican (p. ej. si bajó de plan) y añadiendo al final cualquier widget
@@ -4196,18 +4774,18 @@ function _dashMonthStats(){
   }
   return {consMes,ingresoMes,pacientesNuevosMes,tratCount,total:pacientes.length};
 }
-function dashBirthdaysHTML(){
+function dashBirthdaysHTML(size){
   const now=new Date(); const mm=String(now.getMonth()+1).padStart(2,'0');
   const list=pacientes.filter(p=>p.nacimiento&&p.nacimiento.split('-')[1]===mm)
     .sort((a,b)=>parseInt(a.nacimiento.split('-')[2])-parseInt(b.nacimiento.split('-')[2]));
   return `<div class="dash-card dash-card-rail">
     <p class="dash-label">Cumpleaños este mes${list.length?' · '+list.length:''}</p>
-    ${list.length?list.slice(0,6).map(p=>`<div class="admin-dash-item"><span>${e(titleCase(p.nombre))}</span><span class="admin-dash-time">${parseInt(p.nacimiento.split('-')[2])} de ${MESES_LARGO[now.getMonth()]}</span></div>`).join(''):'<p class="admin-dash-empty">Nadie cumple años este mes</p>'}
+    ${list.length?list.slice(0,size==='s'?3:6).map(p=>`<div class="admin-dash-item"><span>${e(titleCase(p.nombre))}</span><span class="admin-dash-time">${parseInt(p.nacimiento.split('-')[2])} de ${MESES_LARGO[now.getMonth()]}</span></div>`).join(''):'<p class="admin-dash-empty">Nadie cumple años este mes</p>'}
   </div>`;
 }
-function dashTratamientosChartHTML(){
+function dashTratamientosChartHTML(size){
   const {tratCount}=_dashMonthStats();
-  const top=Object.entries(tratCount).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const top=Object.entries(tratCount).sort((a,b)=>b[1]-a[1]).slice(0,size==='s'?3:5);
   const max=top.length?top[0][1]:1;
   return `<div class="dash-card">
     <p class="dash-label">Tratamientos del mes</p>
@@ -4227,7 +4805,7 @@ const DASH_CATALOG={
       </div>
       <div class="dash-card dc-weather dash-weather" id="dashWeatherCard">
         <div>
-          <p class="dash-label">Clima · Valencia</p>
+          <p class="dash-label" id="dashWeatherCity">Clima · ${(()=>{const k=weatherCityPref();return k==='auto'?'Tu ubicación':(WEATHER_CITIES[k]||WEATHER_CITIES.valencia).n;})()}</p>
           <p class="dash-weather-temp" id="dashWeatherTemp">—</p>
           <p class="dash-weather-desc" id="dashWeatherDesc">Buscando…</p>
         </div>
@@ -4239,11 +4817,13 @@ const DASH_CATALOG={
       <div class="dash-qbtn" onclick="toggleCalendar()"><span class="ico">${icon('calendar',24)}</span><span>Calendario</span></div>
     </div>`},
   minical:{label:'Mini-calendario', pro:false, full:false, html:()=>dashMiniCalendarHTML()},
-  today:{label:'Consultas de hoy', pro:false, full:false, html:(todayConsultas,isPro)=>
-    todayConsultas.length>0
+  today:{label:'Consultas de hoy', pro:false, full:false, html:(todayConsultas,isPro,size)=>{
+    const _lim=size==='s'?3:(size==='m'?5:999);
+    const _shown=todayConsultas.slice(0,_lim);
+    return todayConsultas.length>0
       ? `<div class="dash-card dc-today">
           <div class="ct">Consultas de hoy · ${todayConsultas.length}</div>
-          ${todayConsultas.map(c=>{
+          ${_shown.map(c=>{
             const wa=isPro?waLink(c.patientPhone,`Hola ${(c.patientName||'').split(' ')[0]}, te escribo de tu consultorio dental para confirmar tu cita de hoy a las ${c.hora||''}.`):null;
             return `<div class="today-row">
               <div onclick="abrirPacienteConsultas('${c.patientId}')" style="display:flex;align-items:center;gap:14px;flex:1;min-width:0;cursor:pointer">
@@ -4253,18 +4833,19 @@ const DASH_CATALOG={
                   <div class="today-treatment">${e(c.tratamiento||'')}</div>
                 </div>
               </div>
-              ${wa?`<a href="${wa}" target="_blank" rel="noopener" onclick="event.stopPropagation()" class="today-wa" title="Enviar WhatsApp">${icon('chat',15)}</a>`:''}
+              ${wa?`<a href="${wa}" target="_blank" rel="noopener" onclick="event.stopPropagation()" class="today-wa" title="Enviar WhatsApp">${icon('chat',15)}</a>`:(isPro?`<button type="button" class="today-wa today-wa-off" onclick="event.stopPropagation();toast('Este paciente no tiene número de teléfono registrado')" title="Sin número registrado">${icon('chat',15)}</button>`:'')}
               ${c.costo?`<span class="ccc">$${parseFloat(c.costo).toLocaleString()}</span>`:''}
             </div>`;
           }).join('')}
+          ${todayConsultas.length>_shown.length?`<div class="today-more" onclick="toggleCalendar()">+${todayConsultas.length-_shown.length} más · ver calendario</div>`:''}
         </div>`
-      : `<div class="dash-card dc-today-empty"><div class="ct">Consultas de hoy</div><p style="font-size:13px;color:var(--text3);margin:0">No hay consultas agendadas para hoy.</p></div>`},
+      : `<div class="dash-card dc-today-empty"><div class="ct">Consultas de hoy</div><p style="font-size:13px;color:var(--text3);margin:0">No hay consultas agendadas para hoy.</p></div>`;}},
   pacientes_total:{label:'Pacientes totales (Pro)', pro:true, full:false, rail:true, html:()=>{const s=_dashMonthStats();return `<div class="dash-card dash-card-rail"><p class="dash-label">Pacientes totales</p><p class="dash-cycle-n" style="text-align:left;margin:4px 0 0">${s.total}</p></div>`;}},
   consultas_mes:{label:'Consultas este mes (Pro)', pro:true, full:false, rail:true, html:()=>{const s=_dashMonthStats();return `<div class="dash-card dash-card-rail"><p class="dash-label">Consultas este mes</p><p class="dash-cycle-n" style="text-align:left;margin:4px 0 0">${s.consMes}</p></div>`;}},
   ingresos_mes:{label:'Ingresos este mes (Pro)', pro:true, full:false, rail:true, html:()=>{const s=_dashMonthStats();return `<div class="dash-card dash-card-rail"><p class="dash-label">Ingresos este mes</p><p class="dash-cycle-n" style="text-align:left;margin:4px 0 0">$${s.ingresoMes.toLocaleString()}</p></div>`;}},
   pacientes_nuevos:{label:'Pacientes nuevos del mes (Pro)', pro:true, full:false, rail:true, html:()=>{const s=_dashMonthStats();return `<div class="dash-card dash-card-rail"><p class="dash-label">Pacientes nuevos</p><p class="dash-cycle-n" style="text-align:left;margin:4px 0 0">${s.pacientesNuevosMes}</p></div>`;}},
-  tratamientos_chart:{label:'Gráfica de tratamientos (Pro)', pro:true, full:true, html:()=>dashTratamientosChartHTML()},
-  cumpleanos:{label:'Cumpleaños del mes (Pro)', pro:true, full:false, rail:true, html:()=>dashBirthdaysHTML()}
+  tratamientos_chart:{label:'Gráfica de tratamientos (Pro)', pro:true, full:true, html:(t,i,size)=>dashTratamientosChartHTML(size)},
+  cumpleanos:{label:'Cumpleaños del mes (Pro)', pro:true, full:false, rail:true, html:(t,i,size)=>dashBirthdaysHTML(size)}
 };
 function _dashAvailableKeys(isPro){ return Object.keys(DASH_CATALOG).filter(k=>!DASH_CATALOG[k].pro||isPro); }
 function dashWidgetsHTML(todayConsultas){
@@ -4275,7 +4856,10 @@ function dashWidgetsHTML(todayConsultas){
   let main='', rail='';
   order.forEach(k=>{
     const w=DASH_CATALOG[k]; if(!w)return;
-    const html=`<div class="dash-widget${w.full?' full':''}" draggable="true" data-key="${k}"><span class="dash-drag" title="Arrastra para reordenar">${icon('drag',14)}</span>${w.html(todayConsultas,isPro)}</div>`;
+    const size=_dashSizeFor(k,w);
+    const fs=_dashFontFor(k);
+    const sizeBtns=w.rail?'':['s','m','l'].map(s=>`<button type="button" class="${size===s?'on':''}" onclick="event.stopPropagation();dashSetSize('${k}','${s}')" title="Tamaño ${s.toUpperCase()}">${s.toUpperCase()}</button>`).join('');
+    const html=`<div class="dash-widget dw-${size}" draggable="true" data-key="${k}" style="--wz:${fs}"><span class="dash-drag" title="Arrastra para reordenar">${icon('drag',14)}</span><div class="dash-wctl">${sizeBtns}${sizeBtns?'<span class="sep"></span>':''}<button type="button" onclick="event.stopPropagation();dashFont('${k}',-1)" title="Letra más pequeña">A−</button><button type="button" onclick="event.stopPropagation();dashFont('${k}',1)" title="Letra más grande">A+</button></div>${w.html(todayConsultas,isPro,size)}</div>`;
     if(w.rail)rail+=html; else main+=html;
   });
   if(_epDash==='free')dashProTeaserAutoStart();
@@ -4413,38 +4997,16 @@ function dashInitResize(){ /* el redimensionado manual se quitó: generaba scrol
 // veía ilegible.
 let _dashFitTimer=null;
 function dashAutoFit(){
-  const outer=document.querySelector('.landing-grid');
+  // v9 — se eliminó el escalado automático: causaba texto diminuto, espacios
+  // muertos y widgets recortados (p. ej. el mini-calendario con scroll/corte).
+  // El dashboard ahora fluye y scrollea natural, como cualquier dashboard moderno.
   const spacer=document.getElementById('dashFitSpacer');
   const inner=document.getElementById('dashScalable');
-  if(!outer||!spacer||!inner)return;
+  if(!spacer||!inner)return;
   inner.style.transform='none';
   inner.style.width='100%';
   spacer.style.height='auto';
   spacer.style.overflow='visible';
-  if(isAdmin&&!viewAsUid)return; // demasiado contenido para achicar y seguir siendo legible — se deja scrollear
-  const doFit=()=>{
-    // Medimos desde el spacer (sin padding propio) — así el cálculo de
-    // tamaño nunca se confunde con el padding del contenedor exterior,
-    // que es lo que causaba el recorte residual.
-    const available=window.innerHeight-spacer.getBoundingClientRect().top-24;
-    const actual=inner.getBoundingClientRect().height;
-    if(actual>available && available>240){
-      const MIN_SCALE=0.72;
-      const scale=Math.max(MIN_SCALE, available/actual);
-      inner.style.transformOrigin='top left';
-      inner.style.transform=`scale(${scale})`;
-      inner.style.width=(100/scale)+'%';
-      spacer.style.height=Math.min(available, Math.ceil(actual*scale))+'px';
-      spacer.style.overflow=(scale<=MIN_SCALE)?'auto':'hidden';
-    }
-  };
-  // Medir solo cuando la fuente ya cargó y el navegador terminó de pintar —
-  // si se mide antes, el texto puede reflujar después y dejar un recorte.
-  if(document.fonts&&document.fonts.ready){
-    document.fonts.ready.then(()=>requestAnimationFrame(()=>requestAnimationFrame(doFit)));
-  }else{
-    requestAnimationFrame(()=>requestAnimationFrame(doFit));
-  }
 }
 function _dashAutoFitDebounced(){ if(_dashFitTimer)clearTimeout(_dashFitTimer); _dashFitTimer=setTimeout(dashAutoFit,120); }
 window.addEventListener('resize',_dashAutoFitDebounced);
@@ -4506,7 +5068,7 @@ function _dashSaveOrder(){
 }
 
 window.abrirPacienteConsultas=function(id){
-  if(idActual!==id){_imgActiveCat='rad';_imgFilters={cat:'',user:'',cons:'',fecha:''};_imgLightboxId=null;}
+  if(idActual!==id){_imgActiveCat='rad';_imgFilters={cat:'',user:'',cons:'',fecha:''};_imgLightboxId=null;_docFilters={tipo:'',user:'',cons:'',fecha:''};}
   viewActual='paciente';idActual=id;tabActual='cons';consultaView=null;editUnlocked=false;odontoView=null;planView=null;
   logAccess(id);
   renderLista();renderPaciente();
@@ -4547,11 +5109,51 @@ function _wcode(code){
 // fallaba al abrir el archivo localmente y muchos usuarios no dan el permiso).
 // Open-Meteo es gratis y no requiere clave.
 const VALENCIA_LAT=10.1620, VALENCIA_LON=-67.9926;
+// v9 — la ciudad del clima es configurable en Ajustes ('auto' usa geolocalización
+// con fallback a Valencia si el usuario no da permiso o falla).
+const WEATHER_CITIES={
+  valencia:{n:'Valencia',lat:10.1620,lon:-67.9926},
+  caracas:{n:'Caracas',lat:10.4806,lon:-66.9036},
+  maracaibo:{n:'Maracaibo',lat:10.6544,lon:-71.6458},
+  barquisimeto:{n:'Barquisimeto',lat:10.0678,lon:-69.3474},
+  maracay:{n:'Maracay',lat:10.2469,lon:-67.5958},
+  guayana:{n:'Ciudad Guayana',lat:8.3533,lon:-62.6528},
+  merida:{n:'Mérida',lat:8.5897,lon:-71.1561},
+  sancristobal:{n:'San Cristóbal',lat:7.7669,lon:-72.2250},
+  puertolacruz:{n:'Puerto La Cruz',lat:10.2158,lon:-64.6250},
+  maturin:{n:'Maturín',lat:9.7457,lon:-63.1832}
+};
+function weatherCityPref(){ return localStorage.getItem('ds_weather_city')||'valencia'; }
+window.setWeatherCity=function(key){
+  localStorage.setItem('ds_weather_city',key);
+  if(key==='auto')localStorage.removeItem('ds_geo'); // re-pedir ubicación fresca
+  if(document.getElementById('dashWeatherCard'))dashLoadWeather();
+  if(viewActual==='ajustes')renderAjustes();
+};
+async function _weatherCoords(){
+  const pref=weatherCityPref();
+  if(pref!=='auto'){ const c=WEATHER_CITIES[pref]||WEATHER_CITIES.valencia; return {lat:c.lat,lon:c.lon,label:c.n}; }
+  try{ const cached=JSON.parse(localStorage.getItem('ds_geo')||'null');
+    if(cached&&cached.lat&&(Date.now()-(cached.t||0))<6*3600*1000)return {lat:cached.lat,lon:cached.lon,label:'Tu ubicación'};
+  }catch(e){}
+  const pos=await new Promise(res=>{
+    if(!navigator.geolocation)return res(null);
+    navigator.geolocation.getCurrentPosition(p=>res(p),()=>res(null),{timeout:6000,maximumAge:600000});
+  });
+  if(pos&&pos.coords){
+    try{localStorage.setItem('ds_geo',JSON.stringify({lat:pos.coords.latitude,lon:pos.coords.longitude,t:Date.now()}));}catch(e){}
+    return {lat:pos.coords.latitude,lon:pos.coords.longitude,label:'Tu ubicación'};
+  }
+  return {lat:VALENCIA_LAT,lon:VALENCIA_LON,label:'Valencia'};
+}
 async function dashLoadWeather(){
   const card=document.getElementById('dashWeatherCard');
   if(!card)return;
   try{
-    const r=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${VALENCIA_LAT}&longitude=${VALENCIA_LON}&current_weather=true`);
+    const loc=await _weatherCoords();
+    const cityEl=document.getElementById('dashWeatherCity');
+    if(cityEl)cityEl.textContent='Clima · '+loc.label;
+    const r=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${loc.lat}&longitude=${loc.lon}&current_weather=true`);
     const j=await r.json();
     const cw=j.current_weather;
     if(!cw)throw new Error('sin datos');
@@ -4728,6 +5330,20 @@ function adminCycleAutoStart(){
   _adminCycleTimer=setInterval(()=>{ if(document.getElementById('adminCycleCard'))adminCycleNext(); else clearInterval(_adminCycleTimer); },4000);
 }
 function renderAdmin(){
+  // v9 — preservar el scroll y el foco del panel: colapsar/expandir secciones
+  // (códigos, orden de tabs, archivos) re-renderiza y saltaba arriba solo.
+  const _ap=document.querySelector('#mainArea .admin-panel');
+  const _st=_ap?_ap.scrollTop:0;
+  const _hadFocusFiles=!!(document.activeElement&&document.activeElement.closest&&document.activeElement.closest('.admin-files-bar'));
+  const _selPos=_hadFocusFiles&&document.activeElement.selectionStart!=null?document.activeElement.selectionStart:null;
+  if(_st>0||_hadFocusFiles)requestAnimationFrame(()=>{
+    const p2=document.querySelector('#mainArea .admin-panel');
+    if(p2&&_st>0)p2.scrollTop=_st;
+    if(_hadFocusFiles){
+      const inp=document.querySelector('.admin-files-bar input');
+      if(inp){ inp.focus(); if(_selPos!=null){try{inp.setSelectionRange(_selPos,_selPos);}catch(e){}} }
+    }
+  });
   const q=(adminSearchQuery||'').toLowerCase().trim();
   // Compute patient counts per user (so admin can sort/filter by activity)
   const ownerCounts={};
@@ -4762,7 +5378,7 @@ function renderAdmin(){
   const userCards=filtered.map(u=>{
     const allowed=new Set(u.tabsAllowed||ALL_TABS);
     const status=u.status||'active';
-    const fullName=u.title?`${u.title} ${titleCase(u.name)||''}`.trim():(titleCase(u.name)||u.email||'(sin nombre)');
+    const fullName=u.title?`${dispTitle(u.title)} ${titleCase(u.name)||''}`.trim():(titleCase(u.name)||u.email||'(sin nombre)');
     const patientCount=ownerCounts[u.uid]||0;
     return `<div class="admin-user-card">
       <div class="admin-user-head">
@@ -4817,6 +5433,10 @@ function renderAdmin(){
         <label class="admin-tab-chip ${(u.plan==='pro'||u.plan==='clinica')?(u.imagenesDisabled?'':'on'):'locked'}" title="${(u.plan==='pro'||u.plan==='clinica')?'':'Solo disponible en planes Pro o Clínica'}">
           <input type="checkbox" ${(u.plan==='pro'||u.plan==='clinica')?'':'disabled'} ${(u.plan==='pro'||u.plan==='clinica')&&!u.imagenesDisabled?'checked':''} onchange="adminToggleImagenes('${u.uid}',!this.checked)">
           <span>Imágenes${(u.plan==='pro'||u.plan==='clinica')?'':' (Pro)'}</span>
+        </label>
+        <label class="admin-tab-chip ${(u.plan==='pro'||u.plan==='clinica')?(u.documentosDisabled?'':'on'):'locked'}" title="${(u.plan==='pro'||u.plan==='clinica')?'':'Solo disponible en planes Pro o Clínica'}">
+          <input type="checkbox" ${(u.plan==='pro'||u.plan==='clinica')?'':'disabled'} ${(u.plan==='pro'||u.plan==='clinica')&&!u.documentosDisabled?'checked':''} onchange="adminToggleDocumentos('${u.uid}',!this.checked)">
+          <span>Documentos${(u.plan==='pro'||u.plan==='clinica')?'':' (Pro)'}</span>
         </label>
       </div>
     </div>`;
@@ -4885,7 +5505,7 @@ function renderAdmin(){
           <svg class="admin-search-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           <input type="text" id="adminSearchInput" placeholder="Buscar por nombre, correo o título…" value="${e(adminSearchQuery)}" oninput="adminSetSearch(this.value)">
         </div>
-        <button class="filter-toggle-btn${(anyFilterActive||adminFilterPanelOpen)?' on':''}" onclick="adminToggleFilterPanel()">⚙ Filtros${anyFilterActive?` · ${[adminFilterPlan!=='all',adminFilterStatus!=='all',adminFilterRole!=='all',adminSortBy!=='name'].filter(Boolean).length}`:''}</button>
+        <button class="filter-toggle-btn${(anyFilterActive||adminFilterPanelOpen)?' on':''}" onclick="adminToggleFilterPanel()">${icon('filter',12)} Filtros${anyFilterActive?` · ${[adminFilterPlan!=='all',adminFilterStatus!=='all',adminFilterRole!=='all',adminSortBy!=='name'].filter(Boolean).length}`:''}</button>
         <div class="admin-result-count">${filteredCount} de ${userCount}</div>
       </div>
       ${adminFilterPanelOpen?`<div class="admin-toolbar admin-toolbar-expanded">
@@ -4924,6 +5544,7 @@ function renderAdmin(){
         </div>
       </div>`:''}
       ${invitesHTML}
+      ${adminFilesHTML()}
       ${tabOrderHTML}
       ${isEmpty?emptyState:(noMatches?noMatchesState:`<div class="admin-users-grid">${userCards}</div>`)}
       <div class="admin-footer">
@@ -5003,6 +5624,13 @@ window.adminToggleImagenes=async function(uid,disabled){
     await setDoc(doc(db,'users',uid),{imagenesDisabled:disabled},{merge:true});
     toast(disabled?'Imágenes desactivada para este usuario':'Imágenes reactivada');
   }catch(e){ toast('Error al actualizar Imágenes'); }
+};
+window.adminToggleDocumentos=async function(uid,disabled){
+  if(!isAdmin)return;
+  try{
+    await setDoc(doc(db,'users',uid),{documentosDisabled:disabled},{merge:true});
+    toast(disabled?'Documentos desactivada para este usuario':'Documentos reactivada');
+  }catch(e){ toast('Error al actualizar Documentos'); }
 };
 window.adminRemoveUser=async function(uid){
   if(!isAdmin)return;
@@ -5092,13 +5720,72 @@ window.adminToggleDevices=async function(uid){
 };
 
 window.toggleInvites=function(){ invitesCollapsed=!invitesCollapsed; renderAdmin(); };
+// ── v9 · Archivos subidos por los usuarios (auditoría del admin) ────────────
+// Recorre la data que el admin ya tiene en memoria (todas las /pacientes):
+// imágenes + documentos, con quién subió, paciente, fecha y tipo.
+function adminAllFiles(){
+  const out=[];
+  for(const pt of pacientes){
+    for(const im of (pt.imagenes||[])){
+      out.push({kind:'imagen', nombre:im.nombre||'Imagen', fecha:im.fecha||'', quien:im.subidoPorNombre||'—',
+        pacienteId:pt.id, paciente:titleCase(pt.nombre)||'—', url:im.downloadURL||im.dataUrl||'', size:null, cat:imgCatLabel(im.categoria)});
+    }
+    for(const d of (pt.documentos||[])){
+      out.push({kind:d.tipo==='word'?'word':'pdf', nombre:d.nombre||'Documento', fecha:d.fecha||'', quien:d.subidoPorNombre||'—',
+        pacienteId:pt.id, paciente:titleCase(pt.nombre)||'—', url:d.downloadURL||'', size:d.size||null, cat:null});
+    }
+  }
+  out.sort((a,b)=>(b.fecha||'').localeCompare(a.fecha||''));
+  return out;
+}
+function adminFilesHTML(){
+  const all=adminAllFiles();
+  let list=all;
+  if(adminFilesTipo)list=list.filter(f=>f.kind===adminFilesTipo);
+  if(adminFilesQ){ const q=adminFilesQ.toLowerCase(); list=list.filter(f=>(f.nombre+' '+f.paciente+' '+f.quien).toLowerCase().includes(q)); }
+  const KIND_LBL={imagen:'Imagen',pdf:'PDF',word:'Word'};
+  return `<div class="admin-invites">
+    <div class="admin-invites-head">
+      <button class="invites-toggle" onclick="toggleAdminFiles()"><span class="chev">${adminFilesCollapsed?'▸':'▾'}</span> Archivos subidos${all.length?` · ${all.length}`:''}</button>
+    </div>
+    ${adminFilesCollapsed?'':`
+      <div class="admin-files-bar">
+        <select onchange="adminFilesSetTipo(this.value)">
+          <option value="">Todos los tipos</option>
+          <option value="imagen" ${adminFilesTipo==='imagen'?'selected':''}>Imágenes</option>
+          <option value="pdf" ${adminFilesTipo==='pdf'?'selected':''}>PDF</option>
+          <option value="word" ${adminFilesTipo==='word'?'selected':''}>Word</option>
+        </select>
+        <input type="text" placeholder="Buscar por archivo, paciente o usuario…" value="${e(adminFilesQ)}" oninput="adminFilesSetQ(this.value)">
+        <span class="admin-files-count">${list.length} de ${all.length}</span>
+      </div>
+      ${list.length?`<div class="admin-files-list">${list.slice(0,200).map(f=>`
+        <div class="doc-row admin-file-row" ${f.url?`onclick="window.open('${e(f.url)}','_blank','noopener')"`:''}>
+          <span class="doc-badge doc-badge-${f.kind==='imagen'?'img':f.kind}">${KIND_LBL[f.kind]}</span>
+          <div class="doc-row-body">
+            <div class="doc-row-name">${e(f.nombre)}${f.cat?` <span class="admin-file-cat">${e(f.cat)}</span>`:''}</div>
+            <div class="doc-row-sub">${e(f.paciente)} · ${e(f.quien)} · ${e(imgFechaAbs(f.fecha))}${f.size?' · '+docSizeLabel(f.size):''}</div>
+          </div>
+          <button class="ba" onclick="event.stopPropagation();seleccionar('${e(f.pacienteId)}')">Ver paciente</button>
+        </div>`).join('')}${list.length>200?`<p style="font-size:11px;color:var(--text3);padding:8px 2px">Mostrando los 200 más recientes de ${list.length}.</p>`:''}</div>`
+      :`<p style="font-size:12px;color:var(--text3);padding:6px 2px">${all.length?'Ningún archivo coincide con el filtro.':'Aún no hay archivos subidos por los usuarios.'}</p>`}
+    `}
+  </div>`;
+}
+window.toggleAdminFiles=function(){ adminFilesCollapsed=!adminFilesCollapsed; renderAdmin(); };
+window.adminFilesSetTipo=function(v){ adminFilesTipo=v; renderAdmin(); };
+let _afqT=null;
+window.adminFilesSetQ=function(v){ adminFilesQ=v; if(_afqT)clearTimeout(_afqT); _afqT=setTimeout(()=>renderAdmin(),350); };
 window.toggleTabOrder=function(){ tabOrderCollapsed=!tabOrderCollapsed; renderAdmin(); };
 window.adminToggleFilterPanel=function(){ adminFilterPanelOpen=!adminFilterPanelOpen; renderAdmin(); };
 // ===== v7.2 mobile nav + side menu (#1/#5/#6) =====
 function closeSideMenu(){ const m=document.getElementById('sideMenu'),o=document.getElementById('sideMenuOverlay'); if(m)m.classList.remove('open'); if(o)o.classList.remove('on'); }
 function openSideMenu(){ const m=document.getElementById('sideMenu'),o=document.getElementById('sideMenuOverlay'); if(m)m.classList.add('open'); if(o)o.classList.add('on'); }
 function closeOverlays(){ try{cerrarModal();}catch(e){} closeSideMenu(); }
-function bnInicio(){ closeOverlays(); const sb=document.getElementById('sidebar'); if(sb)sb.classList.remove('open'); window.volverInicio(); }
+function bnInicio(){ closeOverlays(); const sb=document.getElementById('sidebar'); if(sb)sb.classList.remove('open');
+  // v9 — si ya estamos en el dashboard, no re-renderizar: evita el parpadeo del botón Inicio.
+  if(viewActual==='paciente'&&!idActual)return;
+  window.volverInicio(); }
 function bnPacientes(){ try{cerrarModal();}catch(e){} closeSideMenu(); const sb=document.getElementById('sidebar'); if(sb)sb.classList.add('open'); }
 function bnNuevo(){ closeOverlays(); const sb=document.getElementById('sidebar'); if(sb)sb.classList.remove('open'); window.modalNuevo(); }
 function bnCalendario(){ closeOverlays(); const sb=document.getElementById('sidebar'); if(sb)sb.classList.remove('open'); if(viewActual!=='calendario'){ window.toggleCalendar(); } }
@@ -5158,6 +5845,7 @@ window.openVideoInformativo=function(){
   document.body.appendChild(div);
   _renderVideoStep();
 };
+window.videoStepMove=function(d){ _videoStep=Math.max(0,_videoStep+d); _renderVideoStep(); }; // v9 fix — onclick corre en scope global
 function _renderVideoStep(){
   const el=document.getElementById('videoStepBody'); if(!el)return;
   const s=VIDEO_STEPS[_videoStep];
@@ -5168,8 +5856,8 @@ function _renderVideoStep(){
     <p style="font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:18px">${e(s.b)}</p>
     <div class="dash-cycle-dots" style="margin-bottom:16px">${VIDEO_STEPS.map((_,i)=>`<span class="${i===_videoStep?'on':''}"></span>`).join('')}</div>
     <div style="display:flex;gap:8px;justify-content:center">
-      <button class="bc" ${_videoStep===0?'disabled':''} onclick="_videoStep--;_renderVideoStep()">Anterior</button>
-      ${_videoStep<VIDEO_STEPS.length-1?`<button class="bs" onclick="_videoStep++;_renderVideoStep()">Siguiente</button>`:`<button class="bs" onclick="document.getElementById('VIM').remove()">Terminar</button>`}
+      <button class="bc" ${_videoStep===0?'disabled':''} onclick="videoStepMove(-1)">Anterior</button>
+      ${_videoStep<VIDEO_STEPS.length-1?`<button class="bs" onclick="videoStepMove(1)">Siguiente</button>`:`<button class="bs" onclick="document.getElementById('VIM').remove()">Terminar</button>`}
     </div>`;
 }
 
@@ -5607,7 +6295,7 @@ window.updateEspLabel=updateEspLabel;
 function impersonationBanner(){
   if(!viewAsUid)return '';
   const target=allUsersList.find(u=>u.uid===viewAsUid);
-  const name=target?((target.title?`${target.title} `:'')+(target.name||target.email||'(sin nombre)')):viewAsUid;
+  const name=target?((target.title?`${dispTitle(target.title)} `:'')+(target.name||target.email||'(sin nombre)')):viewAsUid;
   return `<div class="impersonation-banner">
     <div class="imp-text"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg> Viendo como <strong>${e(name)}</strong></div>
     <button class="ba imp-exit-btn" onclick="exitImpersonation()">Salir</button>
@@ -5727,6 +6415,7 @@ function renderCalendarMes(){
       <button class="ba" onclick="calMesPrev()" title="Mes anterior">‹</button>
       <button class="ba" onclick="calToday()">Hoy</button>
       <button class="ba" onclick="calMesNext()" title="Mes siguiente">›</button>
+      <button class="bs cal-add-btn" onclick="calQuickCreate('${calSelectedDay||today}')">+ Agendar</button>
     </div>
     <div class="panel cal-panel">
       <div class="mes-weekrow">
@@ -5767,10 +6456,11 @@ function renderCalendarDia(){
       <button class="ba" onclick="calPrev()" title="Día anterior">‹</button>
       <button class="ba" onclick="calToday()">Hoy</button>
       <button class="ba" onclick="calNext()" title="Día siguiente">›</button>
+      <button class="bs cal-add-btn" onclick="calQuickCreate('${dateStr}')">+ Agendar</button>
     </div>
     <div class="panel">
       ${consultas.length===0?
-        `<div class="empty"><h3>Sin consultas</h3><p>No hay consultas agendadas para este día.</p><button class="ba" style="margin-top:14px" onclick="calVerMes()">← Volver al mes</button></div>`:
+        `<div class="empty"><h3>Sin consultas</h3><p>No hay consultas agendadas para este día.</p><div style="display:flex;gap:8px;margin-top:14px;justify-content:center;flex-wrap:wrap"><button class="bs" onclick="calQuickCreate('${dateStr}')">+ Agendar consulta</button><button class="ba" onclick="calVerMes()">← Volver al mes</button></div></div>`:
         `<div class="cal-agenda">${consultas.map(c=>{
           const motivo=(c.motivo&&c.motivo.trim())?c.motivo.trim():'';
           const trat=(c.tratamiento||'').trim();
@@ -5784,7 +6474,7 @@ function renderCalendarDia(){
                 ${trat?`<div class="ccn cal-trat"><span class="cal-lbl">Tratamiento</span> ${e(trat)}</div>`:''}
               </div>
               ${c.costo?`<span class="ccc">$${parseFloat(c.costo).toLocaleString()}</span>`:''}
-              <button class="bdel bedit" onclick="event.stopPropagation();editConsFromCalendar('${c.patientId}','${c.id}')" title="Editar consulta">✎</button>
+              <button class="bdel bedit" onclick="event.stopPropagation();editConsFromCalendar('${c.patientId}','${c.id}')" title="Editar consulta">${icon('edit',14)}</button>
             </div>
           </div>`;}).join('')}
         </div>`}
@@ -5800,7 +6490,7 @@ window.calVerDia=function(ds){
   calendarView='dia';renderCalendar();
 };
 window.editConsFromCalendar=function(pid,cid){
-  if(idActual!==pid){_imgActiveCat='rad';_imgFilters={cat:'',user:'',cons:'',fecha:''};_imgLightboxId=null;}
+  if(idActual!==pid){_imgActiveCat='rad';_imgFilters={cat:'',user:'',cons:'',fecha:''};_imgLightboxId=null;_docFilters={tipo:'',user:'',cons:'',fecha:''};}
   viewActual='paciente';idActual=pid;tabActual='cons';consultaView=null;editUnlocked=false;odontoView=null;planView=null;
   logAccess(pid);
   renderLista();renderPaciente();
@@ -5836,20 +6526,26 @@ function renderPaciente(){
   const _impersonated = viewAsUid ? allUsersList.find(u=>u.uid===viewAsUid) : null;
   const effectivePlan = effectivePlanFor(_impersonated);
   const imgAllowed = (effectivePlan==='admin'||effectivePlan==='pro'||effectivePlan==='clinica') && !imagenesDisabledFor(_impersonated);
+  const docAllowed = (effectivePlan==='admin'||effectivePlan==='pro'||effectivePlan==='clinica') && !documentosDisabledFor(_impersonated);
   // Imágenes tab — gated purely by effective plan (not part of ALL_TABS / per-user tabsAllowed).
   if(imgAllowed){
     tabs.splice(tabs.findIndex(t=>t.k==='cons')+1, 0, {k:'img',l:'Imágenes'});
   }
+  // v9 — Documentos (Word/PDF), junto a Imágenes, mismo gating por plan.
+  if(docAllowed){
+    const _ai=tabs.findIndex(t=>t.k==='img');
+    tabs.splice((_ai>=0?_ai:tabs.findIndex(t=>t.k==='cons'))+1, 0, {k:'doc',l:'Documentos'});
+  }
   // Filter tabs based on who's actually "in scope" (per-user tabsAllowed):
   if(_impersonated && Array.isArray(_impersonated.tabsAllowed)){
     const allowed=new Set(_impersonated.tabsAllowed);
-    tabs=tabs.filter(t=>(t.k==='img'&&imgAllowed)||allowed.has(t.k));
+    tabs=tabs.filter(t=>(t.k==='img'&&imgAllowed)||(t.k==='doc'&&docAllowed)||allowed.has(t.k));
     if(tabs.length>0 && !tabs.find(t=>t.k===tabActual)){
       tabActual=tabs[0].k;
     }
   } else if(!isAdmin && currentUserPerms && Array.isArray(currentUserPerms.tabsAllowed)){
     const allowed=new Set(currentUserPerms.tabsAllowed);
-    tabs=tabs.filter(t=>(t.k==='img'&&imgAllowed)||allowed.has(t.k));
+    tabs=tabs.filter(t=>(t.k==='img'&&imgAllowed)||(t.k==='doc'&&docAllowed)||allowed.has(t.k));
     // If active tab got filtered out, fall back to first allowed
     if(tabs.length>0 && !tabs.find(t=>t.k===tabActual)){
       tabActual=tabs[0].k;
@@ -5858,6 +6554,9 @@ function renderPaciente(){
   // Guard: if the active tab is 'img' but the effective plan doesn't allow it,
   // drop straight to the first available tab (defends against direct tabActual='img').
   if(tabActual==='img' && !imgAllowed){
+    tabActual = (tabs[0] && tabs[0].k) || 'datos';
+  }
+  if(tabActual==='doc' && !docAllowed){
     tabActual = (tabs[0] && tabs[0].k) || 'datos';
   }
   // Apply admin-configured global tab order (Item 3). Imágenes gating above still wins.
@@ -5889,6 +6588,14 @@ function renderPaciente(){
         <div class="phn">${e(titleCase(p.nombre))}</div>
         <div class="phm">${edad(p.nacimiento)}${edad(p.nacimiento)&&p.ci?' · ':''}${e(p.ci||'')}${p.telefono?' · '+e(p.telefono):''}</div>
       </div>
+      ${(()=>{
+        const _impW=viewAsUid?allUsersList.find(u=>u.uid===viewAsUid):null;
+        const _epW=effectivePlanFor(_impW);
+        if(!(_epW==='admin'||_epW==='pro'||_epW==='clinica'))return '';
+        const _wa=waLink(p.telefono||p.telefono2,`Hola ${ (titleCase(p.nombre)||'').split(' ')[0] }, le escribo de su consultorio dental.`);
+        return _wa?`<a class="ba phdr-wa" href="${_wa}" target="_blank" rel="noopener" title="Enviar WhatsApp al paciente">${icon('chat',13)} WhatsApp</a>`
+                  :`<button class="ba phdr-wa phdr-wa-off" type="button" onclick="toast('Este paciente no tiene número de teléfono registrado')" title="Sin número registrado">${icon('chat',13)} WhatsApp</button>`;
+      })()}
       ${isAdmin&&!viewAsUid?`<button class="ba" style="font-size:11px;padding:5px 10px" onclick="exportarPacienteJSON()" title="Exportar datos del paciente">↓ Datos</button>`:''}
       <button class="ba" onclick="volverInicio()" title="Volver al inicio">← Inicio</button>
     </div>
@@ -5973,7 +6680,7 @@ window.cambiarTab=function(tab){
   renderTab();
 }
 function tabLabel(k){
-  return{datos:'Datos',clinico:'Historia',odonto:'Odontograma',plan:'Plan',ops:'Operatorias',est:'Proc',rec:'Récord',cons:'Consultas',img:'Imágenes'}[k]||k;
+  return{datos:'Datos',clinico:'Historia',odonto:'Odontograma',plan:'Plan',ops:'Operatorias',est:'Proc',rec:'Récord',cons:'Consultas',img:'Imágenes',doc:'Documentos'}[k]||k;
 }
 
 // ─── IMÁGENES — galería clínica (paid plans only) ─────────────────────────
@@ -6018,14 +6725,14 @@ function imgUploaderIdentity(){
   if(viewAsUid){
     const u=allUsersList.find(x=>x.uid===viewAsUid);
     if(u){
-      const nm=u.title?`${u.title} ${u.name||''}`.trim():(u.name||u.email||'Usuario');
+      const nm=u.title?`${dispTitle(u.title)} ${u.name||''}`.trim():(u.name||u.email||'Usuario');
       return {uid:u.uid, nombre:nm};
     }
     return {uid:viewAsUid, nombre:'Usuario'};
   }
   if(currentUserPerms){
     const u=currentUserPerms;
-    const nm=u.title?`${u.title} ${u.name||''}`.trim():(u.name||u.email||'Usuario');
+    const nm=u.title?`${dispTitle(u.title)} ${u.name||''}`.trim():(u.name||u.email||'Usuario');
     return {uid:currentUserUid||u.uid||'temp', nombre:nm};
   }
   if(isAdmin || (typeof isTempBypass==='function' && isTempBypass())){
@@ -6087,6 +6794,7 @@ function renderImagenes(){
   if(!p){ document.getElementById('panel').innerHTML=''; return; }
   const all=(p.imagenes||[]);
   const filtered=imgFiltered(p);
+  const _roImg=(typeof isReadOnly==='function'&&isReadOnly()); // v9 — candado consistente (9.4)
 
   // botones de categoría (para destino de la subida)
   const catBtns=IMG_CATS.map(c=>
@@ -6096,7 +6804,7 @@ function renderImagenes(){
   // opciones del filtro de usuario (quienes han subido imágenes)
   const userMap=new Map();
   all.forEach(im=>{ if(im.subidoPorUid && !userMap.has(im.subidoPorUid)) userMap.set(im.subidoPorUid, im.subidoPorNombre||'Usuario'); });
-  const userOpts=`<option value="">Todos los doctores</option>`+
+  const userOpts=`<option value="">Todos los odontólogos</option>`+
     Array.from(userMap.entries()).map(([uid,nm])=>`<option value="${e(uid)}"${_imgFilters.user===uid?' selected':''}>${e(nm)}</option>`).join('');
 
   // opciones del filtro de consulta (consultas del paciente + "sin consulta")
@@ -6127,7 +6835,7 @@ function renderImagenes(){
     const cards=filtered.map(im=>{
       const rel=timeAgo(im.fecha);
       const abs=imgFechaAbs(im.fecha);
-      const delBtn=imgCanDelete(im)?`<button type="button" class="img-thumb-del" title="Eliminar" onclick="event.stopPropagation();imgDelete('${e(im.id)}')">✕</button>`:'';
+      const delBtn=(!_roImg&&imgCanDelete(im))?`<button type="button" class="img-thumb-del" title="Eliminar" onclick="event.stopPropagation();imgDelete('${e(im.id)}')">✕</button>`:'';
       return `<figure class="img-thumb" title="${e(abs)}" onclick="imgOpen('${e(im.id)}')">
         <img src="${im.dataUrl||im.downloadURL||''}" alt="${e(im.nombre||'')}">
         ${delBtn}
@@ -6142,12 +6850,14 @@ function renderImagenes(){
   }
 
   const html=`
+    <div class="datos-editbar">${roToggleHTML()}</div>
     <div class="ct-row"><div class="ct">Imágenes clínicas${infoBtn('Radiografías y fotos clínicas del paciente, organizadas por categoría. Puedes etiquetar cada imagen a una consulta específica al subirla, para verla luego desde el visual de esa consulta.')}</div></div>
+    ${roBanner()}
     ${storage?'':`<div class="img-cloud-notice">
       <span class="ico">${icon('cloud',16)}</span>
       <span>Sincronización en la nube no disponible — las imágenes se guardan localmente en el registro del paciente hasta que se habilite Firebase Storage (plan Blaze).</span>
     </div>`}
-    <div class="card">
+    ${_roImg?'':`<div class="card">
       <input type="file" id="imgFileInput" accept="image/*" multiple style="display:none" onchange="imgOnFiles(this.files)">
       <div style="font-size:11px;color:var(--text3);font-family:'DM Sans',sans-serif;margin-bottom:7px">Categoría para nuevas imágenes</div>
       <div class="img-cats">${catBtns}</div>
@@ -6160,11 +6870,11 @@ function renderImagenes(){
         <button type="button" class="ba img-drop-btn" onclick="event.stopPropagation();document.getElementById('imgFileInput').click()">Subir imágenes</button>
         <div class="img-drop-note">Se asocian a este paciente, a tu usuario y con fecha/hora. Opcionalmente puedes etiquetarlas a una consulta al subir.</div>
       </div>
-    </div>
+    </div>`}
     ${all.length>0?`<div class="card">
       <div class="img-filters">
         <div class="img-filter"><label>Categoría</label><select onchange="imgSetFilter('cat',this.value)">${catOpts}</select></div>
-        <div class="img-filter"><label>Doctor / usuario</label><select onchange="imgSetFilter('user',this.value)">${userOpts}</select></div>
+        <div class="img-filter"><label>Odontólogo / usuario</label><select onchange="imgSetFilter('user',this.value)">${userOpts}</select></div>
         <div class="img-filter"><label>Consulta</label><select onchange="imgSetFilter('cons',this.value)">${consOpts}</select></div>
         <div class="img-filter"><label>Fecha</label><select onchange="imgSetFilter('fecha',this.value)">${fechaOpts}</select></div>
       </div>
@@ -6186,6 +6896,7 @@ window.imgClearFilters=function(){ _imgFilters={cat:'',user:'',cons:'',fecha:''}
 // ── Manejo de archivos seleccionados: procesa, comprime y abre el modal ────
 window.imgOnFiles=function(files){
   if(!files||!files.length)return;
+  if(typeof isReadOnly==='function'&&isReadOnly()){ toast('Activa "Editar" para subir imágenes.'); return; }
   const arr=Array.from(files).filter(f=>f.type.startsWith('image/'));
   if(!arr.length){ if(typeof toast==='function')toast('Selecciona archivos de imagen.'); return; }
   let pending=arr.length;
@@ -6356,7 +7067,7 @@ function imgRenderLightbox(){
   const im=(p.imagenes||[]).find(x=>x.id===_imgLightboxId);
   if(!im){ _imgLightboxId=null; return; }
   const consLabel=imgConsultaLabel(p,im.consultaId);
-  const canEdit=imgCanDelete(im);
+  const canEdit=imgCanDelete(im)&&!(typeof isReadOnly==='function'&&isReadOnly());
   const editBtn=canEdit?`<button type="button" class="bc" onclick="imgEditOpen('${e(im.id)}')">${icon('edit',13)} Editar</button>`:'';
   const delBtn=canEdit?`<button type="button" class="bd" onclick="imgDelete('${e(im.id)}')">Eliminar</button>`:'';
   const div=document.createElement('div');
@@ -6369,7 +7080,7 @@ function imgRenderLightbox(){
       <div class="img-lb-meta">
         <h3 class="img-lb-title">${e(im.nombre||'Imagen')}</h3>
         <div class="img-lb-row"><span class="k">Paciente</span><span class="v">${e(titleCase(p.nombre)||'')}</span></div>
-        <div class="img-lb-row"><span class="k">Doctor</span><span class="v">${e(im.subidoPorNombre||'—')}</span></div>
+        <div class="img-lb-row"><span class="k">Odontólogo</span><span class="v">${e(im.subidoPorNombre||'—')}</span></div>
         <div class="img-lb-row"><span class="k">Fecha y hora</span><span class="v">${e(imgFechaAbs(im.fecha))} <span style="color:var(--text3)">(${e(timeAgo(im.fecha))})</span></span></div>
         <div class="img-lb-row"><span class="k">Categoría</span><span class="v">${e(imgCatLabel(im.categoria))}</span></div>
         <div class="img-lb-row"><span class="k">Consulta</span><span class="v">${consLabel?e(consLabel):'<span style="color:var(--text3)">Sin asociar</span>'}</span></div>
@@ -6447,6 +7158,254 @@ function renderImagenesLocked(){
       </p>
     </div></div>`;
 }
+// ═══ v9 · DOCUMENTOS (Word / PDF) — réplica del patrón de Imágenes ═══════════
+// p.documentos = [{ id, nombre, tipo:'pdf'|'word', size, fecha(ISO),
+//   subidoPorUid, subidoPorNombre, consultaId|null, storagePath, downloadURL }]
+// Subida SIEMPRE a Firebase Storage (activado). Campo nuevo aditivo en el doc
+// del paciente; no toca ningún campo existente.
+let _docFilters = { tipo:'', user:'', cons:'', fecha:'' };
+const DOC_TIPOS={pdf:'PDF', word:'Word'};
+function docTipoDe(file){
+  const n=(file.name||'').toLowerCase();
+  if(file.type==='application/pdf'||n.endsWith('.pdf'))return 'pdf';
+  if(n.endsWith('.doc')||n.endsWith('.docx')||(file.type||'').includes('msword')||(file.type||'').includes('officedocument.wordprocessingml'))return 'word';
+  return null;
+}
+function docSizeLabel(b){ if(!b&&b!==0)return ''; if(b<1024)return b+' B'; if(b<1048576)return (b/1024).toFixed(0)+' KB'; return (b/1048576).toFixed(1)+' MB'; }
+function docFiltered(pt){
+  let list=[...(pt.documentos||[])];
+  const f=_docFilters;
+  if(f.tipo) list=list.filter(d=>d.tipo===f.tipo);
+  if(f.user) list=list.filter(d=>d.subidoPorUid===f.user);
+  if(f.cons){
+    if(f.cons==='__none__') list=list.filter(d=>!d.consultaId);
+    else list=list.filter(d=>d.consultaId===f.cons);
+  }
+  if(f.fecha){
+    const now=Date.now(); let cutoff=0;
+    if(f.fecha==='7')cutoff=now-7*86400000;
+    else if(f.fecha==='30')cutoff=now-30*86400000;
+    else if(f.fecha==='90')cutoff=now-90*86400000;
+    else if(f.fecha==='year')cutoff=now-365*86400000;
+    if(cutoff)list=list.filter(d=>d.fecha&&new Date(d.fecha).getTime()>=cutoff);
+  }
+  list.sort((a,b)=>(b.fecha||'').localeCompare(a.fecha||''));
+  return list;
+}
+window.docSetFilter=function(key,val){ _docFilters[key]=val; renderDocumentos(); };
+window.docClearFilters=function(){ _docFilters={tipo:'',user:'',cons:'',fecha:''}; renderDocumentos(); };
+window.docOnFiles=function(files){
+  if(!files||!files.length)return;
+  if(typeof isReadOnly==='function'&&isReadOnly()){ toast('Activa "Editar" para subir documentos.'); return; }
+  const arr=Array.from(files).filter(f=>docTipoDe(f));
+  if(!arr.length){ toast('Solo se aceptan documentos PDF o Word (.pdf, .doc, .docx).'); return; }
+  const MAX=20*1048576;
+  const big=arr.find(f=>f.size>MAX);
+  if(big){ toast(`"${big.name}" pesa más de 20 MB. Reduce el archivo e intenta de nuevo.`); return; }
+  docUpload(arr);
+};
+function docUpload(files){
+  const pt=gp();
+  if(!pt){ toast('Abre un paciente primero.'); return; }
+  if(!storage){ toast('La nube de archivos no está disponible en este momento. Intenta más tarde.'); return; }
+  const consSorted=[...(pt.consultas||[])].sort((a,b)=>((b.fecha||'')+(b.hora||'')).localeCompare((a.fecha||'')+(a.hora||'')));
+  const consOpts=`<option value="">Sin consulta</option>`+consSorted.map(c=>{
+    const motivo=(c.motivo&&c.motivo.trim())||(c.tratamiento&&c.tratamiento.trim())||'Consulta';
+    return `<option value="${e(c.id)}">${e(ff(c.fecha))}${c.hora?' · '+e(c.hora):''} — ${e(motivo)}</option>`;
+  }).join('');
+  const fileRows=files.map(f=>{
+    const t=docTipoDe(f);
+    return `<div class="doc-up-row"><span class="doc-badge doc-badge-${t}">${DOC_TIPOS[t]}</span><span class="doc-up-name">${e(f.name)}</span><span class="doc-up-size">${docSizeLabel(f.size)}</span></div>`;
+  }).join('');
+  const body=`
+    <div style="margin-bottom:12px">${fileRows}</div>
+    <p style="font-size:12px;color:var(--text2);margin:0 0 12px">${files.length} documento${files.length===1?'':'s'} para asociar a <strong>${e(titleCase(pt.nombre)||'este paciente')}</strong>.</p>
+    <div class="mf"><label>Asociar a una consulta (opcional)</label><select id="doc_cons">${consOpts}</select></div>
+    <div id="docUploadProgress" style="display:none;margin-top:4px">
+      <div class="img-upload-track"><div class="img-upload-fill" id="docUploadFill" style="width:0%"></div></div>
+      <p style="font-size:11px;color:var(--text3);margin:6px 0 0;text-align:center" id="docUploadLabel">Subiendo…</p>
+    </div>`;
+  abrirModal('Subir documentos', body, async function(){
+   try{
+    const consultaId=(document.getElementById('doc_cons')||{}).value||null;
+    const who=imgUploaderIdentity();
+    const now=new Date().toISOString();
+    const cur=gp();
+    if(!cur){ cerrarModal(); return; }
+    const docs=(cur.documentos||[]).slice();
+    let fallos=0;
+    const progWrap=document.getElementById('docUploadProgress');
+    const progFill=document.getElementById('docUploadFill');
+    const progLabel=document.getElementById('docUploadLabel');
+    if(progWrap)progWrap.style.display='block';
+    for(let idx=0;idx<files.length;idx++){
+      const f=files[idx];
+      if(progLabel)progLabel.textContent=`Subiendo documento ${idx+1} de ${files.length}…`;
+      if(progFill)progFill.style.width=Math.round((idx/files.length)*100)+'%';
+      const tipo=docTipoDe(f);
+      const id='doc-'+Date.now().toString(36)+'-'+idx+'-'+Math.random().toString(36).slice(2,7);
+      const safe=(f.name||'documento').replace(/[^a-zA-Z0-9_.\-]/g,'_').slice(-80);
+      try{
+        const path=`pacientes/${cur.id}/documentos/${id}_${safe}`;
+        const sref=stRef(storage,path);
+        await Promise.race([
+          uploadBytes(sref,f,{contentType:f.type||undefined}),
+          new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),45000))
+        ]);
+        const url=await getDownloadURL(sref);
+        docs.push({id, nombre:f.name||'Documento', tipo, size:f.size||0, fecha:now,
+          subidoPorUid:who.uid, subidoPorNombre:who.nombre, consultaId:consultaId||null,
+          storagePath:path, downloadURL:url});
+      }catch(err){
+        console.warn('Subida de documento falló:',err.message);
+        fallos++;
+      }
+    }
+    if(progFill)progFill.style.width='100%';
+    if(docs.length>(cur.documentos||[]).length){
+      cur.documentos=docs;
+      await guardar(cur);
+    }
+    cerrarModal();
+    const subidos=files.length-fallos;
+    if(subidos>0&&fallos===0)toast(subidos===1?'Documento subido a la nube':`${subidos} documentos subidos a la nube`);
+    else if(subidos>0)toast(`${subidos} subido${subidos===1?'':'s'} · ${fallos} fallaron — revisa tu conexión`);
+    else toast('No se pudieron subir los documentos. Revisa tu conexión e intenta de nuevo.');
+    renderDocumentos();
+   }catch(err){
+     console.error('docUpload falló:',err);
+     cerrarModal();
+     toast('No se pudieron subir los documentos. Intenta de nuevo.');
+   }
+  });
+}
+window.docPreview=function(id){
+  const pt=gp(); if(!pt)return;
+  const d=(pt.documentos||[]).find(x=>x.id===id);
+  if(!d||!d.downloadURL)return;
+  if(d.tipo!=='pdf'){ window.open(d.downloadURL,'_blank','noopener'); return; }
+  const div=document.createElement('div');
+  div.className='img-lightbox'; div.id='docPreviewBox';
+  div.innerHTML=`
+    <div class="doc-pv-box" onclick="event.stopPropagation()">
+      <div class="doc-pv-head">
+        <span class="doc-pv-title">${e(d.nombre||'Documento')}</span>
+        <div style="display:flex;gap:8px;align-items:center">
+          <a class="ba" href="${e(d.downloadURL)}" target="_blank" rel="noopener" download>Descargar</a>
+          <button type="button" class="img-lb-x" onclick="document.getElementById('docPreviewBox').remove()" aria-label="Cerrar">✕</button>
+        </div>
+      </div>
+      <iframe class="doc-pv-frame" src="${e(d.downloadURL)}" title="${e(d.nombre||'Documento')}"></iframe>
+    </div>`;
+  div.onclick=()=>div.remove();
+  document.body.appendChild(div);
+};
+window.docDelete=async function(id){
+  const pt=gp(); if(!pt)return;
+  const d=(pt.documentos||[]).find(x=>x.id===id);
+  if(!d)return;
+  if(!imgCanDelete(d)){ toast('Solo quien lo subió (o un admin) puede eliminarlo.'); return; }
+  if(!confirm(`¿Eliminar el documento "${d.nombre||'Documento'}"?\n\nEsta acción no se puede deshacer.`))return;
+  if(storage&&d.storagePath){
+    try{ await deleteObject(stRef(storage,d.storagePath)); }
+    catch(err){ console.warn('No se pudo borrar el archivo en Storage:',err.message); }
+  }
+  pt.documentos=(pt.documentos||[]).filter(x=>x.id!==id);
+  await guardar(pt);
+  toast('Documento eliminado');
+  renderDocumentos();
+};
+function renderDocumentosLocked(){
+  const panel=document.getElementById('panel');
+  if(!panel)return;
+  panel.innerHTML=`
+    <div class="ct-row"><div class="ct">Documentos</div></div>
+    <div class="card"><div class="empty" style="height:auto;padding:40px 18px;text-align:center">
+      <div style="margin-bottom:10px;display:flex;justify-content:center;color:var(--text3)">${icon('lock',30)}</div>
+      <h3 style="font-family:'DM Sans',sans-serif;font-weight:500;margin:0 0 6px">Disponible en el plan Pro</h3>
+      <p style="font-family:'DM Sans',sans-serif;font-style:italic;color:var(--text2);max-width:380px;margin:0 auto;line-height:1.55">
+        La carga de documentos (PDF y Word) está incluida en los planes <b>Pro</b> y <b>Clínica</b>.
+      </p>
+    </div></div>`;
+}
+function renderDocumentos(){
+  const pt=gp();
+  if(!pt){ document.getElementById('panel').innerHTML=''; return; }
+  const all=(pt.documentos||[]);
+  const filtered=docFiltered(pt);
+  const ro=(typeof isReadOnly==='function'&&isReadOnly());
+
+  const userMap=new Map();
+  all.forEach(d=>{ if(d.subidoPorUid&&!userMap.has(d.subidoPorUid))userMap.set(d.subidoPorUid,d.subidoPorNombre||'Usuario'); });
+  const userOpts=`<option value="">Todos los odontólogos</option>`+
+    Array.from(userMap.entries()).map(([uid,nm])=>`<option value="${e(uid)}"${_docFilters.user===uid?' selected':''}>${e(nm)}</option>`).join('');
+  const consSorted=[...(pt.consultas||[])].sort((a,b)=>((b.fecha||'')+(b.hora||'')).localeCompare((a.fecha||'')+(a.hora||'')));
+  const consOpts=`<option value="">Todas las consultas</option><option value="__none__"${_docFilters.cons==='__none__'?' selected':''}>Sin consulta</option>`+
+    consSorted.map(c=>{
+      const motivo=(c.motivo&&c.motivo.trim())||(c.tratamiento&&c.tratamiento.trim())||'Consulta';
+      return `<option value="${e(c.id)}"${_docFilters.cons===c.id?' selected':''}>${e(ff(c.fecha))}${c.hora?' · '+e(c.hora):''} — ${e(motivo)}</option>`;
+    }).join('');
+  const tipoOpts=`<option value="">Todos los tipos</option><option value="pdf"${_docFilters.tipo==='pdf'?' selected':''}>PDF</option><option value="word"${_docFilters.tipo==='word'?' selected':''}>Word</option>`;
+  const fechaOpts=[['','Cualquier fecha'],['7','Últimos 7 días'],['30','Últimos 30 días'],['90','Últimos 90 días'],['year','Último año']]
+    .map(([v,l])=>`<option value="${v}"${_docFilters.fecha===v?' selected':''}>${e(l)}</option>`).join('');
+  const hasFilters=!!(_docFilters.tipo||_docFilters.user||_docFilters.cons||_docFilters.fecha);
+
+  let listHtml='';
+  if(filtered.length===0){
+    listHtml=`<div class="card"><div class="empty" style="height:auto;padding:30px 0">
+      <p style="font-family:'DM Sans',sans-serif;font-style:italic;color:var(--text2);margin:0;text-align:center">
+        ${all.length===0?'Aún no hay documentos para este paciente.':'Ningún documento coincide con los filtros.'}
+      </p></div></div>`;
+  }else{
+    const rows=filtered.map(d=>{
+      const consLbl=d.consultaId?imgConsultaLabel(pt,d.consultaId):null;
+      const delBtn=(!ro&&imgCanDelete(d))?`<button type="button" class="bd doc-row-del" title="Eliminar" onclick="event.stopPropagation();docDelete('${e(d.id)}')">✕</button>`:'';
+      return `<div class="doc-row" onclick="docPreview('${e(d.id)}')" title="${e(imgFechaAbs(d.fecha))}">
+        <span class="doc-badge doc-badge-${e(d.tipo||'pdf')}">${e(DOC_TIPOS[d.tipo]||'Doc')}</span>
+        <div class="doc-row-body">
+          <div class="doc-row-name">${e(d.nombre||'Documento')}</div>
+          <div class="doc-row-sub">${e(timeAgo(d.fecha))} · ${e(d.subidoPorNombre||'')}${d.size?' · '+docSizeLabel(d.size):''}${consLbl?' · '+e(consLbl):''}</div>
+        </div>
+        <a class="ba doc-row-dl" href="${e(d.downloadURL||'#')}" target="_blank" rel="noopener" download onclick="event.stopPropagation()">Descargar</a>
+        ${delBtn}
+      </div>`;
+    }).join('');
+    listHtml=`<div class="card doc-list">${rows}</div>`;
+  }
+
+  const uploadCard=ro?'':`<div class="card">
+      <input type="file" id="docFileInput" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" multiple style="display:none" onchange="docOnFiles(this.files)">
+      <div class="img-drop" onclick="document.getElementById('docFileInput').click()"
+           ondragover="event.preventDefault();this.classList.add('drag')"
+           ondragleave="this.classList.remove('drag')"
+           ondrop="event.preventDefault();this.classList.remove('drag');docOnFiles(event.dataTransfer.files)">
+        <div class="img-drop-ico" style="display:flex;justify-content:center;color:var(--text3)">${icon('filetext',34)}</div>
+        <div class="img-drop-t">Arrastra documentos PDF o Word aquí, o toca para subir</div>
+        <button type="button" class="ba img-drop-btn" onclick="event.stopPropagation();document.getElementById('docFileInput').click()">Subir documentos</button>
+        <div class="img-drop-note">Se asocian a este paciente, a tu usuario y con fecha/hora. Opcionalmente puedes etiquetarlos a una consulta al subir. Los PDF se pueden previsualizar; los Word se descargan.</div>
+      </div>
+    </div>`;
+
+  document.getElementById('panel').innerHTML=`
+    <div class="datos-editbar">${roToggleHTML()}</div>
+    <div class="ct-row"><div class="ct">Documentos${infoBtn('Documentos del paciente (PDF y Word): consentimientos, informes, referencias, presupuestos. Cada documento queda asociado al paciente, a quien lo subió, y opcionalmente a una consulta.')}</div></div>
+    ${roBanner()}
+    ${uploadCard}
+    ${all.length>0?`<div class="card">
+      <div class="img-filters">
+        <div class="img-filter"><label>Tipo</label><select onchange="docSetFilter('tipo',this.value)">${tipoOpts}</select></div>
+        <div class="img-filter"><label>Odontólogo / usuario</label><select onchange="docSetFilter('user',this.value)">${userOpts}</select></div>
+        <div class="img-filter"><label>Consulta</label><select onchange="docSetFilter('cons',this.value)">${consOpts}</select></div>
+        <div class="img-filter"><label>Fecha</label><select onchange="docSetFilter('fecha',this.value)">${fechaOpts}</select></div>
+      </div>
+      <div class="img-result-row">
+        <span class="img-result-count"><strong>${filtered.length}</strong> de ${all.length} documento${all.length===1?'':'s'}</span>
+        ${hasFilters?`<button type="button" class="img-clear-filters" onclick="docClearFilters()">Limpiar filtros</button>`:''}
+      </div>
+    </div>`:''}
+    ${listHtml}`;
+}
+
 function renderTab(){
   const t=tabActual;
   // Item 1 guard: never render the Imágenes gallery unless the effective plan allows it.
@@ -6455,6 +7414,13 @@ function renderTab(){
     const _ep = effectivePlanFor(_imp);
     if(!(_ep==='admin'||_ep==='pro'||_ep==='clinica')||imagenesDisabledFor(_imp)){
       return renderImagenesLocked();
+    }
+  }
+  if(t==='doc'){
+    const _imp = viewAsUid ? allUsersList.find(u=>u.uid===viewAsUid) : null;
+    const _ep = effectivePlanFor(_imp);
+    if(!(_ep==='admin'||_ep==='pro'||_ep==='clinica')||documentosDisabledFor(_imp)){
+      return renderDocumentosLocked();
     }
   }
   if(t==='datos')renderDatos();
@@ -6466,6 +7432,7 @@ function renderTab(){
   else if(t==='rec')renderRec();
   else if(t==='cons')renderCons();
   else if(t==='img')renderImagenes();
+  else if(t==='doc')renderDocumentos();
 }
 
 // ─── CI INPUT (3.2.1) ─────────────────────────────────────────────────────
@@ -6580,16 +7547,19 @@ window.autosaveDatos=async function(){
 }
 window.eliminarP=async function(){
   const p=gp();if(!p)return;
-  if(!confirm(`¿Eliminar a "${p.nombre}"?`))return;
-  const snapshot=JSON.parse(JSON.stringify(p));
-  await borrar(idActual);
+  if(!confirm(`¿Eliminar a "${p.nombre}"?\n\nIrá a la Papelera (en Ajustes) y podrás restaurarlo durante 30 días.`))return;
+  // v9 — soft-delete: nada se borra de inmediato; 30 días de gracia en la Papelera.
+  p.deleted=true; p.deletedEn=new Date().toISOString();
+  await guardar(p);
+  pacientes=pacientes.filter(x=>x.id!==p.id);
+  if(!_pacientesTrash.find(x=>x.id===p.id))_pacientesTrash.push(p);
+  rebuildConsultasIndex();
   idActual=null;
   renderLista();
   renderEmpty();
-  undoToast(`${p.nombre} eliminado`,async()=>{
-    const{id,...data}=snapshot;
-    await setDoc(doc(db,'pacientes',id),data);
-    idActual=id;renderLista();renderPaciente();
+  undoToast(`${p.nombre} movido a la papelera`,async()=>{
+    await papeleraRestore(p.id);
+    idActual=p.id;renderLista();renderPaciente();
   });
 }
 
@@ -7688,12 +8658,12 @@ function renderRec(){
   ];
   document.getElementById('panel').innerHTML=`
     <div class="ct-row"><div class="ct">Récord${infoBtn('Bitácora de cambios importantes hechos en la ficha del paciente: quién, qué y cuándo. Incluye accesos, ediciones y tratamientos registrados.')}</div></div>
-    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">
+    <div class="rec-toolbar">
       ${chips.map(c=>`<button class="rec-chip${recordFilter===c.k?' on':''}" onclick="setRecFilter('${c.k}')">${c.l} <span class="badge">${c.c}</span></button>`).join('')}
       <div style="flex:1"></div>
       ${dsDateField('rec_datefilter',recordDateFilter||'',`onchange="setRecDate(this.value)"`)}
-      ${recordDateFilter?`<button class="ba" style="margin-bottom:0" onclick="setRecDate('')">Limpiar fecha</button>`:''}
-      <button class="ba" style="margin-bottom:0" onclick="modalRec()">+ Agregar tratamiento</button>
+      ${recordDateFilter?`<button class="ba" onclick="setRecDate('')">Limpiar fecha</button>`:''}
+      <button class="ba" onclick="modalRec()">+ Agregar tratamiento</button>
     </div>
     <div class="card" style="padding:0;overflow:hidden"><div style="overflow-x:auto">
       <table class="rtbl" style="min-width:440px"><thead><tr><th style="width:110px">Fecha</th><th style="width:80px">Tipo</th><th>Detalle</th><th style="width:36px"></th></tr></thead>
@@ -7941,6 +8911,41 @@ function _consFromModal(existing){
     motivo:g('m_mo'),diagnostico:g('m_dg'),oclusion:g('m_oc'),plan:g('m_pl')
   };
 }
+// ── v9 · Agendar consulta directo desde el calendario ("agenda primero") ──
+window.calQuickCreate=function(fecha){
+  fecha=fecha||hoy();
+  if(!pacientes.length){ toast('Primero crea un paciente con "+ Nuevo paciente".'); return; }
+  const opts=[...pacientes].sort((a,b)=>(a.nombre||'').localeCompare(b.nombre||''))
+    .map(pt=>`<option value="${e(pt.id)}">${e(titleCase(pt.nombre))}${pt.ci?' · '+e(pt.ci):''}</option>`).join('');
+  const body=`
+    <div class="mf"><label>Paciente *</label><select id="qc_pac"><option value="">Selecciona un paciente…</option>${opts}</select></div>
+    <div class="modal-grid-2">
+      <div class="mf"><label>Fecha</label>${dsDateField('m_fe',fecha,'')}</div>
+      <div class="mf"><label>Hora</label><input type="time" id="m_ho" value=""></div>
+    </div>
+    <div class="mf"><label>Tratamiento / motivo *</label><input id="m_tr" placeholder="Limpieza, control, valoración…"></div>
+    <div class="mf"><label>Costo ($)</label><input type="number" id="m_co" placeholder="0"></div>
+    <p style="font-size:11.5px;color:var(--text3);margin:6px 0 0;font-style:italic">La cita queda como consulta del paciente y aparece en el calendario y en "Consultas de hoy". El detalle clínico lo completas el día de la visita.</p>`;
+  abrirModal('Agendar consulta', body, async()=>{
+    const pid=g('qc_pac'); if(!pid){alert('Selecciona el paciente.');return;}
+    const tr=g('m_tr').trim(); if(!tr){alert('Indica el tratamiento o motivo.');return;}
+    const f2=g('m_fe'), ho=g('m_ho');
+    if(f2&&ho){
+      const conflict=consultasIndex.get(f2+' '+ho);
+      if(conflict&&conflict.patientId!==pid){
+        if(!confirm(`Ya hay una consulta a las ${ho} con ${conflict.patientName}. ¿Guardar de todos modos?`))return;
+      }
+    }
+    const pt=pacientes.find(x=>x.id===pid); if(!pt){toast('Paciente no encontrado');return;}
+    if(!pt.consultas)pt.consultas=[];
+    pt.consultas.push({id:Date.now().toString(), fecha:f2, hora:ho, tratamiento:tr,
+      costo:g('m_co'), dientes:'', notas:'', motivo:'', odontoSnapshot:_snapTeeth(pt)});
+    logChange('Agendó consulta desde el calendario','Consultas',pt);
+    await guardar(pt); cerrarModal(); renderLista();
+    if(viewActual==='calendario')renderCalendar();
+    toast('Consulta agendada para '+(titleCase(pt.nombre)||'el paciente').split(' ')[0]);
+  });
+};
 window.modalCons=function(){
   abrirModal('Nueva consulta', consBody(),
     async()=>{
