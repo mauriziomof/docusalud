@@ -5,6 +5,13 @@
 <meta charset="UTF-8">
 <script>
 (function(){var r=sessionStorage.redirect;delete sessionStorage.redirect;if(r&&r!==location.href)history.replaceState(null,null,r);})();
+// v10.2 — logo de respaldo embebido: si logo.svg no está junto al archivo
+// (p. ej. al abrirlo localmente), se muestra esta versión vectorial idéntica
+// en espíritu (cuadro mist + D forest + anillos brass) en vez de un ícono roto.
+window.dsLogoFB=function(img){
+  img.onerror=null;
+  img.src='data:image/svg+xml;utf8,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect x="2" y="2" width="60" height="60" rx="14" fill="#E3E7DA"/><path d="M26 16h10c9.4 0 16 6.6 16 16s-6.6 16-16 16H26V16zm7 6v20h3c5.5 0 9-4 9-10s-3.5-10-9-10h-3z" fill="#1F3A2A"/><g fill="none" stroke="#D2B385" stroke-width="3" stroke-linecap="round"><line x1="15" y1="18" x2="21" y2="18"/><line x1="15" y1="28" x2="21" y2="28"/><line x1="15" y1="38" x2="21" y2="38"/><line x1="15" y1="48" x2="21" y2="48"/></g></svg>');
+};
 </script>
 <script>
 /* Evita parpadeo de tema: aplica modo oscuro antes del primer render si estaba guardado. */
@@ -758,8 +765,8 @@ body.app-active {
 /* Disabled (read-only) inputs look intentional, not broken */
 .card input:disabled,.card select:disabled,.card textarea:disabled,
 .mf input:disabled,.mf textarea:disabled,.mf select:disabled{
-  background:repeating-linear-gradient(135deg, var(--surface2) 0px, var(--surface2) 8px, var(--bg) 8px, var(--bg) 16px);
-  color: var(--text2); opacity:.95; cursor:not-allowed; border-style:dashed; border-color:var(--border2);
+  background:var(--surface2);
+  color: var(--text2); opacity:.9; cursor:not-allowed; border-style:dashed; border-color:var(--border2); box-shadow:none;
 }
 /* Proc. estéticos: entradas con fecha múltiple */
 .proc-entry{ display:flex; gap:8px; align-items:flex-start; margin-bottom:6px; }
@@ -2304,7 +2311,7 @@ html[data-theme="dark"] .lbox input::placeholder{ color:#8A8A7E; opacity:1; }
 /* Campos deshabilitados (rayado) — versión noche coherente */
 html[data-theme="dark"] .card input:disabled,html[data-theme="dark"] .card select:disabled,html[data-theme="dark"] .card textarea:disabled,
 html[data-theme="dark"] .mf input:disabled,html[data-theme="dark"] .mf textarea:disabled,html[data-theme="dark"] .mf select:disabled{
-  background:repeating-linear-gradient(135deg, #23231e 0px, #23231e 8px, #1a1a15 8px, #1a1a15 16px);
+  background:#23231E;
   color:var(--text2);
 }
 /* Zona de subida de imágenes/documentos en noche */
@@ -2320,9 +2327,9 @@ html[data-theme="dark"] .profile-btn{ background:var(--mist); color:var(--forest
 .dash-customize-btn{ font-size:13px; padding:8px 15px; }
 /* Tamaños preconfigurados por widget */
 .dash-widget{ zoom:var(--wz,1); }
-.dash-widgets .dash-widget.dw-s{ flex:1 1 215px; min-width:195px; }
-.dash-widgets .dash-widget.dw-m{ flex:1 1 300px; min-width:240px; }
-.dash-widgets .dash-widget.dw-l{ flex-basis:100%; }
+.dash-widgets .dash-widget.dw-s{ flex:1 1 215px; min-width:195px; max-width:400px; }
+.dash-widgets .dash-widget.dw-m{ flex:1 1 300px; min-width:240px; max-width:640px; }
+.dash-widgets .dash-widget.dw-l{ flex-basis:100%; max-width:none; }
 .dash-widget.dw-s .dash-card{ padding:16px 18px; border-radius:16px; }
 .dash-widget.dw-l .dash-card{ padding:28px 32px; }
 .dash-widget.dw-s .dash-clock-time{ font-size:30px; }
@@ -2584,6 +2591,8 @@ html[data-theme="dark"] .lbg{ background:radial-gradient(90% 55% at 50% 0%, rgba
 .ds-dp-btn > span:first-child{ overflow:hidden; text-overflow:ellipsis; }
 /* Toolbar del Récord: fecha alineada con los botones vecinos */
 .rec-toolbar{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:14px; }
+.rec-toolbar .ba{ min-height:34px; max-height:34px; }
+.rec-toolbar .rec-chip{ max-height:34px; }
 .rec-toolbar .ds-dp{ flex:0 0 auto; }
 .rec-toolbar .ds-dp-btn{ width:auto; min-height:34px; padding:0 12px; border-radius:9px; }
 /* Filas de acciones (admin, modales, papelera): botones ya no "bailan" */
@@ -2597,6 +2606,733 @@ a.ba{ text-decoration:none; }
   .rec-toolbar .ds-dp{ flex:1 1 100%; }
   .rec-toolbar .ds-dp-btn{ width:100%; justify-content:space-between; }
 }
+
+/* ════════ v9.2 · MENÚ DEL PERFIL + EDITOR DE WIDGETS ════════ */
+.profile-menu-wrap{ position:relative; display:inline-flex; }
+.profile-menu{
+  /* v9.3 — el separador visual de 8px es un padding transparente del propio menú,
+     no un hueco: así el cursor nunca "cae al vacío" entre el avatar y el menú. */
+  position:absolute; top:100%; right:0; min-width:190px; z-index:400;
+  padding-top:8px; background:transparent; border:none; box-shadow:none;
+  opacity:0; transform:translateY(-4px) scale(0.98); pointer-events:none;
+  transition:opacity .16s var(--ease,ease), transform .16s var(--ease,ease);
+}
+.profile-menu-inner{
+  background:var(--surface); border:var(--border-default); border-radius:12px;
+  box-shadow:0 12px 34px rgba(26,26,23,0.18); padding:6px;
+}
+.profile-menu.open{ opacity:1; transform:none; pointer-events:auto; }
+@media (hover:hover){
+  .profile-menu-wrap:hover .profile-menu{ opacity:1; transform:none; pointer-events:auto; }
+}
+.profile-menu button{
+  display:flex; align-items:center; gap:9px; width:100%;
+  background:none; border:none; cursor:pointer; text-align:left;
+  font-family:'DM Sans',sans-serif; font-size:13px; color:var(--text);
+  padding:9px 11px; border-radius:8px; white-space:nowrap;
+}
+.profile-menu button:hover{ background:var(--surface2); }
+.profile-menu button svg{ color:var(--text3); flex-shrink:0; }
+.profile-menu .pm-danger{ color:var(--terra); }
+.profile-menu .pm-danger svg{ color:var(--terra); }
+.profile-menu .pm-danger:hover{ background:var(--danger-light); }
+.profile-menu-sep{ height:0.5px; background:var(--border); margin:5px 8px; }
+/* Editor central de widgets */
+.dcw-list{ display:flex; flex-direction:column; gap:4px; max-height:min(52vh,460px); overflow-y:auto; padding-right:2px; }
+.dcw-row{ border:var(--border-default); border-radius:10px; padding:9px 11px; }
+.dcw-row.off{ opacity:.6; }
+.dcw-check{ display:flex; align-items:center; gap:8px; cursor:pointer; font-size:13.5px; color:var(--text); font-family:'DM Sans',sans-serif; }
+.dcw-check input{ accent-color:var(--forest); width:15px; height:15px; flex-shrink:0; }
+.dcw-name{ font-weight:500; flex:1; min-width:0; }
+.dcw-ctls{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:8px; }
+.dcw-group{ display:inline-flex; align-items:center; gap:1px; background:var(--surface2); border:var(--border-default); border-radius:8px; padding:2px; }
+.dcw-group button{
+  background:none; border:none; cursor:pointer; font-family:'DM Sans',sans-serif;
+  font-size:11px; font-weight:700; color:var(--text2); padding:5px 9px; border-radius:6px;
+  min-width:30px; min-height:28px; display:inline-flex; align-items:center; justify-content:center;
+}
+.dcw-group button.on{ background:var(--forest); color:var(--mist); }
+.dcw-group button:not(.on):not(:disabled):hover{ background:var(--surface); color:var(--text); }
+.dcw-group button:disabled{ opacity:.35; cursor:default; }
+.dcw-fs{ font-size:10.5px; color:var(--text3); min-width:34px; text-align:center; }
+/* Móvil: sin controles flotantes sobre el contenido — se edita desde "Personalizar widgets" */
+@media (max-width:768px), (hover:none){
+  .dash-wctl{ display:none !important; }
+  .dash-drag{ display:none !important; }
+}
+
+/* ════════ v9.2 · ARCHIVOS (segmento Imágenes / Documentos) ════════ */
+.arch-seg{ display:inline-flex; gap:2px; background:var(--surface2); border:var(--border-default); border-radius:10px; padding:3px; margin-bottom:14px; }
+.arch-seg button{
+  display:inline-flex; align-items:center; gap:6px; white-space:nowrap;
+  background:none; border:none; cursor:pointer; font-family:'DM Sans',sans-serif;
+  font-size:12.5px; font-weight:500; color:var(--text2); padding:8px 14px; border-radius:8px;
+  transition:background .12s, color .12s; min-height:34px;
+}
+.arch-seg button.on{ background:var(--surface); color:var(--forest); box-shadow:0 1px 2px rgba(31,58,42,0.08); font-weight:600; }
+html[data-theme="dark"] .arch-seg button.on{ color:var(--mist); }
+.arch-seg button svg{ flex-shrink:0; }
+@media (max-width:768px){ .arch-seg{ width:100%; } .arch-seg button{ flex:1; justify-content:center; } }
+
+/* ════════ v9.3 · ARCHIVOS VIVOS + WIDGETS NUEVOS ════════ */
+/* Hero de subida — invita, no estorba */
+.arch-hero{
+  display:flex; align-items:center; gap:18px; cursor:pointer; margin-bottom:14px;
+  padding:20px 22px; border-radius:16px; border:1.5px dashed var(--accent-border);
+  background:linear-gradient(120deg, var(--mist) 0%, var(--bone) 55%, var(--bone) 100%);
+  transition:border-color .15s, box-shadow .2s var(--ease,ease), transform .2s var(--ease,ease);
+}
+.arch-hero:hover, .arch-hero.drag{ border-color:var(--forest); box-shadow:0 8px 24px rgba(31,58,42,0.12); transform:translateY(-1px); }
+html[data-theme="dark"] .arch-hero{ background:linear-gradient(120deg, rgba(47,93,58,0.22) 0%, var(--surface) 60%); }
+.arch-hero-art{ position:relative; width:64px; height:56px; flex-shrink:0; }
+.aha{ position:absolute; display:flex; align-items:center; justify-content:center; border-radius:12px; border:var(--border-default); box-shadow:0 2px 8px rgba(26,26,23,0.10); }
+.aha-1{ width:40px; height:40px; left:0; top:8px; background:var(--surface); color:var(--petrol); transform:rotate(-8deg); }
+.aha-2{ width:40px; height:40px; left:22px; top:0; background:var(--surface); color:var(--terra); transform:rotate(7deg); }
+.aha-3{ width:22px; height:22px; left:40px; top:34px; background:var(--forest); color:var(--mist); border-radius:50%; }
+.arch-hero:hover .aha-1{ transform:rotate(-12deg) translateY(-1px); } .arch-hero:hover .aha-2{ transform:rotate(10deg) translateY(-2px); }
+.aha{ transition:transform .25s var(--ease,ease); }
+.arch-hero-body{ flex:1; min-width:0; }
+.arch-hero-t{ font-family:'DM Sans',sans-serif; font-size:16px; font-weight:700; color:var(--text); letter-spacing:-0.01em; }
+.arch-hero-s{ font-size:12.5px; color:var(--text2); margin-top:3px; line-height:1.55; max-width:560px; }
+.arch-hero-btn{ flex-shrink:0; }
+/* Chips de resumen por tipo (clic = filtro directo) */
+.arch-stats{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px; }
+.arch-chip{
+  display:inline-flex; align-items:center; gap:6px; cursor:pointer; white-space:nowrap;
+  font-family:'DM Sans',sans-serif; font-size:11.5px; font-weight:600;
+  padding:6px 12px; border-radius:980px; border:0.5px solid transparent; transition:transform .12s, box-shadow .15s;
+}
+.arch-chip:hover{ transform:translateY(-1px); box-shadow:0 3px 10px rgba(26,26,23,0.10); }
+.arch-chip::before{ content:''; width:7px; height:7px; border-radius:50%; background:currentColor; opacity:.85; }
+.ac-rad{ background:#E5EDF0; color:#3E606F; } .ac-intra{ background:#F1E7D6; color:#7A5F33; }
+.ac-imgdoc{ background:#E9EAE0; color:#5C6B45; } .ac-otros{ background:var(--surface2); color:var(--text2); }
+.ac-pdf{ background:rgba(184,85,62,0.12); color:var(--terra); } .ac-word{ background:rgba(74,107,124,0.14); color:var(--petrol); }
+html[data-theme="dark"] .ac-rad{ background:rgba(62,96,111,0.3); color:#B4CDD8; }
+html[data-theme="dark"] .ac-intra{ background:rgba(122,95,51,0.3); color:#DFC9A3; }
+html[data-theme="dark"] .ac-imgdoc{ background:rgba(92,107,69,0.3); color:#C4CFAF; }
+html[data-theme="dark"] .ac-pdf{ color:#E39A87; } html[data-theme="dark"] .ac-word{ color:#9CC0D2; }
+/* Galería de imágenes: más presencia, chips de categoría con color */
+.img-grid{ grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:14px; }
+.img-thumb{ border-radius:14px; }
+.img-thumb img{ height:140px; transition:transform .35s var(--ease,ease); }
+.img-thumb:hover img{ transform:scale(1.045); }
+.img-thumb:hover{ box-shadow:0 10px 26px rgba(31,58,42,0.18); transform:translateY(-2px); }
+.img-thumb-meta{ padding:8px 10px 9px; }
+.img-thumb-cat.cat-rad{ background:#E5EDF0; color:#3E606F; }
+.img-thumb-cat.cat-intra{ background:#F1E7D6; color:#7A5F33; }
+.img-thumb-cat.cat-doc{ background:#E9EAE0; color:#5C6B45; }
+.img-thumb-cat.cat-otros{ background:var(--surface2); color:var(--text2); }
+/* Documentos como tarjetas */
+.doc-grid{ display:grid; gap:14px; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); }
+.doc-tile{
+  position:relative; display:flex; align-items:stretch; gap:0; cursor:pointer; overflow:hidden;
+  border:var(--border-default); border-radius:14px; background:var(--surface);
+  transition:box-shadow .15s, transform .12s;
+}
+.doc-tile:hover{ box-shadow:0 10px 26px rgba(31,58,42,0.16); transform:translateY(-2px); }
+.doc-tile-ico{
+  width:64px; flex-shrink:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;
+}
+.doc-tile.dt-pdf .doc-tile-ico{ background:linear-gradient(160deg, rgba(184,85,62,0.16), rgba(184,85,62,0.06)); color:var(--terra); }
+.doc-tile.dt-word .doc-tile-ico{ background:linear-gradient(160deg, rgba(74,107,124,0.18), rgba(74,107,124,0.06)); color:var(--petrol); }
+.doc-tile-ext{ font-size:9px; font-weight:800; letter-spacing:0.08em; font-family:'DM Sans',sans-serif; }
+.doc-tile-meta{ padding:11px 12px; min-width:0; flex:1; display:flex; flex-direction:column; gap:3px; }
+.doc-tile-name{ font-size:12.5px; font-weight:600; color:var(--text); font-family:'DM Sans',sans-serif; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.doc-tile-sub{ font-size:10.5px; color:var(--text3); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.doc-tile-dl{ display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:600; color:var(--forest); text-decoration:none; margin-top:auto; padding-top:4px; }
+.doc-tile-dl:hover{ text-decoration:underline; }
+html[data-theme="dark"] .doc-tile-dl{ color:#9CC8A8; }
+.doc-tile-del{ opacity:0; transition:opacity .15s; }
+.doc-tile:hover .doc-tile-del{ opacity:1; }
+@media (hover:none){ .doc-tile-del{ opacity:1; } }
+/* Estados vacíos que invitan */
+.arch-empty{ text-align:center; padding:34px 18px; }
+.arch-empty-icons{ display:flex; justify-content:center; gap:10px; color:var(--text3); opacity:.65; margin-bottom:12px; }
+.arch-empty-icons svg:nth-child(1){ transform:rotate(-8deg); } .arch-empty-icons svg:nth-child(3){ transform:rotate(8deg); }
+.arch-empty-t{ font-family:'DM Sans',sans-serif; font-size:15px; font-weight:600; color:var(--text); margin:0 0 4px; }
+.arch-empty-s{ font-size:12.5px; color:var(--text2); max-width:420px; margin:0 auto 14px; line-height:1.6; }
+/* Widget: Resumen semanal */
+.dc-week{ background:var(--surface); border:var(--border-default); box-shadow:none; }
+.dash-week{ display:flex; align-items:flex-end; gap:8px; height:96px; padding-top:6px; }
+.dash-week-col{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; gap:4px; height:100%; min-width:0; }
+.dash-week-n{ font-size:10.5px; font-weight:700; color:var(--forest); font-family:'DM Sans',sans-serif; min-height:14px; }
+html[data-theme="dark"] .dash-week-n{ color:#9CC8A8; }
+.dash-week-bar{ width:100%; max-width:34px; border-radius:6px 6px 3px 3px; background:var(--mist); transition:height .4s var(--ease,ease); }
+.dash-week-bar.today{ background:var(--forest); }
+html[data-theme="dark"] .dash-week-bar{ background:rgba(47,93,58,0.4); }
+html[data-theme="dark"] .dash-week-bar.today{ background:#3C7049; }
+.dash-week-d{ font-size:10px; color:var(--text3); font-weight:600; text-transform:uppercase; }
+.dash-week-d.today{ color:var(--forest); }
+html[data-theme="dark"] .dash-week-d.today{ color:#9CC8A8; }
+/* Widget: inactivos — botón WhatsApp */
+.dash-inact-wa{ display:inline-flex; align-items:center; color:#1E7A46; }
+.dash-inact-wa:hover{ color:#3ddc6f; }
+html[data-theme="dark"] .dash-inact-wa{ color:#5FC98B; }
+@media (max-width:768px){
+  .arch-hero{ flex-direction:column; text-align:center; gap:12px; padding:18px 16px; }
+  .arch-hero-art{ margin:0 auto; }
+  .arch-hero-btn{ width:100%; }
+  .doc-grid{ grid-template-columns:1fr 1fr; }
+  .img-grid{ grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); }
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   v9.4 · PREMIUM FIELDS — cómo se SIENTE escribir y leer en DocuSalud
+   Research: Shopify Polaris (labels/validación/teclados), Stripe & shadcn/ui
+   (superficie elevada + focus ring), Linear (date-control de primera clase),
+   Notion/Airtable (tablas editables silenciosas).
+   Diagnóstico: los campos usaban el MISMO crema de las tarjetas (#EDE9DF
+   sobre #FAF9F6) → se veían marrones, planos, "rudimentarios". Ahora el
+   campo es papel elevado: blanco puro, borde frío sutil, sombra de 1px, y
+   estados nítidos reposo→hover→focus con anillo de marca.
+   ══════════════════════════════════════════════════════════════════════ */
+@media screen{
+  html{
+    --field:#FFFFFF;
+    --field-border:rgba(31,58,42,0.16);
+    --field-border-hover:rgba(31,58,42,0.34);
+    --field-shadow:0 1px 2px rgba(26,26,23,0.05);
+    --ring-shadow:0 0 0 3.5px rgba(47,93,58,0.13);
+  }
+  html[data-theme="dark"]{
+    --field:#262620;
+    --field-border:rgba(220,227,210,0.14);
+    --field-border-hover:rgba(220,227,210,0.32);
+    --field-shadow:0 1px 2px rgba(0,0,0,0.3);
+    --ring-shadow:0 0 0 3.5px rgba(143,191,154,0.13);
+  }
+}
+@media print{
+  html,html[data-theme="dark"]{ --field:#FFFFFF; --field-border:rgba(31,58,42,0.2); --field-shadow:none; --ring-shadow:none; }
+}
+/* Superficie de campo — en TODOS los renglones: Datos, Historia, Plan,
+   Operatorias, Proc. estéticos, Consultas, Archivos, modales, admin, login */
+.f input,.f select,.f textarea,.mf input,.mf select,.mf textarea,
+.mbox input,.mbox select,.mbox textarea,
+.ci-input input,.ci-input select,.age-range input,
+.img-filter select,.img-filter input,
+.admin-files-bar select,.admin-files-bar input,#adminSearchInput,
+.odonto-controls select,.pview-sel,
+.ant-grid select,.hab-grid select,.hab-grid input,
+.aj-row select,#search,.lbox input,.esp-dropdown-trigger{
+  background:var(--field);
+  border:1px solid var(--field-border);
+  box-shadow:var(--field-shadow);
+  border-radius:10px;
+  transition:border-color .15s var(--ease,ease), box-shadow .18s var(--ease,ease), background .15s;
+}
+.f input:hover:not(:focus):not(:disabled),.f select:hover:not(:focus):not(:disabled),.f textarea:hover:not(:focus):not(:disabled),
+.mf input:hover:not(:focus):not(:disabled),.mf select:hover:not(:focus):not(:disabled),.mf textarea:hover:not(:focus):not(:disabled),
+.img-filter select:hover:not(:focus),.pview-sel:hover:not(:focus),.odonto-controls select:hover:not(:focus),
+.ant-grid select:hover:not(:focus):not(:disabled),.hab-grid select:hover:not(:focus):not(:disabled),
+.aj-row select:hover:not(:focus),#search:hover:not(:focus),.lbox input:hover:not(:focus){
+  border-color:var(--field-border-hover);
+}
+.f input:focus,.f select:focus,.f textarea:focus,
+.mf input:focus,.mf select:focus,.mf textarea:focus,
+.mbox input:focus,.mbox select:focus,.mbox textarea:focus,
+.ci-input input:focus,.ci-input select:focus,.age-range input:focus,
+.img-filter select:focus,.img-filter input:focus,
+.admin-files-bar select:focus,.admin-files-bar input:focus,#adminSearchInput:focus,
+.odonto-controls select:focus,.pview-sel:focus,
+.ant-grid select:focus,.hab-grid select:focus,.hab-grid input:focus,
+.aj-row select:focus,#search:focus,.lbox input:focus{
+  outline:none;
+  background:var(--field);
+  border-color:var(--sage);
+  box-shadow:var(--field-shadow), var(--ring-shadow);
+}
+::placeholder{ color:var(--text3); opacity:.6; }
+/* Selects con chevron propio (el nativo delataba lo "rudimentario") */
+.f select,.mf select,.mbox select,.img-filter select,.pview-sel,
+.odonto-controls select,.ant-grid select,.hab-grid select,
+.aj-row select,.admin-files-bar select{
+  -webkit-appearance:none; appearance:none;
+  padding-right:32px !important;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 4.5 6 8l3.5-3.5' stroke='%237A8A6E' stroke-width='1.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat; background-position:right 11px center;
+}
+html[data-theme="dark"] .f select,html[data-theme="dark"] .mf select,html[data-theme="dark"] .mbox select,
+html[data-theme="dark"] .img-filter select,html[data-theme="dark"] .pview-sel,
+html[data-theme="dark"] .odonto-controls select,html[data-theme="dark"] .ant-grid select,
+html[data-theme="dark"] .hab-grid select,html[data-theme="dark"] .aj-row select,
+html[data-theme="dark"] .admin-files-bar select{
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 4.5 6 8l3.5-3.5' stroke='%238FA084' stroke-width='1.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+/* Number inputs sin flechitas (limpieza tipo Stripe) */
+.f input[type=number]::-webkit-outer-spin-button,.f input[type=number]::-webkit-inner-spin-button,
+.mf input[type=number]::-webkit-outer-spin-button,.mf input[type=number]::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0; }
+.f input[type=number],.mf input[type=number]{ -moz-appearance:textfield; }
+/* Checkboxes y radios de marca */
+input[type="checkbox"],input[type="radio"]{ accent-color:var(--forest); }
+html[data-theme="dark"] input[type="checkbox"],html[data-theme="dark"] input[type="radio"]{ accent-color:#3C7049; }
+/* Labels con un punto más de presencia */
+.f label,.mf label{ font-size:10px; letter-spacing:0.08em; margin-bottom:5px; display:inline-block; }
+/* Textareas cómodas para notas clínicas */
+.f textarea,.mf textarea{ line-height:1.65; min-height:44px; }
+/* ── Selector de fecha: control de primera clase ── */
+.ds-dp-btn{
+  background:var(--field); border:1px solid var(--field-border); box-shadow:var(--field-shadow);
+  border-radius:10px; padding:4px 12px 4px 4px; min-height:38px;
+  display:inline-grid !important; grid-auto-flow:column; grid-template-rows:1fr;
+  align-items:center; justify-items:start; gap:8px;
+  width:max-content; max-width:100%; white-space:nowrap;
+  transition:border-color .15s var(--ease,ease), box-shadow .18s var(--ease,ease);
+}
+/* En formularios (Datos, modales) el control ocupa el ancho del campo */
+.mf .ds-dp-btn,.f .ds-dp-btn{ width:100%; }
+.ds-dp-btn:hover:not(:disabled){ border-color:var(--field-border-hover); }
+.ds-dp-btn:focus-visible{ outline:none; border-color:var(--sage); box-shadow:var(--field-shadow), var(--ring-shadow); }
+.ds-dp-btn .ic{
+  width:28px; height:28px; flex-shrink:0; border-radius:8px;
+  display:inline-flex; align-items:center; justify-content:center; margin-left:0;
+  background:var(--mist); color:var(--forest);
+}
+html[data-theme="dark"] .ds-dp-btn .ic{ background:rgba(47,93,58,0.32); color:#9CC8A8; }
+.ds-dp-btn .val{ font-weight:500; color:var(--text); overflow:hidden; text-overflow:ellipsis; }
+.ds-dp-btn.empty .val{ color:var(--text3); font-weight:400; }
+.ds-dp-btn:disabled{ opacity:.55; cursor:not-allowed; background:var(--surface2); box-shadow:none; }
+/* Popover del calendario: profundidad y días con carácter */
+.ds-dp-pop{ border-radius:14px; box-shadow:0 18px 50px rgba(26,26,23,0.22); padding:14px; width:262px; border:var(--border-default); background:var(--surface); }
+.ds-dp-month{ font-size:13px; font-weight:700; }
+.ds-dp-day{ border-radius:8px; padding:7px 0; transition:background .12s, box-shadow .12s; }
+.ds-dp-day:hover:not(:disabled):not(.sel){ background:var(--accent-light); box-shadow:inset 0 0 0 1px var(--accent-border); }
+.ds-dp-day.sel{ box-shadow:0 3px 10px rgba(31,58,42,0.3); }
+.ds-dp-foot button{ border-radius:8px; padding:5px 10px; font-weight:600; }
+.ds-dp-foot button:hover{ background:var(--accent-light); }
+/* ── Operatorias / tablas editables: hoja silenciosa (Notion/Airtable) ──
+   La celda es texto en reposo; el campo aparece al pasar la fila o enfocar. */
+.otbl input,.ptbl input{
+  background:transparent; border:1px solid transparent; box-shadow:none; border-radius:8px;
+}
+.otbl tbody tr:hover input:not(:focus):not(:disabled),.ptbl tr:hover input:not(:focus):not(:disabled){
+  background:var(--field); border-color:var(--field-border);
+}
+.otbl input:focus,.ptbl input:focus{
+  background:var(--field); border-color:var(--sage); box-shadow:var(--ring-shadow); outline:none;
+}
+.otbl .ds-dp-btn{ background:transparent; border-color:transparent; box-shadow:none; padding-left:4px; }
+.otbl .ds-dp-btn .ic{ background:transparent; color:var(--text3); width:20px; height:20px; }
+.otbl tbody tr:hover .ds-dp-btn{ background:var(--field); border-color:var(--field-border); }
+.otbl tbody tr:hover .ds-dp-btn .ic{ color:var(--forest); }
+html[data-theme="dark"] .otbl tbody tr:hover .ds-dp-btn .ic{ color:#9CC8A8; }
+.otbl td,.ptbl td{ padding:6px 7px; }
+/* ── Odontograma: el panel del diente como pieza de vitrina ── */
+.viz-panel{ border-radius:18px; border:var(--border-default); box-shadow:0 14px 38px rgba(31,58,42,0.09); }
+html[data-theme="dark"] .viz-panel{ box-shadow:0 14px 38px rgba(0,0,0,0.35); }
+.viz-tooth-num{ font-weight:600; letter-spacing:-0.03em; }
+.viz-pill{ border-radius:9px; padding:6px 9px; min-height:30px; }
+.viz-pill:hover:not(.on){ transform:translateY(-1px); box-shadow:0 3px 8px rgba(26,26,23,0.08); }
+.viz-pill.on{ box-shadow:0 4px 12px rgba(31,58,42,0.28); }
+.viz-state-pill{ font-weight:600; }
+/* ── Plan de tratamiento: firmas y estado de guardado ── */
+.firma-canvas{ border:1.5px dashed var(--border2) !important; border-radius:12px; background:var(--field); transition:border-color .15s; }
+.firma-canvas:hover{ border-color:var(--sage); }
+html[data-theme="dark"] .firma-canvas{ background:#2E2E28; }
+.save-status{
+  font-style:normal; font-size:10.5px; font-weight:600; letter-spacing:0.02em;
+  display:inline-flex; align-items:center; gap:5px; padding:3px 10px; border-radius:20px;
+  background:var(--surface2); color:var(--text3); opacity:1;
+}
+.save-status:empty{ display:none; }
+.save-status::before{ content:''; width:5px; height:5px; border-radius:50%; background:currentColor; opacity:.7; }
+.save-status.saved{ background:rgba(76,175,125,0.13); color:#2E7D52; }
+html[data-theme="dark"] .save-status.saved{ background:rgba(95,200,155,0.13); color:#5fc89b; }
+.save-status.pending{ background:rgba(210,179,133,0.18); color:#8A6A38; }
+html[data-theme="dark"] .save-status.pending{ color:#D6C19A; }
+.save-status.saving{ background:var(--surface2); color:var(--text2); }
+.save-status.error{ background:var(--danger-light); color:var(--terra); }
+/* Consultas: tarjetas que responden */
+.cc{ transition:box-shadow .16s var(--ease,ease), transform .13s var(--ease,ease); }
+.cc:hover{ box-shadow:0 8px 22px rgba(31,58,42,0.10); transform:translateY(-1px); }
+html[data-theme="dark"] .cc:hover{ box-shadow:0 8px 22px rgba(0,0,0,0.3); }
+/* Búsqueda del sidebar como campo de primera */
+.swrap{ position:relative; }
+#search{ padding-left:30px; }
+.swrap::before{
+  content:''; position:absolute; left:10px; top:50%; transform:translateY(-50%);
+  width:13px; height:13px; pointer-events:none; opacity:.55;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='%237A8A6E' stroke-width='2.2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E") no-repeat center/contain;
+}
+/* El login hereda el papel elevado (adiós inputs crema) */
+.lbox input{ letter-spacing:0.06em; }
+
+/* ════════════════════════════════════════════════════════════════════════
+   v9.5 · ARQUITECTURA PREMIUM — el salto estructural
+   1. Columna de contenido por renglón (Stripe/Notion: un formulario nunca
+      corre de borde a borde; respira en ~880px centrados).
+   2. Sistema de botones corregido de raíz: UNA altura por rango, en todas
+      las filas, sin gigantes ni enanos.
+   3. Tab bar de pills (no subrayado de los 2000s).
+   4. Header del paciente como barra de identidad.
+   5. Campos con iconografía semántica, dientes y consultas refinados.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ── 1 · COLUMNA DE CONTENIDO POR RENGLÓN ── */
+#panel[data-tab="datos"]>*, #panel[data-tab="clinico"]>*, #panel[data-tab="plan"]>*{
+  max-width:940px; margin-left:auto !important; margin-right:auto !important;
+}
+#panel[data-tab="est"]>*, #panel[data-tab="cons"]>*{
+  max-width:1020px; margin-left:auto !important; margin-right:auto !important;
+}
+#panel[data-tab="ops"]>*, #panel[data-tab="rec"]>*, #panel[data-tab="img"]>*, #panel[data-tab="doc"]>*{
+  max-width:1180px; margin-left:auto !important; margin-right:auto !important;
+}
+
+/* ── 2 · SISTEMA DE BOTONES: alturas y paddings únicos por rango ── */
+.ba,.bc,.bd{ min-height:32px; padding:0 13px; font-size:12px; }
+.bs{ min-height:38px; padding:0 18px; font-size:13px; }
+/* Contextos que piden su propio calibre — SIEMPRE consistente dentro de la fila */
+.mact .ba,.mact .bc,.mact .bd{ min-height:36px; }
+.mact .bs{ min-height:38px; }
+.cal-nav .bs.cal-add-btn{ min-height:34px; padding:0 15px; font-size:12px; }
+.cal-nav .ba{ min-height:34px; }
+.rec-toolbar .ds-dp-btn{ min-height:32px; padding:3px 10px 3px 3px; }
+.rec-toolbar .ds-dp-btn .ic{ width:24px; height:24px; }
+.phdr .ba,.phdr a.ba{ min-height:32px; font-size:11.5px; padding:0 12px; }
+.admin-user-actions .ba,.admin-user-actions .bc,.admin-user-actions .bd{ min-height:30px; font-size:11.5px; padding:0 11px; }
+.invite-actions button{ min-height:28px; padding:0 10px; }
+.img-drop-btn{ min-height:32px; }
+.doc-row .ba,.doc-row .bd{ min-height:30px; }
+a.ba{ line-height:1.2; }
+
+/* ── 3 · TAB BAR DE PILLS ── */
+.tabbar{ gap:5px; padding:9px 18px; align-items:center; }
+.tab, .tab.on{ border-bottom:0; margin-bottom:0; }
+.tab{
+  padding:8px 14px; border-radius:999px; font-size:12.5px; color:var(--text2);
+  transition:background .15s var(--ease,ease), color .15s var(--ease,ease);
+}
+.tab:hover{ background:var(--surface2); color:var(--text); transform:none; }
+.tab.on{ background:var(--mist); color:var(--forest); font-weight:600; }
+html[data-theme="dark"] .tab.on{ background:rgba(47,93,58,0.38); color:var(--mist); }
+.tab .badge{ margin-left:6px; }
+.tab.on .badge{ background:var(--forest); color:var(--mist); }
+html[data-theme="dark"] .tab.on .badge{ background:var(--mist); color:var(--forest); }
+
+/* ── 4 · HEADER DEL PACIENTE: barra de identidad ── */
+.phdr{ padding:18px 24px 16px; gap:14px; }
+.pav{
+  width:46px; height:46px; border-radius:15px; font-size:15px;
+  background:linear-gradient(135deg, var(--mist) 0%, #EFEDE0 100%);
+  border:none; box-shadow:inset 0 0 0 1px rgba(31,58,42,0.14), 0 2px 6px rgba(31,58,42,0.08);
+}
+html[data-theme="dark"] .pav{
+  background:linear-gradient(135deg, rgba(47,93,58,0.45) 0%, rgba(47,93,58,0.22) 100%);
+  color:var(--mist); box-shadow:inset 0 0 0 1px rgba(220,227,210,0.16);
+}
+.phn{ font-size:19px; font-weight:700; letter-spacing:-0.02em; }
+.phm{ font-size:12px; margin-top:3px; letter-spacing:0.01em; }
+
+/* ── 5 · TARJETAS QUE ACOMPAÑAN LA ESCRITURA ── */
+.card{ border-radius:16px; padding:22px 24px; }
+.card:focus-within{ border-color:var(--accent-border); box-shadow:0 8px 28px rgba(31,58,42,0.10); }
+html[data-theme="dark"] .card:focus-within{ box-shadow:0 8px 28px rgba(0,0,0,0.35); }
+.ct{ font-size:16px; margin-bottom:18px; }
+
+/* ── 6 · ICONOGRAFÍA SEMÁNTICA EN DATOS PERSONALES ── */
+#d_em,#d_dir,#d_oc,#d_ref{ padding-left:34px !important; background-repeat:no-repeat; background-position:11px center; background-size:14px; }
+#d_em{ background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237A8A6E' stroke-width='1.8'%3E%3Crect x='2' y='4' width='20' height='16' rx='2'/%3E%3Cpath d='m22 7-10 6L2 7'/%3E%3C/svg%3E"); }
+#d_dir{ background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237A8A6E' stroke-width='1.8'%3E%3Cpath d='M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0Z'/%3E%3Ccircle cx='12' cy='10' r='3'/%3E%3C/svg%3E"); }
+#d_oc{ background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237A8A6E' stroke-width='1.8'%3E%3Crect x='2' y='7' width='20' height='14' rx='2'/%3E%3Cpath d='M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2'/%3E%3C/svg%3E"); }
+#d_ref{ background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237A8A6E' stroke-width='1.8'%3E%3Cpath d='M16 3h5v5M21 3l-7 7M8 21H3v-5M3 21l7-7'/%3E%3C/svg%3E"); }
+
+/* ── 7 · ODONTOGRAMA: dientes con carácter (colores/semántica intactos) ── */
+.tooth{ border-radius:9px; transition:transform .13s var(--ease,ease), box-shadow .15s var(--ease,ease), background .12s; }
+.tooth:hover{ transform:translateY(-2px); box-shadow:0 5px 12px rgba(26,26,23,0.14); }
+.tooth .ts{ font-weight:600; }
+.tooth .tn{ font-size:8.5px; }
+
+/* ── 8 · CONSULTAS: tarjetas con lomo y ritmo ── */
+.cc{ border-radius:14px; padding:15px 17px; margin-bottom:10px; border-left:3px solid var(--border); }
+.cc:hover{ border-left-color:var(--brass); background:var(--surface); }
+.ccd{ font-size:10.5px; color:var(--forest); }
+html[data-theme="dark"] .ccd{ color:#9CC8A8; }
+
+/* ── 9 · PROC. ESTÉTICOS: títulos de grupo como overline editorial ── */
+.proc-group-title{ font-size:10.5px; letter-spacing:0.14em; color:var(--forest); border-bottom:none; padding-bottom:0; margin-bottom:10px; display:flex; align-items:center; gap:10px; }
+.proc-group-title::after{ content:''; flex:1; height:0.5px; background:var(--border); }
+html[data-theme="dark"] .proc-group-title{ color:#9CC8A8; }
+
+@media (max-width:768px){
+  .pav{ width:40px; height:40px; border-radius:12px; font-size:13px; }
+  .phn{ font-size:16.5px; }
+  .tab{ padding:7px 12px; }
+  .card{ padding:16px 16px; border-radius:14px; }
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   v10 · COMPONENTES RECONSTRUIDOS — carta de superficies, ledger de
+   operatorias, línea de tiempo de procedimientos, Sí/No segmentado,
+   filtro de fecha como chip, paleta del odontograma.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ── CARTA DE SUPERFICIES (diagrama coronal pintable) ── */
+.surf-help{ font-size:12.5px; color:var(--text2); line-height:1.55; margin:0 0 12px; }
+.surf-pal{ display:flex; flex-wrap:wrap; gap:6px; margin-bottom:14px; }
+.surf-chip{
+  font-family:'DM Sans',sans-serif; font-size:11.5px; font-weight:600; cursor:pointer;
+  padding:7px 13px; border-radius:999px; border:1px solid var(--border);
+  background:var(--surface); color:var(--text2); transition:all .13s var(--ease,ease);
+  display:inline-flex; align-items:center; gap:6px;
+}
+.surf-chip::before{ content:''; width:9px; height:9px; border-radius:3px; border:0.5px solid rgba(0,0,0,0.12); }
+.surf-chip.on{ transform:translateY(-1px); box-shadow:0 4px 12px rgba(26,26,23,0.16); border-color:currentColor; color:var(--text); font-weight:700; }
+.sc-caries::before{ background:#D98873; } .sc-tratado::before{ background:#8FBF9A; }
+.sc-corona::before{ background:#8FB0C0; } .sc-endodoncia::before{ background:#D9BE85; }
+.sc-protesis::before{ background:#B4A1D1; } .sc-ausente::before{ background:#B9B7AC; }
+.sc-sano::before{ background:var(--surface2); }
+.surf-chip.sc-caries.on{ background:rgba(184,85,62,0.10); }
+.surf-chip.sc-tratado.on{ background:var(--accent-light); }
+.surf-chip.sc-corona.on{ background:var(--info-light); }
+.surf-chip.sc-endodoncia.on{ background:var(--warn-light); }
+.surf-chip.sc-protesis.on{ background:rgba(120,80,160,0.10); }
+.surf-chip.sc-ausente.on{ background:var(--surface2); }
+.surf-stage{ display:flex; justify-content:center; padding:6px 0 2px; }
+.surf-diagram{ width:min(240px,70vw); }
+.surf-svg{ width:100%; height:auto; display:block; filter:drop-shadow(0 6px 16px rgba(31,58,42,0.14)); }
+.sfz{ cursor:pointer; }
+.sfz path,.sfz circle{ stroke:var(--surface); stroke-width:3; transition:filter .12s, opacity .12s; }
+.sfz:hover path,.sfz:hover circle{ filter:brightness(0.92); }
+.sfz:active path,.sfz:active circle{ filter:brightness(0.86); }
+.sfz-l{ font-family:'DM Sans',sans-serif; font-size:13px; font-weight:700; fill:var(--text2); pointer-events:none; }
+.sfz.st-sano path,.sfz.st-sano circle{ fill:#EDE9DD; }
+.sfz.st-caries path,.sfz.st-caries circle{ fill:#E2A38F; }
+.sfz.st-tratado path,.sfz.st-tratado circle{ fill:#A9CDB2; }
+.sfz.st-ausente path,.sfz.st-ausente circle{ fill:#CFCDC2; opacity:.55; }
+.sfz.st-corona path,.sfz.st-corona circle{ fill:#A6C3D3; }
+.sfz.st-endodoncia path,.sfz.st-endodoncia circle{ fill:#E0C48E; }
+.sfz.st-protesis path,.sfz.st-protesis circle{ fill:#C3B1DC; }
+.sfz:not(.st-sano) .sfz-l{ fill:#33332B; }
+html[data-theme="dark"] .sfz path,html[data-theme="dark"] .sfz circle{ stroke:var(--surface); }
+html[data-theme="dark"] .sfz.st-sano path,html[data-theme="dark"] .sfz.st-sano circle{ fill:#31312A; }
+html[data-theme="dark"] .sfz-l{ fill:var(--text2); }
+html[data-theme="dark"] .sfz:not(.st-sano) .sfz-l{ fill:#1E1E19; }
+.surf-actions{ display:flex; justify-content:center; margin:10px 0 4px; }
+.surf-read{ display:flex; flex-wrap:wrap; gap:6px; justify-content:center; margin-top:10px; min-height:26px; }
+.surf-read-pill{ font-size:11px; font-weight:600; padding:4px 11px; border-radius:999px; font-family:'DM Sans',sans-serif; border:0.5px solid var(--border); background:var(--surface2); color:var(--text); display:inline-flex; align-items:center; gap:6px; }
+.surf-read-pill::before{ content:''; width:8px; height:8px; border-radius:3px; }
+.surf-read-pill.sc-caries::before{ background:#D98873; } .surf-read-pill.sc-tratado::before{ background:#8FBF9A; }
+.surf-read-pill.sc-corona::before{ background:#8FB0C0; } .surf-read-pill.sc-endodoncia::before{ background:#D9BE85; }
+.surf-read-pill.sc-protesis::before{ background:#B4A1D1; } .surf-read-pill.sc-ausente::before{ background:#B9B7AC; }
+.surf-read-empty{ font-size:11.5px; color:var(--text3); font-style:italic; }
+
+/* ── OPERATORIAS: ledger ── */
+.op-head{
+  display:grid; grid-template-columns:26px 158px 96px 172px 118px 1fr 30px; gap:10px; align-items:center;
+  padding:0 10px 8px; font-size:9.5px; font-weight:700; letter-spacing:0.07em; text-transform:uppercase; color:var(--text3);
+}
+.op-list{ display:flex; flex-direction:column; gap:6px; }
+.op-row{
+  display:grid; grid-template-columns:26px 158px 96px 172px 118px 1fr 30px; gap:10px; align-items:center;
+  padding:9px 10px; border:0.5px solid var(--border); border-radius:12px; background:var(--surface);
+  transition:box-shadow .15s var(--ease,ease), border-color .15s;
+}
+.op-row:hover{ border-color:var(--border2); box-shadow:0 3px 12px rgba(31,58,42,0.07); }
+.op-row:focus-within{ border-color:var(--accent-border); box-shadow:0 4px 16px rgba(31,58,42,0.10); }
+.op-row.ghost{ border-style:dashed; background:transparent; opacity:.75; }
+.op-row.ghost:hover{ opacity:1; }
+.op-n{ font-size:11px; font-weight:700; color:var(--text3); text-align:center; font-variant-numeric:tabular-nums; }
+.op-row.ghost .op-n{ color:var(--forest); font-size:14px; }
+.op-cell{ min-width:0; display:flex; flex-direction:column; gap:3px; }
+.op-l{ display:none; font-size:9px; font-weight:700; letter-spacing:0.07em; text-transform:uppercase; color:var(--text3); }
+.op-cell select,.op-cell input{ height:34px; font-size:12.5px; }
+.op-cell .ds-dp-btn{ min-height:34px; padding:3px 10px 3px 3px; }
+.op-cell .ds-dp-btn .ic{ width:24px; height:24px; }
+.op-x{ display:flex; justify-content:center; }
+/* Fibra: 3 toques, no dropdown */
+.seg3{ display:inline-flex; background:var(--surface2); border:0.5px solid var(--border); border-radius:9px; padding:2px; gap:1px; }
+.seg3 button{
+  flex:1; min-width:0; background:none; border:none; cursor:pointer; font-family:'DM Sans',sans-serif;
+  font-size:11px; font-weight:600; color:var(--text3); padding:6px 9px; border-radius:7px; white-space:nowrap;
+  transition:background .12s, color .12s;
+}
+.seg3 button:hover{ color:var(--text); }
+.seg3 button.on{ background:var(--forest); color:var(--mist); box-shadow:0 1px 4px rgba(31,58,42,0.25); }
+@media (max-width:900px){
+  .op-head{ display:none; }
+  .op-row{ grid-template-columns:1fr 1fr; padding:12px; row-gap:10px; }
+  .op-n{ display:none; }
+  .op-l{ display:block; }
+  .op-cell-marca{ grid-column:1 / -1; }
+  .op-x{ position:absolute; }
+  .op-row{ position:relative; }
+  .op-x{ top:8px; right:8px; }
+}
+
+/* ── PROC. ESTÉTICOS: línea de tiempo ── */
+.proc-timeline{ position:relative; padding-left:2px; }
+.pentry{ display:flex; gap:12px; align-items:stretch; margin-bottom:2px; }
+.pe-rail{ position:relative; width:14px; flex-shrink:0; display:flex; justify-content:center; }
+.pe-rail::before{ content:''; position:absolute; top:4px; bottom:-6px; width:2px; background:var(--border); border-radius:2px; }
+.pentry:last-child .pe-rail::before{ bottom:auto; height:22px; }
+.pe-dot{ position:relative; z-index:1; width:10px; height:10px; border-radius:50%; background:var(--brass); box-shadow:0 0 0 3px var(--surface); margin-top:12px; flex-shrink:0; }
+.pe-main{ flex:1; min-width:0; padding-bottom:14px; }
+.pe-top{ display:flex; align-items:center; gap:8px; margin-bottom:7px; }
+.pe-top .ds-dp{ flex:0 0 auto; }
+.pe-top .ds-dp-btn{ min-height:32px; padding:3px 10px 3px 3px; }
+.pe-top .ds-dp-btn .ic{ width:24px; height:24px; }
+.pe-top .bdel{ margin-left:auto; opacity:0; transition:opacity .15s; }
+.pentry:hover .pe-top .bdel{ opacity:1; }
+@media (hover:none){ .pe-top .bdel{ opacity:1; } }
+.pe-nodate{ font-size:11px; color:var(--text3); font-style:italic; }
+.pe-main textarea{ width:100%; }
+.proc-entries-add{ margin-left:26px; }
+
+/* ── ANTECEDENTES / HÁBITOS: Sí·No segmentado ── */
+.ant-row,.hab-row{ display:flex; align-items:center; gap:10px; padding:4px 0; }
+.ant-row label,.hab-row label{ flex:1; min-width:0; font-size:12.5px; color:var(--text); }
+.sino{ display:inline-flex; background:var(--surface2); border:0.5px solid var(--border); border-radius:9px; padding:2px; gap:1px; flex-shrink:0; }
+.sino-b{
+  background:none; border:none; cursor:pointer; font-family:'DM Sans',sans-serif;
+  font-size:11px; font-weight:600; color:var(--text3); padding:5px 11px; border-radius:7px;
+  transition:background .12s, color .12s; min-width:34px;
+}
+.sino-b:hover:not(:disabled){ color:var(--text); }
+.sino-b.on{ background:var(--surface); color:var(--text); box-shadow:0 1px 3px rgba(26,26,23,0.12); }
+.sino-b.si.on{ background:var(--forest); color:var(--mist); }
+.sino-b.no.on{ background:var(--terra); color:#FBEFEA; }
+.sino-b:disabled{ opacity:.55; cursor:not-allowed; }
+.hab-row .sino{ margin-right:2px; }
+.hab-row input{ flex:1.2; min-width:120px; }
+
+/* ── RÉCORD: el filtro de fecha es un chip de la misma familia ── */
+.rec-toolbar .ds-dp-btn{
+  border-radius:999px; min-height:34px; max-height:34px; padding:0 14px 0 4px;
+  background:var(--surface); border:0.5px solid var(--border); box-shadow:none;
+}
+.rec-toolbar .ds-dp-btn .ic{ width:26px; height:26px; border-radius:999px; background:var(--surface2); color:var(--text3); }
+.rec-toolbar .ds-dp-btn .val{ font-size:12.5px; font-weight:500; line-height:1; }
+.rec-toolbar .ds-dp-btn.empty .val{ font-weight:500; }
+.rec-toolbar .ds-dp-btn:hover{ border-color:var(--border2); background:var(--surface2); }
+.rec-toolbar .ds-dp-btn:not(.empty){ background:var(--mist); border-color:var(--accent-border); }
+.rec-toolbar .ds-dp-btn:not(.empty) .val{ color:var(--forest); }
+.rec-toolbar .ds-dp-btn:not(.empty) .ic{ background:var(--forest); color:var(--mist); }
+html[data-theme="dark"] .rec-toolbar .ds-dp-btn:not(.empty){ background:rgba(47,93,58,0.35); }
+html[data-theme="dark"] .rec-toolbar .ds-dp-btn:not(.empty) .val{ color:var(--mist); }
+
+/* ── ODONTOGRAMA: paleta de condiciones como toolbar de estudio ── */
+.tleg{ gap:7px; margin-bottom:18px; }
+.leg{
+  border-radius:999px; padding:7px 14px; font-size:11.5px; font-weight:600;
+  border:1px solid var(--border); background:var(--surface);
+  transition:all .13s var(--ease,ease); display:inline-flex; align-items:center; gap:7px;
+}
+.leg:hover{ transform:translateY(-1px); box-shadow:0 3px 10px rgba(26,26,23,0.10); }
+.leg.sel{ transform:translateY(-1px); box-shadow:0 4px 14px rgba(31,58,42,0.18); border-color:var(--forest); }
+.ld{ width:11px; height:11px; border-radius:4px; }
+@media (max-width:768px){
+  .ant-row,.hab-row{ flex-wrap:wrap; }
+  .ant-row label,.hab-row label{ flex-basis:100%; }
+}
+
+/* ════════ v10.1 · VISUALIZADOR DEL DIENTE — de gris a vitrina clínica ════════ */
+.viz-canvas{
+  background:radial-gradient(ellipse 75% 58% at 50% 42%, #FFFFFF 0%, var(--bone) 55%, var(--mist) 130%);
+  border:0.5px solid var(--border); border-radius:14px;
+}
+html[data-theme="dark"] .viz-canvas{
+  background:radial-gradient(ellipse 75% 58% at 50% 42%, #2C2C25 0%, var(--surface) 60%, rgba(47,93,58,0.20) 130%);
+  border-color:var(--border);
+}
+.viz-surf{ cursor:pointer; transition:filter .12s, opacity .12s; }
+.viz-surf:hover{ filter:brightness(0.93) saturate(1.15); }
+.viz-surf:active{ filter:brightness(0.86); }
+.viz-dir-lbl{ font-family:'DM Sans',sans-serif; font-size:10.5px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; fill:var(--text3); }
+.viz-zone-lbl-o{ font-family:'DM Sans',sans-serif; font-size:15px; font-weight:800; fill:var(--forest); opacity:.55; }
+html[data-theme="dark"] .viz-zone-lbl-o{ fill:var(--mist); }
+.viz-hint{ font-size:11.5px; color:var(--text2); background:var(--surface2); border-radius:9px; padding:8px 11px; line-height:1.5; }
+.viz-badges{ display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
+
+/* ════════ v10.1 · OPERATORIAS COMO TARJETAS DE REGISTRO ════════ */
+.opc-grid{ display:grid; gap:12px; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); }
+.opc{
+  position:relative; display:flex; gap:13px; align-items:flex-start; cursor:pointer;
+  border:0.5px solid var(--border); border-radius:14px; background:var(--surface); padding:14px 15px;
+  transition:box-shadow .16s var(--ease,ease), transform .13s var(--ease,ease), border-color .15s;
+}
+.opc:hover{ transform:translateY(-2px); box-shadow:0 10px 26px rgba(31,58,42,0.13); border-color:var(--accent-border); }
+.opc-tooth{
+  flex-shrink:0; width:52px; height:52px; border-radius:13px;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px;
+  background:linear-gradient(135deg, var(--mist), #EFEDE0); box-shadow:inset 0 0 0 1px rgba(31,58,42,0.14);
+}
+html[data-theme="dark"] .opc-tooth{ background:linear-gradient(135deg, rgba(47,93,58,0.45), rgba(47,93,58,0.2)); box-shadow:inset 0 0 0 1px rgba(220,227,210,0.16); }
+.opc-tooth-n{ font-family:'DM Sans',sans-serif; font-size:17px; font-weight:800; color:var(--forest); line-height:1; letter-spacing:-0.02em; }
+html[data-theme="dark"] .opc-tooth-n{ color:var(--mist); }
+.opc-tooth-l{ font-size:7.5px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text3); }
+.opc-body{ flex:1; min-width:0; display:flex; flex-direction:column; gap:6px; }
+.opc-date{ font-size:12px; font-weight:700; color:var(--forest); font-family:'DM Sans',sans-serif; letter-spacing:0.02em; }
+html[data-theme="dark"] .opc-date{ color:#9CC8A8; }
+.opc-meta{ display:flex; gap:6px; flex-wrap:wrap; }
+.opc-pill{ display:inline-flex; align-items:center; gap:5px; font-size:10.5px; font-weight:600; padding:3px 9px; border-radius:999px; background:var(--surface2); color:var(--text2); font-family:'DM Sans',sans-serif; }
+.opc-vita{ background:var(--warn-light); color:#7A5F33; }
+html[data-theme="dark"] .opc-vita{ color:#DFC9A3; }
+.opc-swatch{ width:9px; height:9px; border-radius:3px; background:linear-gradient(135deg,#FBF6E8,#E8D9B8); border:0.5px solid rgba(122,95,51,0.35); }
+.opc-fibra-si{ background:var(--accent-light); color:var(--forest); }
+html[data-theme="dark"] .opc-fibra-si{ color:var(--mist); }
+.opc-marca{ font-size:11.5px; color:var(--text2); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.opc-del{ position:absolute; top:9px; right:9px; opacity:0; transition:opacity .15s; }
+.opc:hover .opc-del{ opacity:1; }
+@media (hover:none){ .opc-del{ opacity:1; } }
+@media print{ .opc{ break-inside:avoid; border:0.8px solid #000; } .opc-del{ display:none; } }
+
+/* ════════ v10.1 · PROC. ESTÉTICOS: bitácora ════════ */
+.proc-card{ border:0.5px solid var(--border); border-radius:14px; padding:14px 16px; margin-bottom:12px; background:var(--surface); }
+.proc-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px; }
+.proc-name{ font-size:13.5px; font-weight:700; color:var(--text); font-family:'DM Sans',sans-serif; }
+.proc-count{ font-size:10.5px; font-weight:600; color:var(--forest); background:var(--mist); padding:3px 9px; border-radius:999px; flex-shrink:0; }
+html[data-theme="dark"] .proc-count{ background:rgba(47,93,58,0.38); color:var(--mist); }
+
+/* ════════ v10.2 · PROC. ESTÉTICOS con tarjetas + Récord alineado ════════ */
+.pec-grid{ grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); }
+.pec .opc-tooth-n{ font-size:16px; }
+.pec-com{ font-size:12px; color:var(--text2); line-height:1.5; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+
+/* ════════ v10.3 · BOTÓN PERSONALIZAR + LIMPIEZA DE OVERLAYS ════════ */
+.dash-customize-btn{
+  display:inline-flex; align-items:center; gap:8px;
+  background:linear-gradient(180deg, var(--sage), var(--forest));
+  color:var(--mist); border:none; border-radius:999px;
+  padding:9px 16px; font-size:12.5px; font-weight:600; letter-spacing:0.01em;
+  box-shadow:0 4px 14px rgba(31,58,42,0.28);
+  transition:transform .15s var(--ease,ease), box-shadow .18s var(--ease,ease);
+}
+.dash-customize-btn:hover{ background:linear-gradient(180deg, var(--sage), var(--forest)); color:var(--mist); transform:translateY(-1px); box-shadow:0 8px 20px rgba(31,58,42,0.34); }
+.dash-customize-btn:active{ transform:translateY(0); }
+.dash-customize-btn svg{ flex-shrink:0; }
+.dcb-n{
+  background:var(--mist); color:var(--forest); font-size:10.5px; font-weight:800;
+  min-width:20px; height:20px; padding:0 6px; border-radius:999px;
+  display:inline-flex; align-items:center; justify-content:center;
+}
+/* Los widgets ya no tienen controles ni drag flotantes */
+.dash-drag,.dash-wctl{ display:none !important; }
+
+/* ════════ v10.4 · DRAG & DROP DEL EDITOR DE WIDGETS ════════ */
+.dcw-row{ display:flex; align-items:flex-start; gap:8px; background:var(--surface); position:relative;
+  transition:transform .18s var(--ease,ease), box-shadow .18s var(--ease,ease);
+  cursor:grab; touch-action:pan-y; }
+.dcw-row .dcw-check,.dcw-row .dcw-ctls{ cursor:auto; }
+body.dnd-active{ user-select:none; -webkit-user-select:none; cursor:grabbing; }
+body.dnd-active .dcw-row{ cursor:grabbing; }
+.dcw-main{ flex:1; min-width:0; }
+.dcw-handle{
+  flex-shrink:0; display:inline-flex; align-items:center; justify-content:center;
+  width:32px; align-self:stretch; min-height:34px; margin-top:0; border-radius:8px; color:var(--text3);
+  cursor:grab; touch-action:none; user-select:none; -webkit-user-select:none;
+  transition:background .12s, color .12s;
+}
+.dcw-handle:hover{ background:var(--surface2); color:var(--text); }
+.dcw-row.drag{
+  z-index:10; cursor:grabbing; transition:none;
+  box-shadow:0 14px 34px rgba(31,58,42,0.25); border-color:var(--accent-border);
+  background:var(--surface);
+}
+.dcw-row.drag .dcw-handle{ cursor:grabbing; color:var(--forest); }
+.dcw-list{ overscroll-behavior:contain; }
+.dcw-off-title{ font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--text3); margin:14px 2px 6px; }
+.dcw-list-off{ max-height:none; opacity:.85; }
 </style>
 </head>
 <body>
@@ -2616,7 +3352,7 @@ window.showApp = function(opts){ window._pendingShowApp = opts || {}; };
 <!-- NAV -->
 <nav class="nav">
   <div class="nav-brand">
-    <img src="logo.svg" alt="DocuSalud">
+    <img src="logo.svg" alt="DocuSalud" onerror="dsLogoFB(this)">
     <div class="nav-logo"><b>docu</b>salud</div>
   </div>
   <div class="nav-links">
@@ -2829,7 +3565,7 @@ window.showApp = function(opts){ window._pendingShowApp = opts || {}; };
 
 <!-- FOOTER -->
 <footer class="footer">
-  <div class="footer-logo"><img src="logo.svg" alt="DocuSalud"><b>docu</b>salud · 2026</div>
+  <div class="footer-logo"><img src="logo.svg" alt="DocuSalud" onerror="dsLogoFB(this)"><b>docu</b>salud · 2026</div>
   <div class="footer-links">
     <a href="#">Privacidad</a>
     <a href="#">Términos</a>
@@ -2847,7 +3583,7 @@ window.showApp = function(opts){ window._pendingShowApp = opts || {}; };
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
   </button>
   <div class="lbox">
-    <img class="ds-logo ds-logo-lg" src="logo.svg" width="56" height="56" alt="DocuSalud">
+    <img class="ds-logo ds-logo-lg" src="logo.svg" width="56" height="56" alt="DocuSalud" onerror="dsLogoFB(this)">
     <h2><span>docu</span>salud</h2>
     <p>Historias clínicas · Acceso privado</p>
 
@@ -2926,7 +3662,7 @@ window.showApp = function(opts){ window._pendingShowApp = opts || {}; };
     <button id="menuBtn" onclick="event.stopPropagation();openSideMenu()" style="display:none;background:none;border:none;cursor:pointer;padding:4px;color:var(--text2)">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
     </button>
-    <img class="ds-logo" src="logo.svg" width="32" height="32" alt="DocuSalud">
+    <img class="ds-logo" src="logo.svg" width="32" height="32" alt="DocuSalud" onerror="dsLogoFB(this)">
     <div>
       <div class="brand-name"><span>docu</span>salud</div>
       <div class="brand-sub">Historias clínicas</div>
@@ -2936,9 +3672,6 @@ window.showApp = function(opts){ window._pendingShowApp = opts || {}; };
   <div style="display:flex;gap:6px;align-items:center">
     <button class="tbtn tbtn-admin" id="adminBtn" style="display:none" onclick="toggleAdmin()" title="Administración de usuarios" aria-label="Administración">
       <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><span class="lbl">Admin</span>
-    </button>
-    <button class="tbtn" onclick="openAjustes()" title="Ajustes" aria-label="Ajustes">
-      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg><span class="lbl">Ajustes</span>
     </button>
     <button class="dark-toggle" onclick="toggleDark()" id="darkBtn" title="Modo oscuro" aria-label="Cambiar tema">
       <svg class="dark-icon dark-icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
@@ -2957,9 +3690,26 @@ window.showApp = function(opts){ window._pendingShowApp = opts || {}; };
     <button class="tbtn" onclick="window.print()" title="Imprimir" aria-label="Imprimir">
       <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg><span class="lbl">Imprimir</span>
     </button>
-    <button class="profile-btn" id="profileBtn" onclick="openProfile()" title="Mi perfil" aria-label="Mi perfil" style="display:none">
-      <span id="profileInitials">D</span>
-    </button>
+    <div class="profile-menu-wrap" id="profileMenuWrap" style="display:none">
+      <button class="profile-btn" id="profileBtn" onclick="toggleProfileMenu(event)" title="Mi cuenta" aria-label="Mi cuenta" aria-haspopup="true" aria-expanded="false">
+        <span id="profileInitials">D</span>
+      </button>
+      <div class="profile-menu" id="profileMenu" role="menu"><div class="profile-menu-inner">
+        <button role="menuitem" onclick="closeProfileMenu();openProfile()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          Mi perfil
+        </button>
+        <button role="menuitem" onclick="closeProfileMenu();openAjustes()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
+          Ajustes
+        </button>
+        <div class="profile-menu-sep"></div>
+        <button role="menuitem" class="pm-danger" onclick="closeProfileMenu();cerrarSesion()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>
+          Cerrar sesión
+        </button>
+      </div></div>
+    </div>
   </div>
 </div>
 
@@ -2974,7 +3724,7 @@ window.showApp = function(opts){ window._pendingShowApp = opts || {}; };
   </div>
   <div class="main" id="mainArea">
     <div class="panel"><div class="empty">
-      <img class="ds-logo ds-logo-lg empty-logo-svg" src="logo.svg" width="56" height="56" alt="DocuSalud">
+      <img class="ds-logo ds-logo-lg empty-logo-svg" src="logo.svg" width="56" height="56" alt="DocuSalud" onerror="dsLogoFB(this)">
       <h3><span>docu</span>salud</h3>
       <p>Selecciona un paciente o crea uno nuevo.</p>
     </div></div>
@@ -2991,7 +3741,7 @@ window.showApp = function(opts){ window._pendingShowApp = opts || {}; };
     Calendario
   </button>
   <button class="bn-btn bn-inicio" onclick="bnInicio()">
-    <img class="bn-logo" src="logo.svg" alt="" width="23" height="23">
+    <img class="bn-logo" src="logo.svg" alt="" width="23" height="23" onerror="dsLogoFB(this)">
     Inicio
   </button>
   <button class="bn-btn" onclick="bnNuevo()">
@@ -3140,7 +3890,7 @@ function documentosDisabledFor(_impersonated){
 // Only admins can change it; it applies to every user's patient tab bar.
 let globalTabOrder = null;        // array of tab keys, or null until loaded
 let tabOrderUnsubscribe = null;
-const TAB_LABELS_IMG = Object.assign({}, TAB_LABELS, {img:'Imágenes', doc:'Documentos'});
+const TAB_LABELS_IMG = Object.assign({}, TAB_LABELS, {img:'Archivos'});
 // Reorders the given tab list according to globalTabOrder. Tabs not listed keep
 // their default relative order, appended after the ordered ones.
 function applyTabOrder(tabs){
@@ -3268,7 +4018,8 @@ function icon(name,size){
     home:'<path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/>',
     moon:'<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>',
     restore:'<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 3"/>',
-    filter:'<path d="M22 4H2l8 9.2V19l4 2v-7.8Z"/>'
+    filter:'<path d="M22 4H2l8 9.2V19l4 2v-7.8Z"/>',
+    sliders:'<path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/>'
   }[name]||'';
   return `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${P}</svg>`;
 }
@@ -3282,7 +4033,7 @@ function dsDateField(id,value,extraAttrs,disabled){
   const disp=value?ff(value):'Seleccionar fecha';
   return `<div class="ds-dp" id="${id}_wrap">
     <input type="hidden" id="${id}" value="${e(value||'')}" ${extraAttrs||''}>
-    <button type="button" class="ds-dp-btn" ${disabled?'disabled style="opacity:.6;cursor:default"':''} onclick="dsDpToggle('${id}')"><span>${disp}</span><span class="ic">${icon('calendar',13)}</span></button>
+    <button type="button" class="ds-dp-btn${value?'':' empty'}" ${disabled?'disabled':''} onclick="dsDpToggle('${id}')"><span class="ic">${icon('calendar',13)}</span><span class="val">${disp}</span></button>
   </div>`;
 }
 window.dsDpToggle=function(id){
@@ -3317,7 +4068,10 @@ function _dsDpOutside(ev){
   if(!_dpOpen)return;
   const wrap=document.getElementById(_dpOpen+'_wrap');
   const pop=document.getElementById(_dpOpen+'_pop');
-  if(wrap&&!wrap.contains(ev.target)&&pop&&!pop.contains(ev.target))dsDpClose();
+  // v10.3 fix — si el campo ya no existe (la vista se re-renderizó), el popover
+  // quedaba huérfano flotando sobre el nuevo renglón: ciérralo siempre.
+  if(!wrap||!pop){ dsDpClose(); return; }
+  if(!wrap.contains(ev.target)&&!pop.contains(ev.target))dsDpClose();
 }
 window.dsDpClose=dsDpClose; // v9 fix — el botón "Cerrar" del popover la llama desde onclick global
 function dsDpClose(){
@@ -3365,8 +4119,10 @@ window.dsDpPick=function(id,iso){
   // input (checkConflict, updOp, etc.) sigan funcionando exactamente igual.
   inp.dispatchEvent(new Event('input',{bubbles:true}));
   inp.dispatchEvent(new Event('change',{bubbles:true}));
-  const lbl=document.querySelector('#'+id+'_wrap .ds-dp-btn span');
+  const _dpb=document.querySelector('#'+id+'_wrap .ds-dp-btn');
+  const lbl=_dpb?_dpb.querySelector('.val'):null;
   if(lbl)lbl.textContent=ff(iso)||'Seleccionar fecha';
+  if(_dpb)_dpb.classList.toggle('empty',!iso);
   dsDpClose();
 };
 // Candado de solo lectura — control segmentado (mismo lenguaje visual que
@@ -3802,10 +4558,33 @@ function updateAdminUI(){
     // so logout is always reachable from the profile menu, especially on mobile.
     const _authed = !!currentUserUid || isAdmin || isTempBypass();
     profBtn.style.display = _authed ? 'inline-flex' : 'none';
+    const _pmw=document.getElementById('profileMenuWrap');
+    if(_pmw)_pmw.style.display = _authed ? 'inline-flex' : 'none';
     const _nm = (currentUserPerms && (currentUserPerms.name||currentUserPerms.email)) || (isAdmin?'Admin':'D');
     if(profInit) profInit.textContent = _nm.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
   }
 }
+
+// ─── v9.2 · MENÚ DEL PERFIL (avatar → Perfil / Ajustes / Salir) ─────────────
+window.toggleProfileMenu=function(ev){
+  if(ev)ev.stopPropagation();
+  const m=document.getElementById('profileMenu');
+  const b=document.getElementById('profileBtn');
+  if(!m)return;
+  const open=m.classList.toggle('open');
+  if(b)b.setAttribute('aria-expanded',open?'true':'false');
+};
+window.closeProfileMenu=function(){
+  const m=document.getElementById('profileMenu');
+  const b=document.getElementById('profileBtn');
+  if(m)m.classList.remove('open');
+  if(b)b.setAttribute('aria-expanded','false');
+};
+document.addEventListener('click',ev=>{
+  const w=document.getElementById('profileMenuWrap');
+  if(w&&!w.contains(ev.target))window.closeProfileMenu();
+});
+document.addEventListener('keydown',ev=>{ if(ev.key==='Escape'){ window.closeProfileMenu(); try{closeSideMenu();}catch(e){} } });
 
 // ─── v9 · AJUSTES ───────────────────────────────────────────────────────────
 window.openAjustes=function(){
@@ -4631,7 +5410,7 @@ function renderLista(){
 }
 
 window.seleccionar=function(id){
-  if(idActual!==id){_imgActiveCat='rad';_imgFilters={cat:'',user:'',cons:'',fecha:''};_imgLightboxId=null;_docFilters={tipo:'',user:'',cons:'',fecha:''};}
+  if(idActual!==id){_imgActiveCat='rad';_imgFilters={cat:'',user:'',cons:'',fecha:''};_imgLightboxId=null;_docFilters={tipo:'',user:'',cons:'',fecha:''};_archVista='img';}
   idActual=id;tabActual='datos';viewActual='paciente';consultaView=null;editUnlocked=false;odontoView=null;planView=null;
   logAccess(id);
   renderLista();renderPaciente();
@@ -4653,7 +5432,7 @@ function rebuildConsultasIndex(){
 
 // ─── EMPTY / LANDING (3.3.2) ──────────────────────────────────────────────
 // v7 notebook-D logo: spiral binding marks on the left + brass underline
-function logoSVG(size=28){return`<img class="ds-logo" src="logo.svg" width="${size}" height="${size}" alt="DocuSalud">`}
+function logoSVG(size=28){return`<img class="ds-logo" src="logo.svg" width="${size}" height="${size}" alt="DocuSalud" onerror="dsLogoFB(this)">`}
 
 function renderEmpty(){
   // v7.1 — self-heal (Bug #1): drop a stale admin flag for non-allowlisted sessions.
@@ -4693,7 +5472,7 @@ function renderEmpty(){
         const _epD=effectivePlanFor(_impD);
         const _isProD=_epD==='admin'||_epD==='pro'||_epD==='clinica';
         const _n=_dashOrder(_isProD).length;
-        return `<button class="dash-customize-btn" onclick="dashCustomize()">${icon('plus',13)} Personalizar widgets · ${_n} activo${_n===1?'':'s'}</button>`;
+        return `<button class="dash-customize-btn" onclick="dashCustomize()">${icon('sliders',14)}<span>Personalizar</span><span class="dcb-n">${_n}</span></button>`;
       })()}
     </div>
     ${(isAdmin&&!viewAsUid)?`<div class="dash-admin-section"><p class="dash-admin-title">${icon('lock',13)} Panel de administración</p>${adminDashboardWidgetsHTML()}<button class="bc" onclick="toggleAdmin()">Ir a gestión de usuarios →</button></div>`:''}
@@ -4718,13 +5497,13 @@ function _dashOrderKey(){ return 'ds_dash_order_'+(currentUserUid||'anon'); }
 // v9 — tamaño preconfigurado (S/M/L) y escala tipográfica por widget, por usuario/dispositivo.
 function _dashSizeKey(){ return 'ds_dash_sizes_'+(currentUserUid||'anon'); }
 function _dashFontKey(){ return 'ds_dash_fonts_'+(currentUserUid||'anon'); }
-const DASH_DEFAULT_SIZE={clock_weather:'l',today:'l',quick:'l',minical:'m',tratamientos_chart:'l'};
+const DASH_DEFAULT_SIZE={clock_weather:'l',today:'l',quick:'l',minical:'m',tratamientos_chart:'l',resumen_semanal:'m'};
 function _dashSizes(){ try{ return JSON.parse(localStorage.getItem(_dashSizeKey())||'{}')||{}; }catch(e){ return {}; } }
 function _dashSizeFor(k,w){ const s=_dashSizes()[k]; if(s==='s'||s==='m'||s==='l')return s; if(w&&w.full)return 'l'; return DASH_DEFAULT_SIZE[k]||'m'; }
 function _dashFonts(){ try{ return JSON.parse(localStorage.getItem(_dashFontKey())||'{}')||{}; }catch(e){ return {}; } }
 function _dashFontFor(k){ const v=parseFloat(_dashFonts()[k]); return (v>=0.8&&v<=1.4)?v:1; }
-window.dashSetSize=function(k,s){ const m=_dashSizes(); m[k]=s; try{localStorage.setItem(_dashSizeKey(),JSON.stringify(m));}catch(e){} renderEmpty(); };
-window.dashFont=function(k,d){ const m=_dashFonts(); let v=parseFloat(m[k])||1; v=Math.min(1.4,Math.max(0.8,Math.round((v+d*0.1)*10)/10)); m[k]=v; try{localStorage.setItem(_dashFontKey(),JSON.stringify(m));}catch(e){} renderEmpty(); };
+window.dashSetSize=function(k,s){ const m=_dashSizes(); m[k]=s; try{localStorage.setItem(_dashSizeKey(),JSON.stringify(m));}catch(e){} renderEmpty(); _dashCustomizeRefresh(); };
+window.dashFont=function(k,d){ const m=_dashFonts(); let v=parseFloat(m[k])||1; v=Math.min(1.4,Math.max(0.8,Math.round((v+d*0.1)*10)/10)); m[k]=v; try{localStorage.setItem(_dashFontKey(),JSON.stringify(m));}catch(e){} renderEmpty(); _dashCustomizeRefresh(); };
 const DASH_DEFAULT_ORDER=['clock_weather','today','quick','minical'];
 // Devuelve el orden + selección de widgets del usuario, filtrando los que ya
 // no aplican (p. ej. si bajó de plan) y añadiendo al final cualquier widget
@@ -4749,10 +5528,34 @@ function _dashOrder(isPro){
     }
     localStorage.setItem(lastProKey,isPro?'1':'0');
   }catch(e){}
+  // v9.3 — si el catálogo trae widgets que este usuario nunca ha visto, se
+  // añaden una sola vez al final (luego puede ocultarlos desde Personalizar).
+  try{
+    const seenKey='ds_dash_seen_'+(currentUserUid||'anon');
+    const seen=new Set(JSON.parse(localStorage.getItem(seenKey)||'[]'));
+    let changed=false;
+    for(const k of avail){ if(!seen.has(k)){ seen.add(k); changed=true; if(!order.includes(k)&&!DASH_DEFAULT_ORDER.includes(k))order.push(k); } }
+    if(changed){
+      localStorage.setItem(seenKey,JSON.stringify([...seen]));
+      localStorage.setItem(_dashOrderKey(),JSON.stringify(order));
+    }
+  }catch(e){}
   return order;
 }
+// v9.3 — Regla de números para WhatsApp: los teléfonos se guardan en formato
+// local (p. ej. "0414-1234567"). Para wa.me: se quita el 0 inicial y se
+// antepone el código de país +1 → "0414…" → "1414…", "0787…" → "1787…".
+// Si el número ya viene con 1 adelante (11+ dígitos), no se duplica.
+function waPhone(phone){
+  let d=(phone||'').replace(/[^0-9]/g,'');
+  if(!d)return null;
+  d=d.replace(/^0+/,'');            // elimina el/los 0 iniciales
+  if(!d)return null;
+  if(!(d.length>=11&&d.startsWith('1')))d='1'+d;  // código de país +1
+  return d;
+}
 function waLink(phone,text){
-  const digits=(phone||'').replace(/[^0-9]/g,'');
+  const digits=waPhone(phone);
   if(!digits)return null;
   return `https://wa.me/${digits}?text=${encodeURIComponent(text)}`;
 }
@@ -4794,6 +5597,60 @@ function dashTratamientosChartHTML(size){
         <div class="dash-bar-track"><div class="dash-bar-fill" style="width:${(n/max*100).toFixed(0)}%"></div></div>
         <span class="dash-bar-n">${n}</span>
       </div>`).join(''):'<p class="admin-dash-empty">Sin tratamientos registrados este mes</p>'}
+  </div>`;
+}
+// v9.3 — Resumen semanal: consultas de los últimos 7 días como mini-gráfica.
+function dashWeekHTML(size){
+  const days=[]; const now=new Date();
+  for(let i=6;i>=0;i--){
+    const d=new Date(now); d.setDate(now.getDate()-i);
+    days.push({iso:d.toISOString().split('T')[0], lbl:['D','L','M','M','J','V','S'][d.getDay()]});
+  }
+  const counts=new Map(days.map(d=>[d.iso,0]));
+  let total=0, ingreso=0;
+  for(const pt of pacientes){
+    for(const c of (pt.consultas||[])){
+      if(counts.has(c.fecha)){ counts.set(c.fecha,counts.get(c.fecha)+1); total++; ingreso+=parseFloat(c.costo)||0; }
+    }
+  }
+  const max=Math.max(1,...counts.values());
+  return `<div class="dash-card dc-week">
+    <p class="dash-label">Resumen semanal · ${total} consulta${total===1?'':'s'}${ingreso?` · $${ingreso.toLocaleString()}`:''}</p>
+    <div class="dash-week">
+      ${days.map((d,i)=>{
+        const n=counts.get(d.iso);
+        const hoyBar=i===6;
+        return `<div class="dash-week-col" title="${n} consulta${n===1?'':'s'} · ${ff(d.iso)}">
+          <span class="dash-week-n">${n||''}</span>
+          <div class="dash-week-bar${hoyBar?' today':''}" style="height:${Math.max(6,Math.round(n/max*100))}%"></div>
+          <span class="dash-week-d${hoyBar?' today':''}">${d.lbl}</span>
+        </div>`;
+      }).join('')}
+    </div>
+  </div>`;
+}
+// v9.3 — Pacientes inactivos: sin consulta en los últimos 6 meses (reactivación).
+function dashInactivosHTML(size){
+  const cutoff=new Date(); cutoff.setMonth(cutoff.getMonth()-6);
+  const cutIso=cutoff.toISOString().split('T')[0];
+  const list=pacientes
+    .map(pt=>({pt,last:patientLastConsultaDate(pt)}))
+    .filter(x=>x.last&&x.last<cutIso)
+    .sort((a,b)=>a.last.localeCompare(b.last));
+  const lim=size==='s'?3:5;
+  return `<div class="dash-card dash-card-rail">
+    <p class="dash-label">Sin visita hace +6 meses${list.length?' · '+list.length:''}</p>
+    ${list.length?list.slice(0,lim).map(x=>{
+      const wa=waLink(x.pt.telefono||x.pt.telefono2,`Hola ${(titleCase(x.pt.nombre)||'').split(' ')[0]}, le escribo de su consultorio dental. ¡Hace tiempo no le vemos! ¿Le gustaría agendar un control?`);
+      return `<div class="admin-dash-item">
+        <span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer" onclick="seleccionar('${x.pt.id}')">${e(titleCase(x.pt.nombre))}</span>
+        <span style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+          <span class="admin-dash-time">${e(ff(x.last))}</span>
+          ${wa?`<a href="${wa}" target="_blank" rel="noopener" class="dash-inact-wa" title="Invitar por WhatsApp" onclick="event.stopPropagation()">${icon('chat',13)}</a>`:''}
+        </span>
+      </div>`;
+    }).join('')+(list.length>lim?`<p class="admin-dash-empty" style="margin-top:6px">y ${list.length-lim} más…</p>`:''):
+    '<p class="admin-dash-empty">Todos tus pacientes tienen visitas recientes</p>'}
   </div>`;
 }
 const DASH_CATALOG={
@@ -4845,7 +5702,9 @@ const DASH_CATALOG={
   ingresos_mes:{label:'Ingresos este mes (Pro)', pro:true, full:false, rail:true, html:()=>{const s=_dashMonthStats();return `<div class="dash-card dash-card-rail"><p class="dash-label">Ingresos este mes</p><p class="dash-cycle-n" style="text-align:left;margin:4px 0 0">$${s.ingresoMes.toLocaleString()}</p></div>`;}},
   pacientes_nuevos:{label:'Pacientes nuevos del mes (Pro)', pro:true, full:false, rail:true, html:()=>{const s=_dashMonthStats();return `<div class="dash-card dash-card-rail"><p class="dash-label">Pacientes nuevos</p><p class="dash-cycle-n" style="text-align:left;margin:4px 0 0">${s.pacientesNuevosMes}</p></div>`;}},
   tratamientos_chart:{label:'Gráfica de tratamientos (Pro)', pro:true, full:true, html:(t,i,size)=>dashTratamientosChartHTML(size)},
-  cumpleanos:{label:'Cumpleaños del mes (Pro)', pro:true, full:false, rail:true, html:(t,i,size)=>dashBirthdaysHTML(size)}
+  cumpleanos:{label:'Cumpleaños del mes (Pro)', pro:true, full:false, rail:true, html:(t,i,size)=>dashBirthdaysHTML(size)},
+  resumen_semanal:{label:'Resumen semanal (Pro)', pro:true, full:false, html:(t,i,size)=>dashWeekHTML(size)},
+  inactivos:{label:'Pacientes inactivos +6 meses (Pro)', pro:true, full:false, rail:true, html:(t,i,size)=>dashInactivosHTML(size)}
 };
 function _dashAvailableKeys(isPro){ return Object.keys(DASH_CATALOG).filter(k=>!DASH_CATALOG[k].pro||isPro); }
 function dashWidgetsHTML(todayConsultas){
@@ -4858,8 +5717,9 @@ function dashWidgetsHTML(todayConsultas){
     const w=DASH_CATALOG[k]; if(!w)return;
     const size=_dashSizeFor(k,w);
     const fs=_dashFontFor(k);
-    const sizeBtns=w.rail?'':['s','m','l'].map(s=>`<button type="button" class="${size===s?'on':''}" onclick="event.stopPropagation();dashSetSize('${k}','${s}')" title="Tamaño ${s.toUpperCase()}">${s.toUpperCase()}</button>`).join('');
-    const html=`<div class="dash-widget dw-${size}" draggable="true" data-key="${k}" style="--wz:${fs}"><span class="dash-drag" title="Arrastra para reordenar">${icon('drag',14)}</span><div class="dash-wctl">${sizeBtns}${sizeBtns?'<span class="sep"></span>':''}<button type="button" onclick="event.stopPropagation();dashFont('${k}',-1)" title="Letra más pequeña">A−</button><button type="button" onclick="event.stopPropagation();dashFont('${k}',1)" title="Letra más grande">A+</button></div>${w.html(todayConsultas,isPro,size)}</div>`;
+    // v10.3 — sin controles flotantes sobre el contenido: tamaño, letra, orden
+    // y visibilidad viven en un solo lugar, el editor "Personalizar".
+    const html=`<div class="dash-widget dw-${size}" data-key="${k}" style="--wz:${fs}">${w.html(todayConsultas,isPro,size)}</div>`;
     if(w.rail)rail+=html; else main+=html;
   });
   if(_epDash==='free')dashProTeaserAutoStart();
@@ -5010,26 +5870,171 @@ function dashAutoFit(){
 }
 function _dashAutoFitDebounced(){ if(_dashFitTimer)clearTimeout(_dashFitTimer); _dashFitTimer=setTimeout(dashAutoFit,120); }
 window.addEventListener('resize',_dashAutoFitDebounced);
-window.dashCustomize=function(){
+// v9.2 — Editor central de widgets: mostrar/ocultar, reordenar (↑↓), tamaño
+// S/M/L y tipografía A−/A+, todo en un solo lugar. Es LA forma de editar en
+// móvil (los controles flotantes se ocultan ahí) y un atajo cómodo en desktop.
+function _dashCustomizeBody(){
   const _impDash=viewAsUid?allUsersList.find(u=>u.uid===viewAsUid):null;
   const isPro=(()=>{const ep=effectivePlanFor(_impDash);return ep==='admin'||ep==='pro'||ep==='clinica';})();
-  const current=new Set(_dashOrder(isPro));
+  const order=_dashOrder(isPro);
+  const current=new Set(order);
   const avail=_dashAvailableKeys(isPro);
+  // v10.4 — la lista refleja TU orden real: activos primero (arrastrables), ocultos abajo.
+  const onKeys=order.filter(k=>avail.includes(k));
+  const offKeys=avail.filter(k=>!current.has(k));
+  const row=(k,on,idx)=>{
+    const w=DASH_CATALOG[k];
+    const size=_dashSizeFor(k,w);
+    const fs=_dashFontFor(k);
+    return `<div class="dcw-row${on?'':' off'}" data-key="${k}">
+      ${on?`<span class="dcw-handle" title="Arrastra para reordenar">${icon('drag',15)}</span>`:''}
+      <div class="dcw-main">
+        <label class="dcw-check">
+          <input type="checkbox" ${on?'checked':''} onchange="dashToggleWidget('${k}',this.checked)">
+          <span class="dcw-name">${e(w.label.replace(' (Pro)',''))}</span>
+          ${w.pro?'<span class="dash-chip-pro">Pro</span>':''}
+        </label>
+        ${on?`<div class="dcw-ctls">
+          <div class="dcw-group" title="Orden">
+            <button type="button" ${idx<=0?'disabled':''} onclick="dashMoveWidget('${k}',-1)" aria-label="Subir">↑</button>
+            <button type="button" ${idx>=onKeys.length-1?'disabled':''} onclick="dashMoveWidget('${k}',1)" aria-label="Bajar">↓</button>
+          </div>
+          ${w.rail?'':`<div class="dcw-group" title="Tamaño">
+            ${['s','m','l'].map(s=>`<button type="button" class="${size===s?'on':''}" onclick="dashSetSize('${k}','${s}')">${s.toUpperCase()}</button>`).join('')}
+          </div>`}
+          <div class="dcw-group" title="Tamaño de letra">
+            <button type="button" ${fs<=0.8?'disabled':''} onclick="dashFont('${k}',-1)">A−</button>
+            <span class="dcw-fs">${Math.round(fs*100)}%</span>
+            <button type="button" ${fs>=1.4?'disabled':''} onclick="dashFont('${k}',1)">A+</button>
+          </div>
+        </div>`:''}
+      </div>
+    </div>`;
+  };
+  return `
+    <h3 style="margin-bottom:4px">Personalizar widgets</h3>
+    <p style="font-size:12.5px;color:var(--text2);margin-bottom:14px">Este es el orden real de tu pantalla de inicio: <strong>arrastra</strong> ${icon('drag',11)} para reordenar, y ajusta tamaño y letra. Los cambios se aplican al instante.</p>
+    <div class="dcw-list" id="dcwList">${onKeys.map((k,i)=>row(k,true,i)).join('')}</div>
+    ${offKeys.length?`<p class="dcw-off-title">Ocultos</p><div class="dcw-list dcw-list-off">${offKeys.map(k=>row(k,false,-1)).join('')}</div>`:''}
+    <div class="mact"><button class="bc" onclick="document.getElementById('DCM').remove()">Listo</button></div>`;
+}
+// ── v10.5 · Drag & drop v2 (patrones SortableJS / dnd-kit) ──────────────────
+//  · Se puede arrastrar desde CUALQUIER zona no-interactiva de la fila (no solo
+//    el agarre) — objetivo táctil generoso.
+//  · Umbral de 4px antes de activar (SortableJS): un clic nunca se convierte
+//    en arrastre accidental.
+//  · Índice destino por PUNTO MEDIO REAL de cada fila (dnd-kit): las filas
+//    tienen alturas distintas y el cálculo por "ranura fija" fallaba.
+//  · Compensación de auto-scroll: las coordenadas siguen siendo correctas
+//    aunque la lista scrollee durante el arrastre.
+function dashDndInit(){
+  const list=document.getElementById('dcwList'); if(!list)return;
+  list.querySelectorAll('.dcw-row').forEach(r=>{ r.addEventListener('pointerdown',_dndStart); });
+}
+let _dnd=null;
+function _dndStart(ev){
+  if(ev.button!==undefined&&ev.button!==0)return;
+  const row=ev.currentTarget;
+  // desde el agarre siempre; desde el resto de la fila solo si no es un control
+  if(!ev.target.closest('.dcw-handle') && ev.target.closest('button,input,select,label,.dcw-ctls'))return;
+  const list=row.parentElement;
+  const rows=[...list.querySelectorAll('.dcw-row')];
+  if(rows.length<2)return;
+  ev.preventDefault();
+  const rects=rows.map(r=>r.getBoundingClientRect());
+  const idx=rows.indexOf(row);
+  const gap=rows.length>1?Math.max(4,rects[1].top-rects[0].bottom):4;
+  _dnd={row,list,rows,rects,startY:ev.clientY,startIdx:idx,tgt:idx,
+        h:rects[idx].height+gap,startScroll:list.scrollTop,moved:false};
+  try{ row.setPointerCapture(ev.pointerId); }catch(e){}
+  row.addEventListener('pointermove',_dndMove);
+  row.addEventListener('pointerup',_dndEnd);
+  row.addEventListener('pointercancel',_dndEnd);
+}
+function _dndMove(ev){
+  if(!_dnd)return;
+  const scrollDelta=_dnd.list.scrollTop-_dnd.startScroll;
+  const dy=(ev.clientY-_dnd.startY)+scrollDelta;
+  if(!_dnd.moved){
+    if(Math.abs(dy)<4)return; // umbral anti-clic accidental
+    _dnd.moved=true;
+    _dnd.row.classList.add('drag');
+    document.body.classList.add('dnd-active');
+  }
+  _dnd.row.style.transform=`translateY(${dy}px) scale(1.01)`;
+  // auto-scroll suave al rozar los bordes de la lista
+  const lr=_dnd.list.getBoundingClientRect();
+  if(ev.clientY<lr.top+34)_dnd.list.scrollTop-=8;
+  else if(ev.clientY>lr.bottom-34)_dnd.list.scrollTop+=8;
+  // destino = cuántas OTRAS filas tienen su punto medio por encima del puntero
+  const yAbs=ev.clientY+scrollDelta;
+  let tgt=0;
+  _dnd.rects.forEach((rc,i)=>{ if(i===_dnd.startIdx)return; if(yAbs>rc.top+rc.height/2)tgt++; });
+  if(tgt!==_dnd.tgt){
+    _dnd.tgt=tgt;
+    _dnd.rows.forEach((r,i)=>{
+      if(i===_dnd.startIdx)return;
+      let t=0;
+      if(i>_dnd.startIdx && i<=tgt)t=-_dnd.h;        // se desliza hacia arriba
+      else if(i<_dnd.startIdx && i>=tgt)t=_dnd.h;    // se desliza hacia abajo
+      r.style.transform=t?`translateY(${t}px)`:'';
+    });
+  }
+}
+function _dndEnd(ev){
+  if(!_dnd)return;
+  const {row,rows,startIdx,tgt,moved}=_dnd;
+  row.removeEventListener('pointermove',_dndMove);
+  row.removeEventListener('pointerup',_dndEnd);
+  row.removeEventListener('pointercancel',_dndEnd);
+  row.classList.remove('drag');
+  document.body.classList.remove('dnd-active');
+  rows.forEach(r=>{ r.style.transform=''; });
+  _dnd=null;
+  if(moved && tgt!==startIdx){
+    const keys=rows.map(r=>r.getAttribute('data-key'));
+    const k=keys.splice(startIdx,1)[0];
+    keys.splice(tgt,0,k);
+    _dashDndCommit(keys);
+  }
+}
+// Persiste el nuevo orden visible (los ocultos no forman parte del orden).
+function _dashDndCommit(visibleKeys){
+  try{ localStorage.setItem(_dashOrderKey(),JSON.stringify(visibleKeys)); }catch(e){}
+  renderEmpty(); _dashCustomizeRefresh();
+}
+window._dashDndCommit=_dashDndCommit;
+function _dashCustomizeRefresh(){
+  const box=document.querySelector('#DCM .mbox');
+  if(!box)return;
+  // v10.5 — conservar la posición de scroll: editar tamaño/letra/orden ya no
+  // "reinicia" la vista al tope de la lista.
+  const list=document.getElementById('dcwList');
+  const sl=list?list.scrollTop:0;
+  const sb=box.scrollTop;
+  box.innerHTML=_dashCustomizeBody();
+  const l2=document.getElementById('dcwList');
+  if(l2)l2.scrollTop=sl;
+  box.scrollTop=sb;
+  dashDndInit();
+}
+window.dashCustomize=function(){
   const div=document.createElement('div');
   div.className='mbg'; div.id='DCM';
-  div.innerHTML=`<div class="mbox" style="max-width:400px">
-    <h3 style="margin-bottom:4px">Personalizar widgets</h3>
-    <p style="font-size:12.5px;color:var(--text2);margin-bottom:14px">Elige cuáles quieres ver en tu pantalla de inicio.</p>
-    <div class="dash-customize-grid">
-      ${avail.map(k=>`<label class="admin-tab-chip dash-chip${current.has(k)?' on':''}">
-        <input type="checkbox" ${current.has(k)?'checked':''} onchange="dashToggleWidget('${k}',this.checked)">
-        <span>${e(DASH_CATALOG[k].label.replace(' (Pro)',''))}</span>
-        ${DASH_CATALOG[k].pro?'<span class="dash-chip-pro">Pro</span>':''}
-      </label>`).join('')}
-    </div>
-    <div class="mact"><button class="bc" onclick="document.getElementById('DCM').remove()">Cerrar</button></div>
-  </div>`;
+  div.innerHTML=`<div class="mbox" style="max-width:460px"></div>`;
+  div.onclick=ev=>{ if(ev.target===div)div.remove(); };
   document.body.appendChild(div);
+  _dashCustomizeRefresh();
+};
+window.dashMoveWidget=function(k,dir){
+  const _imp=viewAsUid?allUsersList.find(u=>u.uid===viewAsUid):null;
+  const isPro=(()=>{const ep=effectivePlanFor(_imp);return ep==='admin'||ep==='pro'||ep==='clinica';})();
+  const order=_dashOrder(isPro);
+  const i=order.indexOf(k); const j=i+dir;
+  if(i<0||j<0||j>=order.length)return;
+  [order[i],order[j]]=[order[j],order[i]];
+  try{localStorage.setItem(_dashOrderKey(),JSON.stringify(order));}catch(e){}
+  renderEmpty(); _dashCustomizeRefresh();
 };
 window.dashToggleWidget=function(key,on){
   let order=[];
@@ -5037,7 +6042,7 @@ window.dashToggleWidget=function(key,on){
   if(on){ if(!order.includes(key))order.push(key); }
   else{ order=order.filter(k=>k!==key); }
   try{localStorage.setItem(_dashOrderKey(),JSON.stringify(order));}catch(e){}
-  renderEmpty();
+  renderEmpty(); _dashCustomizeRefresh();
 };
 function dashInitDrag(){
   let dragging=null;
@@ -5068,7 +6073,7 @@ function _dashSaveOrder(){
 }
 
 window.abrirPacienteConsultas=function(id){
-  if(idActual!==id){_imgActiveCat='rad';_imgFilters={cat:'',user:'',cons:'',fecha:''};_imgLightboxId=null;_docFilters={tipo:'',user:'',cons:'',fecha:''};}
+  if(idActual!==id){_imgActiveCat='rad';_imgFilters={cat:'',user:'',cons:'',fecha:''};_imgLightboxId=null;_docFilters={tipo:'',user:'',cons:'',fecha:''};_archVista='img';}
   viewActual='paciente';idActual=id;tabActual='cons';consultaView=null;editUnlocked=false;odontoView=null;planView=null;
   logAccess(id);
   renderLista();renderPaciente();
@@ -6490,7 +7495,7 @@ window.calVerDia=function(ds){
   calendarView='dia';renderCalendar();
 };
 window.editConsFromCalendar=function(pid,cid){
-  if(idActual!==pid){_imgActiveCat='rad';_imgFilters={cat:'',user:'',cons:'',fecha:''};_imgLightboxId=null;_docFilters={tipo:'',user:'',cons:'',fecha:''};}
+  if(idActual!==pid){_imgActiveCat='rad';_imgFilters={cat:'',user:'',cons:'',fecha:''};_imgLightboxId=null;_docFilters={tipo:'',user:'',cons:'',fecha:''};_archVista='img';}
   viewActual='paciente';idActual=pid;tabActual='cons';consultaView=null;editUnlocked=false;odontoView=null;planView=null;
   logAccess(pid);
   renderLista();renderPaciente();
@@ -6527,14 +7532,10 @@ function renderPaciente(){
   const effectivePlan = effectivePlanFor(_impersonated);
   const imgAllowed = (effectivePlan==='admin'||effectivePlan==='pro'||effectivePlan==='clinica') && !imagenesDisabledFor(_impersonated);
   const docAllowed = (effectivePlan==='admin'||effectivePlan==='pro'||effectivePlan==='clinica') && !documentosDisabledFor(_impersonated);
-  // Imágenes tab — gated purely by effective plan (not part of ALL_TABS / per-user tabsAllowed).
+  // v9.2 — Archivos: Imágenes y Documentos consolidados en UNA sola tab (clave
+  // 'img' para compatibilidad con tabsAllowed y /config/tabOrder existentes).
   if(imgAllowed){
-    tabs.splice(tabs.findIndex(t=>t.k==='cons')+1, 0, {k:'img',l:'Imágenes'});
-  }
-  // v9 — Documentos (Word/PDF), junto a Imágenes, mismo gating por plan.
-  if(docAllowed){
-    const _ai=tabs.findIndex(t=>t.k==='img');
-    tabs.splice((_ai>=0?_ai:tabs.findIndex(t=>t.k==='cons'))+1, 0, {k:'doc',l:'Documentos'});
+    tabs.splice(tabs.findIndex(t=>t.k==='cons')+1, 0, {k:'img',l:'Archivos'});
   }
   // Filter tabs based on who's actually "in scope" (per-user tabsAllowed):
   if(_impersonated && Array.isArray(_impersonated.tabsAllowed)){
@@ -6680,7 +7681,7 @@ window.cambiarTab=function(tab){
   renderTab();
 }
 function tabLabel(k){
-  return{datos:'Datos',clinico:'Historia',odonto:'Odontograma',plan:'Plan',ops:'Operatorias',est:'Proc',rec:'Récord',cons:'Consultas',img:'Imágenes',doc:'Documentos'}[k]||k;
+  return{datos:'Datos',clinico:'Historia',odonto:'Odontograma',plan:'Plan',ops:'Operatorias',est:'Proc',rec:'Récord',cons:'Consultas',img:'Archivos',doc:'Documentos'}[k]||k;
 }
 
 // ─── IMÁGENES — galería clínica (paid plans only) ─────────────────────────
@@ -6794,7 +7795,7 @@ function renderImagenes(){
   if(!p){ document.getElementById('panel').innerHTML=''; return; }
   const all=(p.imagenes||[]);
   const filtered=imgFiltered(p);
-  const _roImg=(typeof isReadOnly==='function'&&isReadOnly()); // v9 — candado consistente (9.4)
+
 
   // botones de categoría (para destino de la subida)
   const catBtns=IMG_CATS.map(c=>
@@ -6827,20 +7828,26 @@ function renderImagenes(){
   // grid de resultados
   let grid='';
   if(filtered.length===0){
-    grid=`<div class="card"><div class="empty" style="height:auto;padding:30px 0">
-      <p style="font-family:'DM Sans',sans-serif;font-style:italic;color:var(--text2);margin:0;text-align:center">
-        ${all.length===0?'Aún no hay imágenes para este paciente.':'Ninguna imagen coincide con los filtros.'}
-      </p></div></div>`;
+    grid=all.length===0
+      ?`<div class="card arch-empty">
+          <div class="arch-empty-icons">${icon('image',26)}${icon('image',26)}${icon('image',26)}</div>
+          <p class="arch-empty-t">Aún no hay imágenes</p>
+          <p class="arch-empty-s">Radiografías, fotos intraorales, antes y después — la galería del paciente empieza con la primera.</p>
+          <button type="button" class="ba" onclick="document.getElementById('archFileInput').click()">${icon('plus',13)} Subir la primera imagen</button>
+        </div>`
+      :`<div class="card arch-empty" style="padding:22px 0">
+          <p class="arch-empty-t" style="margin:0">Ninguna imagen coincide con los filtros.</p>
+        </div>`;
   }else{
     const cards=filtered.map(im=>{
       const rel=timeAgo(im.fecha);
       const abs=imgFechaAbs(im.fecha);
-      const delBtn=(!_roImg&&imgCanDelete(im))?`<button type="button" class="img-thumb-del" title="Eliminar" onclick="event.stopPropagation();imgDelete('${e(im.id)}')">✕</button>`:'';
+      const delBtn=imgCanDelete(im)?`<button type="button" class="img-thumb-del" title="Eliminar" onclick="event.stopPropagation();imgDelete('${e(im.id)}')">✕</button>`:'';
       return `<figure class="img-thumb" title="${e(abs)}" onclick="imgOpen('${e(im.id)}')">
         <img src="${im.dataUrl||im.downloadURL||''}" alt="${e(im.nombre||'')}">
         ${delBtn}
         <div class="img-thumb-meta">
-          <span class="img-thumb-cat">${e(imgCatLabel(im.categoria))}</span>
+          <span class="img-thumb-cat cat-${e(im.categoria||'otros')}">${e(imgCatLabel(im.categoria))}</span>
           <div class="img-thumb-name">${e(im.nombre||'Imagen')}</div>
           <div class="img-thumb-sub" title="${e(abs)}">${e(rel)} · ${e(im.subidoPorNombre||'')}</div>
         </div>
@@ -6850,27 +7857,7 @@ function renderImagenes(){
   }
 
   const html=`
-    <div class="datos-editbar">${roToggleHTML()}</div>
-    <div class="ct-row"><div class="ct">Imágenes clínicas${infoBtn('Radiografías y fotos clínicas del paciente, organizadas por categoría. Puedes etiquetar cada imagen a una consulta específica al subirla, para verla luego desde el visual de esa consulta.')}</div></div>
-    ${roBanner()}
-    ${storage?'':`<div class="img-cloud-notice">
-      <span class="ico">${icon('cloud',16)}</span>
-      <span>Sincronización en la nube no disponible — las imágenes se guardan localmente en el registro del paciente hasta que se habilite Firebase Storage (plan Blaze).</span>
-    </div>`}
-    ${_roImg?'':`<div class="card">
-      <input type="file" id="imgFileInput" accept="image/*" multiple style="display:none" onchange="imgOnFiles(this.files)">
-      <div style="font-size:11px;color:var(--text3);font-family:'DM Sans',sans-serif;margin-bottom:7px">Categoría para nuevas imágenes</div>
-      <div class="img-cats">${catBtns}</div>
-      <div class="img-drop" onclick="document.getElementById('imgFileInput').click()"
-           ondragover="event.preventDefault();this.classList.add('drag')"
-           ondragleave="this.classList.remove('drag')"
-           ondrop="event.preventDefault();this.classList.remove('drag');imgOnFiles(event.dataTransfer.files)">
-        <div class="img-drop-ico" style="display:flex;justify-content:center;color:var(--text3)">${icon('image',34)}</div>
-        <div class="img-drop-t">Arrastra imágenes aquí o toca para subir</div>
-        <button type="button" class="ba img-drop-btn" onclick="event.stopPropagation();document.getElementById('imgFileInput').click()">Subir imágenes</button>
-        <div class="img-drop-note">Se asocian a este paciente, a tu usuario y con fecha/hora. Opcionalmente puedes etiquetarlas a una consulta al subir.</div>
-      </div>
-    </div>`}
+    ${archHeaderHTML('img')}
     ${all.length>0?`<div class="card">
       <div class="img-filters">
         <div class="img-filter"><label>Categoría</label><select onchange="imgSetFilter('cat',this.value)">${catOpts}</select></div>
@@ -6896,7 +7883,6 @@ window.imgClearFilters=function(){ _imgFilters={cat:'',user:'',cons:'',fecha:''}
 // ── Manejo de archivos seleccionados: procesa, comprime y abre el modal ────
 window.imgOnFiles=function(files){
   if(!files||!files.length)return;
-  if(typeof isReadOnly==='function'&&isReadOnly()){ toast('Activa "Editar" para subir imágenes.'); return; }
   const arr=Array.from(files).filter(f=>f.type.startsWith('image/'));
   if(!arr.length){ if(typeof toast==='function')toast('Selecciona archivos de imagen.'); return; }
   let pending=arr.length;
@@ -7067,7 +8053,7 @@ function imgRenderLightbox(){
   const im=(p.imagenes||[]).find(x=>x.id===_imgLightboxId);
   if(!im){ _imgLightboxId=null; return; }
   const consLabel=imgConsultaLabel(p,im.consultaId);
-  const canEdit=imgCanDelete(im)&&!(typeof isReadOnly==='function'&&isReadOnly());
+  const canEdit=imgCanDelete(im);
   const editBtn=canEdit?`<button type="button" class="bc" onclick="imgEditOpen('${e(im.id)}')">${icon('edit',13)} Editar</button>`:'';
   const delBtn=canEdit?`<button type="button" class="bd" onclick="imgDelete('${e(im.id)}')">Eliminar</button>`:'';
   const div=document.createElement('div');
@@ -7148,13 +8134,13 @@ function renderImagenesLocked(){
   const panel=document.getElementById('panel');
   if(!panel)return;
   panel.innerHTML=`
-    <div class="ct-row"><div class="ct">Imágenes clínicas</div></div>
+    <div class="ct-row"><div class="ct">Archivos</div></div>
     <div class="card"><div class="empty" style="height:auto;padding:40px 18px;text-align:center">
       <div style="margin-bottom:10px;display:flex;justify-content:center;color:var(--text3)">${icon('lock',30)}</div>
       <h3 style="font-family:'DM Sans',sans-serif;font-weight:500;margin:0 0 6px">Disponible en el plan Pro</h3>
       <p style="font-family:'DM Sans',sans-serif;font-style:italic;color:var(--text2);max-width:380px;margin:0 auto;line-height:1.55">
-        La galería de imágenes clínicas (radiografías, fotografías intraorales y documentos)
-        está incluida en los planes <b>Pro</b> y <b>Clínica</b>.
+        Los archivos del paciente (radiografías, fotografías intraorales, PDF y Word)
+        están incluidos en los planes <b>Pro</b> y <b>Clínica</b>.
       </p>
     </div></div>`;
 }
@@ -7164,6 +8150,7 @@ function renderImagenesLocked(){
 // Subida SIEMPRE a Firebase Storage (activado). Campo nuevo aditivo en el doc
 // del paciente; no toca ningún campo existente.
 let _docFilters = { tipo:'', user:'', cons:'', fecha:'' };
+let _archVista = 'img'; // v9.2 — sub-vista de la tab Archivos: 'img' | 'doc'
 const DOC_TIPOS={pdf:'PDF', word:'Word'};
 function docTipoDe(file){
   const n=(file.name||'').toLowerCase();
@@ -7196,7 +8183,6 @@ window.docSetFilter=function(key,val){ _docFilters[key]=val; renderDocumentos();
 window.docClearFilters=function(){ _docFilters={tipo:'',user:'',cons:'',fecha:''}; renderDocumentos(); };
 window.docOnFiles=function(files){
   if(!files||!files.length)return;
-  if(typeof isReadOnly==='function'&&isReadOnly()){ toast('Activa "Editar" para subir documentos.'); return; }
   const arr=Array.from(files).filter(f=>docTipoDe(f));
   if(!arr.length){ toast('Solo se aceptan documentos PDF o Word (.pdf, .doc, .docx).'); return; }
   const MAX=20*1048576;
@@ -7315,6 +8301,73 @@ window.docDelete=async function(id){
   toast('Documento eliminado');
   renderDocumentos();
 };
+// ── v9.2 · ARCHIVOS: header compartido (subida unificada, sin modo edición) ──
+function archHeaderHTML(active){
+  const pt=gp(); if(!pt)return '';
+  const nImg=(pt.imagenes||[]).length, nDoc=(pt.documentos||[]).length;
+  const _imp=viewAsUid?allUsersList.find(u=>u.uid===viewAsUid):null;
+  const docOk=!documentosDisabledFor(_imp);
+  return `
+    <div class="ct-row"><div class="ct">Archivos${infoBtn('Imágenes clínicas y documentos (PDF/Word) del paciente, en un solo lugar. Todo queda asociado al paciente, a quien lo subió y, opcionalmente, a una consulta.')}</div></div>
+    ${storage?'':`<div class="img-cloud-notice">
+      <span class="ico">${icon('cloud',16)}</span>
+      <span>Sincronización en la nube no disponible — las imágenes se guardan localmente; los documentos requieren la nube.</span>
+    </div>`}
+    <input type="file" id="archFileInput" accept="image/*,.pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" multiple style="display:none" onchange="archOnFiles(this.files)">
+    <div class="arch-hero" onclick="document.getElementById('archFileInput').click()"
+         ondragover="event.preventDefault();this.classList.add('drag')"
+         ondragleave="this.classList.remove('drag')"
+         ondrop="event.preventDefault();this.classList.remove('drag');archOnFiles(event.dataTransfer.files)">
+      <div class="arch-hero-art" aria-hidden="true">
+        <span class="aha aha-1">${icon('image',22)}</span>
+        <span class="aha aha-2">${icon('filetext',22)}</span>
+        <span class="aha aha-3">${icon('plus',16)}</span>
+      </div>
+      <div class="arch-hero-body">
+        <div class="arch-hero-t">${(nImg+nDoc)===0?`Empieza la historia visual de ${e((titleCase(pt.nombre)||'este paciente').split(' ')[0])}`:`La historia visual de ${e((titleCase(pt.nombre)||'este paciente').split(' ')[0])}`}</div>
+        <div class="arch-hero-s">${(nImg+nDoc)===0
+          ?'Una radiografía dice más que mil notas. Sube radiografías, fotos intraorales, consentimientos o presupuestos — quedan seguros en la nube, junto al paciente.'
+          :'Radiografías, fotos, consentimientos y presupuestos — seguros en la nube, junto al paciente. Arrastra aquí o toca para subir.'}</div>
+      </div>
+      <button type="button" class="bs arch-hero-btn" onclick="event.stopPropagation();document.getElementById('archFileInput').click()">${icon('plus',14)} Subir archivos</button>
+    </div>
+    ${(()=>{
+      const c={rad:0,intra:0,doc:0,otros:0};
+      (pt.imagenes||[]).forEach(im=>{ c[im.categoria&&c[im.categoria]!==undefined?im.categoria:'otros']++; });
+      let nPdf=0,nWord=0;
+      (pt.documentos||[]).forEach(d=>{ if(d.tipo==='word')nWord++; else nPdf++; });
+      const chips=[
+        c.rad?`<button type="button" class="arch-chip ac-rad" onclick="archChip('rad')">${c.rad} radiografía${c.rad===1?'':'s'}</button>`:'',
+        c.intra?`<button type="button" class="arch-chip ac-intra" onclick="archChip('intra')">${c.intra} intraoral${c.intra===1?'':'es'}</button>`:'',
+        c.doc?`<button type="button" class="arch-chip ac-imgdoc" onclick="archChip('doc')">${c.doc} doc. escaneado${c.doc===1?'':'s'}</button>`:'',
+        c.otros?`<button type="button" class="arch-chip ac-otros" onclick="archChip('otros')">${c.otros} otra${c.otros===1?'':'s'}</button>`:'',
+        nPdf?`<button type="button" class="arch-chip ac-pdf" onclick="archChip('pdf')">${nPdf} PDF</button>`:'',
+        nWord?`<button type="button" class="arch-chip ac-word" onclick="archChip('word')">${nWord} Word</button>`:''
+      ].filter(Boolean).join('');
+      return chips?`<div class="arch-stats">${chips}</div>`:'';
+    })()}
+    <div class="arch-seg">
+      <button type="button" class="${active==='img'?'on':''}" onclick="archVista('img')">${icon('image',13)} Imágenes${nImg?` · ${nImg}`:''}</button>
+      ${docOk?`<button type="button" class="${active==='doc'?'on':''}" onclick="archVista('doc')">${icon('filetext',13)} Documentos${nDoc?` · ${nDoc}`:''}</button>`:''}
+    </div>`;
+}
+window.archVista=function(k){ _archVista=(k==='doc'?'doc':'img'); renderTab(); };
+// Chip de resumen → salta directo al tipo con el filtro puesto
+window.archChip=function(kind){
+  if(kind==='pdf'||kind==='word'){ _archVista='doc'; _docFilters.tipo=kind; }
+  else{ _archVista='img'; _imgFilters.cat=kind; }
+  renderTab();
+};
+window.archOnFiles=function(files){
+  if(!files||!files.length)return;
+  const arr=Array.from(files);
+  const imgs=arr.filter(f=>(f.type||'').startsWith('image/'));
+  const docs=arr.filter(f=>!(f.type||'').startsWith('image/')&&docTipoDe(f));
+  if(imgs.length&&docs.length){ toast('Sube imágenes y documentos en tandas separadas, por favor.'); return; }
+  if(imgs.length){ _archVista='img'; imgOnFiles(imgs); return; }
+  if(docs.length){ _archVista='doc'; docOnFiles(docs); return; }
+  toast('Formato no soportado. Se aceptan imágenes, PDF y Word.');
+};
 function renderDocumentosLocked(){
   const panel=document.getElementById('panel');
   if(!panel)return;
@@ -7333,7 +8386,6 @@ function renderDocumentos(){
   if(!pt){ document.getElementById('panel').innerHTML=''; return; }
   const all=(pt.documentos||[]);
   const filtered=docFiltered(pt);
-  const ro=(typeof isReadOnly==='function'&&isReadOnly());
 
   const userMap=new Map();
   all.forEach(d=>{ if(d.subidoPorUid&&!userMap.has(d.subidoPorUid))userMap.set(d.subidoPorUid,d.subidoPorNombre||'Usuario'); });
@@ -7352,45 +8404,39 @@ function renderDocumentos(){
 
   let listHtml='';
   if(filtered.length===0){
-    listHtml=`<div class="card"><div class="empty" style="height:auto;padding:30px 0">
-      <p style="font-family:'DM Sans',sans-serif;font-style:italic;color:var(--text2);margin:0;text-align:center">
-        ${all.length===0?'Aún no hay documentos para este paciente.':'Ningún documento coincide con los filtros.'}
-      </p></div></div>`;
+    listHtml=all.length===0
+      ?`<div class="card arch-empty">
+          <div class="arch-empty-icons">${icon('filetext',26)}${icon('filetext',26)}${icon('filetext',26)}</div>
+          <p class="arch-empty-t">Aún no hay documentos</p>
+          <p class="arch-empty-s">Consentimientos firmados, informes, referencias, presupuestos — todo el papeleo del paciente, en un solo lugar y sin gavetas.</p>
+          <button type="button" class="ba" onclick="document.getElementById('archFileInput').click()">${icon('plus',13)} Subir el primer documento</button>
+        </div>`
+      :`<div class="card arch-empty" style="padding:22px 0">
+          <p class="arch-empty-t" style="margin:0">Ningún documento coincide con los filtros.</p>
+        </div>`;
   }else{
-    const rows=filtered.map(d=>{
+    const tiles=filtered.map(d=>{
       const consLbl=d.consultaId?imgConsultaLabel(pt,d.consultaId):null;
-      const delBtn=(!ro&&imgCanDelete(d))?`<button type="button" class="bd doc-row-del" title="Eliminar" onclick="event.stopPropagation();docDelete('${e(d.id)}')">✕</button>`:'';
-      return `<div class="doc-row" onclick="docPreview('${e(d.id)}')" title="${e(imgFechaAbs(d.fecha))}">
-        <span class="doc-badge doc-badge-${e(d.tipo||'pdf')}">${e(DOC_TIPOS[d.tipo]||'Doc')}</span>
-        <div class="doc-row-body">
-          <div class="doc-row-name">${e(d.nombre||'Documento')}</div>
-          <div class="doc-row-sub">${e(timeAgo(d.fecha))} · ${e(d.subidoPorNombre||'')}${d.size?' · '+docSizeLabel(d.size):''}${consLbl?' · '+e(consLbl):''}</div>
-        </div>
-        <a class="ba doc-row-dl" href="${e(d.downloadURL||'#')}" target="_blank" rel="noopener" download onclick="event.stopPropagation()">Descargar</a>
+      const delBtn=imgCanDelete(d)?`<button type="button" class="img-thumb-del doc-tile-del" title="Eliminar" onclick="event.stopPropagation();docDelete('${e(d.id)}')">✕</button>`:'';
+      const t=(d.tipo==='word')?'word':'pdf';
+      return `<div class="doc-tile dt-${t}" onclick="docPreview('${e(d.id)}')" title="${e(imgFechaAbs(d.fecha))}${consLbl?' · '+e(consLbl):''}">
         ${delBtn}
+        <div class="doc-tile-ico">
+          ${icon('filetext',26)}
+          <span class="doc-tile-ext">${t==='word'?'DOC':'PDF'}</span>
+        </div>
+        <div class="doc-tile-meta">
+          <div class="doc-tile-name">${e(d.nombre||'Documento')}</div>
+          <div class="doc-tile-sub">${e(timeAgo(d.fecha))} · ${e(d.subidoPorNombre||'')}${d.size?' · '+docSizeLabel(d.size):''}</div>
+          <a class="doc-tile-dl" href="${e(d.downloadURL||'#')}" target="_blank" rel="noopener" download onclick="event.stopPropagation()">${icon('download',12)} Descargar</a>
+        </div>
       </div>`;
     }).join('');
-    listHtml=`<div class="card doc-list">${rows}</div>`;
+    listHtml=`<div class="doc-grid">${tiles}</div>`;
   }
 
-  const uploadCard=ro?'':`<div class="card">
-      <input type="file" id="docFileInput" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" multiple style="display:none" onchange="docOnFiles(this.files)">
-      <div class="img-drop" onclick="document.getElementById('docFileInput').click()"
-           ondragover="event.preventDefault();this.classList.add('drag')"
-           ondragleave="this.classList.remove('drag')"
-           ondrop="event.preventDefault();this.classList.remove('drag');docOnFiles(event.dataTransfer.files)">
-        <div class="img-drop-ico" style="display:flex;justify-content:center;color:var(--text3)">${icon('filetext',34)}</div>
-        <div class="img-drop-t">Arrastra documentos PDF o Word aquí, o toca para subir</div>
-        <button type="button" class="ba img-drop-btn" onclick="event.stopPropagation();document.getElementById('docFileInput').click()">Subir documentos</button>
-        <div class="img-drop-note">Se asocian a este paciente, a tu usuario y con fecha/hora. Opcionalmente puedes etiquetarlos a una consulta al subir. Los PDF se pueden previsualizar; los Word se descargan.</div>
-      </div>
-    </div>`;
-
   document.getElementById('panel').innerHTML=`
-    <div class="datos-editbar">${roToggleHTML()}</div>
-    <div class="ct-row"><div class="ct">Documentos${infoBtn('Documentos del paciente (PDF y Word): consentimientos, informes, referencias, presupuestos. Cada documento queda asociado al paciente, a quien lo subió, y opcionalmente a una consulta.')}</div></div>
-    ${roBanner()}
-    ${uploadCard}
+    ${archHeaderHTML('doc')}
     ${all.length>0?`<div class="card">
       <div class="img-filters">
         <div class="img-filter"><label>Tipo</label><select onchange="docSetFilter('tipo',this.value)">${tipoOpts}</select></div>
@@ -7408,6 +8454,11 @@ function renderDocumentos(){
 
 function renderTab(){
   const t=tabActual;
+  try{ dsDpClose(); }catch(e){} // v10.3 — nunca dejar un date-picker abierto al cambiar de renglón
+  // v9.5 — el panel conoce su pestaña: permite darle a cada renglón su ancho
+  // de columna ideal (los formularios nunca más corren de borde a borde).
+  const _pn=document.getElementById('panel');
+  if(_pn)_pn.setAttribute('data-tab',t);
   // Item 1 guard: never render the Imágenes gallery unless the effective plan allows it.
   if(t==='img'){
     const _imp = viewAsUid ? allUsersList.find(u=>u.uid===viewAsUid) : null;
@@ -7431,7 +8482,7 @@ function renderTab(){
   else if(t==='est')renderEst();
   else if(t==='rec')renderRec();
   else if(t==='cons')renderCons();
-  else if(t==='img')renderImagenes();
+  else if(t==='img'){ if(_archVista==='doc')renderDocumentos(); else renderImagenes(); }
   else if(t==='doc')renderDocumentos();
 }
 
@@ -7567,7 +8618,27 @@ window.eliminarP=async function(){
 // v7.1 (#5) — structured antecedentes & hábitos (Akel clinical-history model)
 const ANTEC_LIST=[['alergicos','Alérgicos'],['quirurgicos','Quirúrgicos'],['traumaticos','Traumáticos (accidentes)'],['infecto','Infecto-contagiosas'],['cardiovascular','Cardiovascular'],['endocrinos','Endocrinos / hormonales'],['neurologicas','Enf. neurológicas'],['respiratorios','Trastornos respiratorios']];
 const HABIT_LIST=[['fuma','Fuma'],['cafe','Café'],['drogas','Drogas'],['bruxismo','Bruxismo']];
-function _sino(id,v){return `<select id="${id}" onchange="autosaveClinico()"><option value=""${!v?' selected':''}>—</option><option value="si"${v==='si'?' selected':''}>Sí</option><option value="no"${v==='no'?' selected':''}>No</option></select>`;}
+// v10 — Sí/No en UN toque (segmented, patrón Polaris ChoiceList): antes cada
+// antecedente eran 2 clics de dropdown; ahora es un tap con color semántico.
+// El valor vive en un input oculto con el MISMO id → autosaveClinico() intacto.
+function _sino(id,v){
+  const dis=(typeof isReadOnly==='function'&&isReadOnly());
+  const opt=(val,lbl,cls)=>`<button type="button" class="sino-b${cls}${(v||'')===val?' on':''}" ${dis?'disabled':''} onclick="sinoSet('${id}','${val}')">${lbl}</button>`;
+  return `<span class="sino" id="${id}_wrap"><input type="hidden" id="${id}" value="${e(v||'')}">${opt('','—','')}${opt('si','Sí',' si')}${opt('no','No',' no')}</span>`;
+}
+window.sinoSet=function(id,val){
+  if(typeof isReadOnly==='function'&&isReadOnly())return;
+  const inp=document.getElementById(id); if(!inp)return;
+  inp.value=val;
+  const wrap=document.getElementById(id+'_wrap');
+  if(wrap){
+    const bs=wrap.querySelectorAll('.sino-b');
+    bs.forEach(b=>b.classList.remove('on'));
+    const idx=val==='si'?1:(val==='no'?2:0);
+    if(bs[idx])bs[idx].classList.add('on');
+  }
+  autosaveClinico();
+};
 function antecedentesCard(p){
   const a=p.antecedentes_struct||{}; const h=p.habitos||{};
   return `<div class="card card-fijo">
@@ -7628,7 +8699,7 @@ function renderClinico(){
         ${_imgs.slice(0,5).map(im=>`<img src="${e(im.downloadURL||im.dataUrl||'')}" style="width:56px;height:56px;object-fit:cover;border-radius:8px;border:var(--border-default);flex-shrink:0">`).join('')}
         ${_imgs.length>5?`<div style="width:56px;height:56px;border-radius:8px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--text2);flex-shrink:0">+${_imgs.length-5}</div>`:''}
       </div>
-      <p style="font-size:11px;color:var(--text3);margin:8px 0 0">Ver todas en Imágenes →</p>
+      <p style="font-size:11px;color:var(--text3);margin:8px 0 0">Ver todas en Archivos →</p>
     </div>`:'';
   document.getElementById('panel').innerHTML=`
     ${_editToggle}
@@ -7640,7 +8711,7 @@ function renderClinico(){
     ${specialtyHTML}`;
   if(isReadOnly()){
     document.querySelectorAll('#panel .card-fijo ~ .card select, #panel .card-fijo ~ .card textarea, #panel .card-fijo ~ .card input').forEach(el=>el.disabled=true);
-    document.querySelectorAll('#panel .ant-grid select, #panel .hab-grid select, #panel .hab-grid input, #panel #ant_otras, #panel #hab_otros').forEach(el=>el.disabled=true);
+    document.querySelectorAll('#panel .ant-grid select, #panel .hab-grid select, #panel .hab-grid input, #panel #ant_otras, #panel #hab_otros, #panel .ant-grid .sino-b, #panel .hab-grid .sino-b').forEach(el=>el.disabled=true);
   }
 }
 // Historial de motivo/diagnóstico/oclusión — de solo lectura; cada fila abre el
@@ -7751,15 +8822,27 @@ function getSurfaceState(p,n,k){
   if(typeof t==='string')return t;
   return t[k]||'sano';
 }
+// v10.1 — paleta clínica viva para el visualizador (research: cartas dentales
+// profesionales usan color pleno por condición, no beige plano; el marfil
+// cálido del diente sano hace que las condiciones salten a la vista).
 function surfaceColors(st){
-  const map={
-    sano:{fill:'var(--surface)',stroke:'var(--border2)'},
-    caries:{fill:'var(--danger-light)',stroke:'var(--terra)'},
-    tratado:{fill:'var(--accent-light)',stroke:'var(--forest)'},
-    ausente:{fill:'#E5E4DD',stroke:'var(--border2)'},
-    corona:{fill:'var(--info-light)',stroke:'var(--petrol)'},
-    endodoncia:{fill:'var(--warn-light)',stroke:'var(--brass)'},
-    protesis:{fill:'#F0EBF7',stroke:'#7850A0'}
+  const dark=document.documentElement.getAttribute('data-theme')==='dark';
+  const map=dark?{
+    sano:{fill:'#33332B',stroke:'rgba(220,227,210,0.25)'},
+    caries:{fill:'#8A4B3B',stroke:'#E3A18F'},
+    tratado:{fill:'#3E6B4A',stroke:'#A9CDB2'},
+    ausente:{fill:'#2A2A24',stroke:'rgba(220,227,210,0.2)'},
+    corona:{fill:'#3E5B6B',stroke:'#A6C3D3'},
+    endodoncia:{fill:'#77602F',stroke:'#E0C48E'},
+    protesis:{fill:'#584A72',stroke:'#C3B1DC'}
+  }:{
+    sano:{fill:'#FBF8F0',stroke:'#D8D2C2'},
+    caries:{fill:'#E8A894',stroke:'#B8553E'},
+    tratado:{fill:'#AFD2B8',stroke:'#2F5D3A'},
+    ausente:{fill:'#E3E1D6',stroke:'#B4B1A4'},
+    corona:{fill:'#ACC9D9',stroke:'#4A6B7C'},
+    endodoncia:{fill:'#E6CB96',stroke:'#9A7A34'},
+    protesis:{fill:'#CCBAE3',stroke:'#7850A0'}
   };
   return map[st]||map.sano;
 }
@@ -7979,7 +9062,7 @@ function renderRefinedOcclusal(p,n,states,type,upper){
         ${surfRect('o',70,70,60,60,4)}
         ${cusps.map(c=>`<circle cx="${c[0]}" cy="${c[1]}" r="3.5" fill="#A29A85" opacity="0.4" pointer-events="none"/>`).join('')}
       </g>
-      <g pointer-events="none">${outerShapeSVG(type,'fill="none" stroke="#A89F8C" stroke-width="2"')}</g>
+      <g pointer-events="none">${outerShapeSVG(type,'fill="none" stroke="var(--forest)" stroke-width="2" opacity="0.5"')}</g>
     </g>
     <text x="100" y="108" class="viz-zone-lbl-o" text-anchor="middle" pointer-events="none">O</text>
     <text x="100" y="11" class="viz-dir-lbl" text-anchor="middle" pointer-events="none">${upper?'palatino':'lingual'}</text>
@@ -8199,9 +9282,12 @@ function renderOdontoKeepScroll(){
 window.mDiente=async function(n){
   vizToothN=n;
   const p=gp();if(!p)return;
+  // v10.3 fix — Modo superficie tiene prioridad: abre la carta de caras del
+  // diente sin importar la condición activa (antes, "Seleccionar" retornaba
+  // primero y el modo superficie quedaba muerto).
+  if(surfaceMode){renderOdontoKeepScroll();abrirSurfaceModal(n);return;}
   // Modo neutral "Seleccionar": solo selecciona el diente y muestra su panel; NO modifica el odontograma.
   if(estadoDiente==='seleccionar'){renderOdontoKeepScroll();return;}
-  if(surfaceMode){abrirSurfaceModal(n);return;}
   const tgt=odontoEditTarget(p);
   if(estadoDiente==='sano')delete tgt.teeth[n];
   else tgt.teeth[n]=estadoDiente;
@@ -8220,22 +9306,82 @@ window.rDiente=async function(ev,n){
 window.autosaveObs=function(){
   autosave('odonto',()=>{const p=gp();if(!p)return null;p.teeth_obs=g('o_ob');return p;},'ss-odonto');
 }
+// ═══ v10 · CARTA DE SUPERFICIES ═══════════════════════════════════════════
+// Investigación (CareStack, Curve, iDentalSoft, odontogramas open-source):
+// el estándar profesional es CLIC DIRECTO sobre la superficie en un diagrama
+// coronal, con color inmediato — nunca dropdowns. Misma data ({m,d,o,v,l}
+// con los mismos 7 estados), interacción de carta dental real:
+//  1. Eliges la condición en la paleta.  2. Pintas las caras tocándolas.
+//  3. Tocar de nuevo con la misma condición la limpia (corrección en 1 tap).
+let _surfSel=null, _surfPaint='caries';
+const SURF_STATES=['caries','tratado','corona','endodoncia','protesis','ausente','sano'];
+const SURF_STATE_LBL={sano:'Sana',caries:'Caries',tratado:'Tratada',ausente:'Ausente',corona:'Corona',endodoncia:'Endodoncia',protesis:'Prótesis'};
+function _surfSVG(){
+  const Z={
+    v:{d:'M42.8,42.8 A95,95 0 0 1 177.2,42.8 L139.7,80.3 A42,42 0 0 0 80.3,80.3 Z',lx:110,ly:56},
+    d:{d:'M177.2,42.8 A95,95 0 0 1 177.2,177.2 L139.7,139.7 A42,42 0 0 0 139.7,80.3 Z',lx:164,ly:114},
+    l:{d:'M177.2,177.2 A95,95 0 0 1 42.8,177.2 L80.3,139.7 A42,42 0 0 0 139.7,139.7 Z',lx:110,ly:172},
+    m:{d:'M42.8,177.2 A95,95 0 0 1 42.8,42.8 L80.3,80.3 A42,42 0 0 0 80.3,139.7 Z',lx:56,ly:114}
+  };
+  const zone=(k,shape)=>`<g class="sfz st-${_surfSel[k]}" id="sfz_${k}" onclick="surfFace('${k}')"><title>${SURFACE_LABELS[k]} · ${SURF_STATE_LBL[_surfSel[k]]||_surfSel[k]}</title>${shape}<text class="sfz-l" x="${Z[k]?Z[k].lx:110}" y="${Z[k]?Z[k].ly:114}" text-anchor="middle" dominant-baseline="middle">${k.toUpperCase()}</text></g>`;
+  return `<svg viewBox="0 0 220 220" class="surf-svg" xmlns="http://www.w3.org/2000/svg" aria-label="Diagrama de superficies del diente">
+    ${zone('v',`<path d="${Z.v.d}"/>`)}
+    ${zone('d',`<path d="${Z.d.d}"/>`)}
+    ${zone('l',`<path d="${Z.l.d}"/>`)}
+    ${zone('m',`<path d="${Z.m.d}"/>`)}
+    <g class="sfz st-${_surfSel.o}" id="sfz_o" onclick="surfFace('o')"><title>${SURFACE_LABELS.o} · ${SURF_STATE_LBL[_surfSel.o]||_surfSel.o}</title><circle cx="110" cy="110" r="38"/><text class="sfz-l" x="110" y="114" text-anchor="middle" dominant-baseline="middle">O</text></g>
+  </svg>`;
+}
+function _surfPaletteHTML(){
+  return `<div class="surf-pal">${SURF_STATES.map(s=>`<button type="button" class="surf-chip sc-${s}${_surfPaint===s?' on':''}" onclick="surfPick('${s}')">${s==='sano'?'Limpiar':SURF_STATE_LBL[s]}</button>`).join('')}</div>`;
+}
+function _surfLegendHTML(){
+  const marked=SURFACE_KEYS.filter(k=>_surfSel[k]!=='sano');
+  return marked.length
+    ? `<div class="surf-read">${marked.map(k=>`<span class="surf-read-pill sc-${_surfSel[k]}">${SURFACE_LABELS[k]}: ${SURF_STATE_LBL[_surfSel[k]]}</span>`).join('')}</div>`
+    : `<div class="surf-read"><span class="surf-read-empty">Todas las caras sanas — toca una para marcarla</span></div>`;
+}
+function _surfRefresh(){
+  const dia=document.getElementById('surfDiagram');
+  if(dia)dia.innerHTML=_surfSVG();
+  const pal=document.getElementById('surfPal');
+  if(pal)pal.innerHTML=_surfPaletteHTML();
+  const rd=document.getElementById('surfRead');
+  if(rd)rd.innerHTML=_surfLegendHTML();
+}
+window.surfPick=function(s){ _surfPaint=s; _surfRefresh(); };
+window.surfFace=function(k){
+  if(!_surfSel)return;
+  _surfSel[k]=(_surfSel[k]===_surfPaint)?'sano':_surfPaint;
+  _surfRefresh();
+};
+window.surfAll=function(){
+  if(!_surfSel)return;
+  const allSame=SURFACE_KEYS.every(k=>_surfSel[k]===_surfPaint);
+  SURFACE_KEYS.forEach(k=>{ _surfSel[k]=allSame?'sano':_surfPaint; });
+  _surfRefresh();
+};
 function abrirSurfaceModal(n){
   const p=gp();
   // Bug 2: lee/escribe en el objetivo activo (consolidado o instantánea de consulta).
   const tgt=odontoEditTarget(p);
   const cur=(tgt.teeth||{})[n];
-  const surfaces=typeof cur==='object'&&cur!==null?cur:{m:typeof cur==='string'?cur:'sano',d:typeof cur==='string'?cur:'sano',o:typeof cur==='string'?cur:'sano',v:typeof cur==='string'?cur:'sano',l:typeof cur==='string'?cur:'sano'};
-  const states=['sano','caries','tratado','ausente','corona','endodoncia','protesis'];
-  const body=`<p style="font-size:12px;color:var(--text3);margin-bottom:14px">Diente ${n} — selecciona el estado de cada cara.</p>`+
-    SURFACE_KEYS.map(k=>`<div class="mf"><label>${SURFACE_LABELS[k]}</label><select id="surf_${k}">
-      ${states.map(s=>`<option value="${s}"${surfaces[k]===s?' selected':''}>${s}</option>`).join('')}
-    </select></div>`).join('');
+  _surfSel=typeof cur==='object'&&cur!==null?{...cur}:{m:typeof cur==='string'?cur:'sano',d:typeof cur==='string'?cur:'sano',o:typeof cur==='string'?cur:'sano',v:typeof cur==='string'?cur:'sano',l:typeof cur==='string'?cur:'sano'};
+  SURFACE_KEYS.forEach(k=>{ if(!_surfSel[k])_surfSel[k]='sano'; });
+  _surfPaint='caries';
+  const body=`
+    <p class="surf-help">Elige la condición y <strong>toca las caras</strong> del diente para pintarlas. Tocar de nuevo con la misma condición la limpia.</p>
+    <div id="surfPal">${_surfPaletteHTML()}</div>
+    <div class="surf-stage">
+      <div id="surfDiagram" class="surf-diagram">${_surfSVG()}</div>
+    </div>
+    <div class="surf-actions"><button type="button" class="ba" onclick="surfAll()">Aplicar a todas las caras</button></div>
+    <div id="surfRead">${_surfLegendHTML()}</div>`;
   abrirModal(`Diente ${n} · superficies`,body,async()=>{
     const np=gp();if(!np)return;
     const t2=odontoEditTarget(np);
     const newSurf={};
-    for(const k of SURFACE_KEYS)newSurf[k]=g(`surf_${k}`)||'sano';
+    for(const k of SURFACE_KEYS)newSurf[k]=_surfSel[k]||'sano';
     if(SURFACE_KEYS.every(k=>newSurf[k]==='sano')){
       delete t2.teeth[n];
     }else{
@@ -8496,29 +9642,88 @@ function renderOps(){
   const p=gp();
   const ops=p.operatorias||[];
   const allTeeth=[...UPPER,...LOWER,...DECIDUOUS_UPPER,...DECIDUOUS_LOWER];
-  const rows=Array.from({length:Math.max(ops.length+1,5)},(_,i)=>{
-    const o=ops[i]||{fecha:'',ud:'',fibra:'',color:'',marca:''};
-    const udOptions=allTeeth.map(t=>`<option value="${t}"${o.ud==t?' selected':''}>${t}</option>`).join('');
-    const fibraOptions=FIBRA_OPTIONS.map(f=>`<option value="${f}"${o.fibra===f?' selected':''}>${f}</option>`).join('');
-    const colorOptions=VITA_SHADES.map(s=>`<option value="${s}"${o.color===s?' selected':''}>${s}</option>`).join('');
-    let extra='';
-    if(o.color&&!VITA_SHADES.includes(o.color))extra=`<option value="${e(o.color)}" selected>${e(o.color)}</option>`;
-    return `<tr>
-      <td style="min-width:140px">${dsDateField('op_fe_'+i,o.fecha||'',`onchange="updOp(${i},'fecha',this.value)"`)}</td>
-      <td><select onchange="updOp(${i},'ud',this.value)"><option value="">—</option>${udOptions}</select></td>
-      <td><select onchange="updOp(${i},'fibra',this.value)"><option value="">—</option>${fibraOptions}</select></td>
-      <td><select onchange="updOp(${i},'color',this.value)"><option value="">—</option>${colorOptions}${extra}</select></td>
-      <td><input value="${e(o.marca)}" oninput="updOp(${i},'marca',this.value)"></td>
-      <td>${ops.length>1&&i<ops.length?`<button class="bdel" onclick="delOp(${i})" title="Eliminar fila">✕</button>`:''}</td>
-    </tr>`;
-  }).join('');
+  // v10.1 — REGISTRO DE OPERATORIAS: nada de tablas con filas vacías.
+  // Lo hecho se lee como TARJETAS DE REGISTRO (diente protagonista, color VITA,
+  // fibra, marca, fecha) y lo nuevo se captura en un COMPOSITOR enfocado.
+  // Misma data: p.operatorias[{fecha,ud,fibra,color,marca}].
+  const reales=ops.map((o,i)=>({o,i})).filter(x=>x.o&&((x.o.fecha||'')+(x.o.ud||'')+(x.o.fibra||'')+(x.o.color||'')+(x.o.marca||'')).trim()!=='');
+  const cards=reales.map(({o,i})=>`
+    <div class="opc" onclick="opComposer(${i})" title="Editar registro">
+      <div class="opc-tooth"><span class="opc-tooth-n">${e(o.ud||'—')}</span><span class="opc-tooth-l">diente</span></div>
+      <div class="opc-body">
+        <div class="opc-date">${o.fecha?ff(o.fecha):'<span style="opacity:.6">Sin fecha</span>'}</div>
+        <div class="opc-meta">
+          ${o.color?`<span class="opc-pill opc-vita" title="Color VITA"><span class="opc-swatch"></span>${e(o.color)}</span>`:''}
+          ${o.fibra?`<span class="opc-pill ${o.fibra==='Sí'?'opc-fibra-si':'opc-fibra'}" title="Fibra de vidrio">Fibra ${e(o.fibra)}</span>`:''}
+        </div>
+        ${o.marca?`<div class="opc-marca">${e(o.marca)}</div>`:''}
+      </div>
+      <button type="button" class="bdel opc-del" title="Eliminar registro" onclick="event.stopPropagation();delOpCard(${i})">✕</button>
+    </div>`).join('');
   document.getElementById('panel').innerHTML=`
     <div class="card card-fijo">
-      <div class="ct-row"><div class="ct">Operatorias realizadas${infoBtn('Registro de procedimientos restaurativos (resinas, coronas, incrustaciones, etc.) con fecha, diente, fibra/material y color usado.')}</div>${statusEl('ops')}</div>
-      <div style="overflow-x:auto"><table class="otbl" style="min-width:640px"><thead><tr><th>Fecha</th><th>Unidad Dentaria</th><th>Fibra de vidrio</th><th>Color resinas</th><th>Marca resina</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>
-      <button class="ba" style="margin-top:10px" onclick="addOp()">+ Agregar fila</button>
+      <div class="ct-row" style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+        <div class="ct" style="margin-bottom:0">Operatorias realizadas${reales.length?` · ${reales.length}`:''}${infoBtn('Registro de procedimientos restaurativos (resinas, coronas, incrustaciones, etc.) con fecha, diente, fibra/material y color usado.')}</div>
+        <div style="display:flex;align-items:center;gap:10px">${statusEl('ops')}<button class="bs" onclick="opComposer(-1)">+ Registrar operatoria</button></div>
+      </div>
+      ${reales.length?`<div class="opc-grid">${cards}</div>`
+      :`<div class="arch-empty" style="padding:30px 18px">
+          <div class="arch-empty-icons">${icon('edit',24)}${icon('clipboard',24)}${icon('edit',24)}</div>
+          <p class="arch-empty-t">Aún no hay operatorias registradas</p>
+          <p class="arch-empty-s">Cada restauración queda como una tarjeta: diente, color VITA, fibra y marca — legible de un vistazo.</p>
+          <button type="button" class="bs" onclick="opComposer(-1)">+ Registrar la primera</button>
+        </div>`}
     </div>`;
 }
+// Compositor de operatoria: captura/edición enfocada en un modal.
+window.opComposer=function(idx){
+  const p0=gp(); if(!p0)return;
+  const ops0=p0.operatorias||[];
+  const o=(idx>=0&&ops0[idx])?ops0[idx]:{fecha:hoy(),ud:'',fibra:'',color:'',marca:''};
+  const allTeeth=[...UPPER,...LOWER,...DECIDUOUS_UPPER,...DECIDUOUS_LOWER];
+  const udOptions=allTeeth.map(t=>`<option value="${t}"${String(o.ud)===String(t)?' selected':''}>${t}</option>`).join('');
+  const colorOptions=VITA_SHADES.map(s=>`<option value="${s}"${o.color===s?' selected':''}>${s}</option>`).join('');
+  const extra=(o.color&&!VITA_SHADES.includes(o.color))?`<option value="${e(o.color)}" selected>${e(o.color)}</option>`:'';
+  const body=`
+    <div class="modal-grid-2">
+      <div class="mf"><label>Fecha</label>${dsDateField('opc_fe',o.fecha||'','')}</div>
+      <div class="mf"><label>Diente (FDI)</label><select id="opc_ud"><option value="">—</option>${udOptions}</select></div>
+    </div>
+    <div class="mf"><label>Fibra de vidrio</label>
+      <input type="hidden" id="opc_fibra" value="${e(o.fibra||'')}">
+      <div class="seg3" id="opcFibSeg">${FIBRA_OPTIONS.map(f=>`<button type="button" class="${o.fibra===f?'on':''}" onclick="opcFib('${f}')">${f}</button>`).join('')}</div>
+    </div>
+    <div class="modal-grid-2">
+      <div class="mf"><label>Color (guía VITA)</label><select id="opc_color"><option value="">—</option>${colorOptions}${extra}</select></div>
+      <div class="mf"><label>Marca de resina</label><input id="opc_marca" placeholder="Ej: Filtek Z350" value="${e(o.marca||'')}"></div>
+    </div>`;
+  abrirModal(idx>=0?'Editar operatoria':'Registrar operatoria', body, async()=>{
+    const np=gp(); if(!np)return;
+    if(!np.operatorias)np.operatorias=[];
+    const nuevo={fecha:g('opc_fe'),ud:g('opc_ud'),fibra:g('opc_fibra'),color:g('opc_color'),marca:g('opc_marca').trim()};
+    if(((nuevo.fecha||'')+(nuevo.ud||'')+(nuevo.fibra||'')+(nuevo.color||'')+(nuevo.marca||'')).trim()===''){
+      toast('Completa al menos un dato del registro.');return;
+    }
+    if(idx>=0&&np.operatorias[idx])np.operatorias[idx]=nuevo;
+    else np.operatorias.push(nuevo);
+    logChange(idx>=0?'Editó operatoria':'Registró operatoria','Operatorias',np);
+    await guardar(np); cerrarModal(); renderOps();
+    toast(idx>=0?'Registro actualizado':'Operatoria registrada');
+  });
+};
+window.opcFib=function(f){
+  const inp=document.getElementById('opc_fibra'); if(!inp)return;
+  inp.value=(inp.value===f)?'':f;
+  document.querySelectorAll('#opcFibSeg button').forEach(b=>b.classList.toggle('on',b.textContent===inp.value));
+};
+window.delOpCard=async function(i){
+  const p0=gp(); if(!p0||!p0.operatorias||!p0.operatorias[i])return;
+  if(!confirm('¿Eliminar este registro de operatoria?'))return;
+  p0.operatorias.splice(i,1);
+  logChange('Eliminó operatoria','Operatorias',p0);
+  await guardar(p0); renderOps(); toast('Registro eliminado');
+}
+window.renderOps=renderOps; // v10 — el segmented de Fibra re-renderiza desde onclick (scope global)
 window.updOp=function(i,k,v){
   const p=gp();if(!p.operatorias)p.operatorias=[];
   while(p.operatorias.length<=i)p.operatorias.push({fecha:'',ud:'',fibra:'',color:'',marca:''});
@@ -8549,41 +9754,111 @@ function procEntries(d){
   if(d.fecha||d.obs)return [{fecha:d.fecha||'',comentario:d.obs||''}];
   return [];
 }
+// v10.1 — BITÁCORA DE PROCEDIMIENTOS: solo se muestra lo que EXISTE (adiós a
+// las 11 cajas "Sin registros"); todo lo nuevo entra por un compositor único
+// que pregunta procedimiento + fecha + comentario. Misma data: p.procs[k].entries.
 function renderEst(){
   const p=gp();
   const pr=p.procs||{};
   const ro=false; // ITEM 10: siempre editable
-  let html=`<div class="card card-fijo"><div class="ct-row"><div class="ct">Procedimientos estéticos / protésicos${infoBtn('Seguimiento de tratamientos estéticos o protésicos que pueden tener varias fechas (ej. controles de blanqueamiento), con su diente y color.')}</div>${statusEl('est')}</div>`;
-  html+=`<p class="ds-note" style="margin-bottom:14px">Cada procedimiento admite <strong>varias entradas con su propia fecha</strong>. Un comentario nuevo ya no sobrescribe la fecha del anterior.</p>`;
+  // ¿Qué procedimientos tienen historia?
+  const grupos=[];
+  let totalEntradas=0;
   for(const group of PROCS_GROUPED){
-    html+=`<div class="proc-group"><div class="proc-group-title">${group.label}</div>`;
+    const conData=[];
     for(const proc of group.procs){
       const k=procKey(proc);
       const entries=procEntries(pr[k]);
-      const showDate=!PROC_NO_DATE.has(k);
-      html+=`<div class="proc-card">
-        <div class="proc-head"><div class="proc-name">${proc}</div>
-          ${entries.length===0?`<span style="font-size:11px;color:var(--text3)">Sin registros</span>`:''}
-        </div>`;
-      if(entries.length){
-        html+=`<div class="proc-entries">`;
+      if(entries.length){ conData.push({proc,k,entries}); totalEntradas+=entries.length; }
+    }
+    if(conData.length)grupos.push({label:group.label,procs:conData});
+  }
+  let html=`<div class="card card-fijo">
+    <div class="ct-row" style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+      <div class="ct" style="margin-bottom:0">Procedimientos estéticos / protésicos${totalEntradas?` · ${totalEntradas}`:''}${infoBtn('Seguimiento de tratamientos estéticos o protésicos que pueden tener varias fechas (ej. controles de blanqueamiento), con su diente y color.')}</div>
+      <div style="display:flex;align-items:center;gap:10px">${statusEl('est')}<button class="bs" onclick="estComposer()">+ Registrar procedimiento</button></div>
+    </div>`;
+  if(!grupos.length){
+    html+=`<div class="arch-empty" style="padding:30px 18px">
+      <div class="arch-empty-icons">${icon('clipboard',24)}${icon('calendar',24)}${icon('clipboard',24)}</div>
+      <p class="arch-empty-t">Aún no hay procedimientos registrados</p>
+      <p class="arch-empty-s">Impresiones, provisionales, pruebas de porcelana, cementaciones… cada procedimiento guarda su propia línea de tiempo de fechas y observaciones.</p>
+      <button type="button" class="bs" onclick="estComposer()">+ Registrar el primero</button>
+    </div>`;
+  }else{
+    for(const grupo of grupos){
+      html+=`<div class="proc-group"><div class="proc-group-title">${grupo.label}</div>`;
+      for(const {proc,k,entries} of grupo.procs){
+        const showDate=!PROC_NO_DATE.has(k);
+        html+=`<div class="proc-card">
+          <div class="proc-head"><div class="proc-name">${proc}</div><div style="display:flex;align-items:center;gap:8px"><span class="proc-count">${entries.length} entrada${entries.length===1?'':'s'}</span><button class="ba" style="min-height:28px;font-size:11px;padding:0 10px" onclick="estComposer('${k}')">+ Entrada</button></div></div>
+          <div class="opc-grid pec-grid">`;
         entries.forEach((en,i)=>{
-          html+=`<div class="proc-entry">
-            ${showDate?dsDateField('proc_fe_'+k+'_'+i,en.fecha||'',`onchange="updProcEntry('${k}',${i},'fecha',this.value)"`,!!ro):'<span style="font-size:11px;color:var(--text3);width:140px;flex-shrink:0">Sin fecha</span>'}
-            <textarea placeholder="Comentario / observación…" oninput="updProcEntry('${k}',${i},'comentario',this.value)" ${ro?'disabled':''}>${e(en.comentario||'')}</textarea>
-            ${ro?'':`<button class="bdel" title="Eliminar entrada" onclick="delProcEntry('${k}',${i})">✕</button>`}
+          const _d=en.fecha?new Date(en.fecha+'T00:00:00'):null;
+          const _day=_d?_d.getDate():'—';
+          const _mes=_d?['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'][_d.getMonth()]:'';
+          html+=`<div class="opc pec" onclick="estEdit('${k}',${i})" title="Editar entrada">
+            <div class="opc-tooth"><span class="opc-tooth-n">${_day}</span><span class="opc-tooth-l">${_mes||'s/f'}</span></div>
+            <div class="opc-body">
+              <div class="opc-date">${en.fecha?ff(en.fecha):'<span style="opacity:.6">Sin fecha</span>'}</div>
+              <div class="pec-com">${e((en.comentario||'').trim())||'<span style="opacity:.55;font-style:italic">Sin observaciones — toca para completar</span>'}</div>
+            </div>
+            <button type="button" class="bdel opc-del" title="Eliminar entrada" onclick="event.stopPropagation();delProcEntry('${k}',${i})">✕</button>
           </div>`;
         });
-        html+=`</div>`;
+        html+=`</div>
+        </div>`;
       }
-      if(!ro)html+=`<button class="ba proc-entries-add" onclick="addProcEntry('${k}')">+ Agregar entrada${entries.length?'':' / fecha'}</button>`;
       html+=`</div>`;
     }
-    html+=`</div>`;
   }
   html+=`</div>`;
   document.getElementById('panel').innerHTML=html;
 }
+// Editor de una entrada existente — mismo lenguaje que el compositor.
+window.estEdit=function(k,i){
+  const p0=gp(); if(!p0)return;
+  const obj=_ensureProcEntries(p0,k);
+  const en=obj.entries[i]; if(!en)return;
+  const showDate=!PROC_NO_DATE.has(k);
+  let nombre=k;
+  for(const gr of PROCS_GROUPED){ for(const pr2 of gr.procs){ if(procKey(pr2)===k)nombre=pr2; } }
+  const body=`
+    <p style="font-size:12px;color:var(--text2);margin:0 0 12px"><strong>${e(nombre)}</strong> · entrada ${i+1}</p>
+    ${showDate?`<div class="mf"><label>Fecha</label>${dsDateField('est_fe',en.fecha||'','')}</div>`:''}
+    <div class="mf"><label>Comentario / observación</label><textarea id="est_com" placeholder="Diente, color, laboratorio, resultado…">${e(en.comentario||'')}</textarea></div>`;
+  abrirModal('Editar entrada', body, async()=>{
+    const np=gp(); if(!np)return;
+    const o2=_ensureProcEntries(np,k);
+    if(!o2.entries[i])return;
+    o2.entries[i]={fecha:showDate?(g('est_fe')||''):'',comentario:g('est_com')};
+    logChange('Editó procedimiento estético','Proc. estéticos',np);
+    await guardar(np); cerrarModal(); renderEst();
+    toast('Entrada actualizada');
+  });
+};
+// Compositor: procedimiento + fecha + observación en un solo paso.
+window.estComposer=function(preK){
+  const p0=gp(); if(!p0)return;
+  const opts=PROCS_GROUPED.map(gr=>`<optgroup label="${e(gr.label)}">${gr.procs.map(pr2=>{
+    const k=procKey(pr2);
+    return `<option value="${k}"${preK===k?' selected':''}>${e(pr2)}</option>`;
+  }).join('')}</optgroup>`).join('');
+  const body=`
+    <div class="mf"><label>Procedimiento</label><select id="est_k">${opts}</select></div>
+    <div class="mf"><label>Fecha</label>${dsDateField('est_fe',hoy(),'')}</div>
+    <div class="mf"><label>Comentario / observación</label><textarea id="est_com" placeholder="Diente, color, laboratorio, resultado…"></textarea></div>`;
+  abrirModal('Registrar procedimiento', body, async()=>{
+    const np=gp(); if(!np)return;
+    const k=g('est_k'); if(!k){toast('Elige el procedimiento.');return;}
+    const obj=_ensureProcEntries(np,k);
+    const fecha=PROC_NO_DATE.has(k)?'':g('est_fe');
+    obj.entries.push({fecha:fecha||'',comentario:g('est_com')});
+    logChange('Registró procedimiento estético','Proc. estéticos',np);
+    await guardar(np); cerrarModal(); renderEst();
+    toast('Procedimiento registrado');
+  });
+};
 // Garantiza que p.procs[k] esté en el nuevo formato {entries:[...]}.
 function _ensureProcEntries(p,k){
   if(!p.procs)p.procs={};
@@ -8836,8 +10111,7 @@ function renderCons(){
     return kb.localeCompare(ka);
   });
   const total=(p.consultas||[]).reduce((s,c)=>s+(parseFloat(c.costo)||0),0);
-  let html=`<div class="ct-row"><div class="ct">Consultas${infoBtn('Cada visita del paciente, con su tratamiento, costo y motivo. Haz clic en una tarjeta para ver todo lo vinculado a esa consulta: odontograma, imágenes y plan.')}</div></div>
-    <button class="ba" onclick="modalCons()">+ Nueva consulta</button>`;
+  let html=`<div class="ct-row" style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap"><div class="ct" style="margin-bottom:0">Consultas${infoBtn('Cada visita del paciente, con su tratamiento, costo y motivo. Haz clic en una tarjeta para ver todo lo vinculado a esa consulta: odontograma, imágenes y plan.')}</div><button class="bs" onclick="modalCons()">+ Nueva consulta</button></div>`;
   if(sorted.length>0)html+=`<p style="font-size:12px;color:var(--text2);margin-bottom:14px">Total acumulado: <strong style="color:var(--forest)">$${total.toLocaleString()}</strong></p>`;
   else html+=`<div class="ds-note" style="margin-bottom:14px">${icon('chat',13)} ¿Nuevo paciente? Registra aquí cada visita — motivo, tratamiento, diagnóstico y plan quedan ligados a esa fecha, y se ven después desde Historia clínica.</div>`;
   sorted.forEach(c=>{
