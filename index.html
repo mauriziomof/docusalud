@@ -376,9 +376,11 @@ body.app-active {
 .phm { font-size: 11px; color: var(--text3); margin-top: 2px; letter-spacing: 0.02em; }
 .tabbar {
   background: var(--surface); border-bottom: var(--border-default);
-  padding: 0 16px; display: flex; overflow-x: auto; flex-shrink: 0;
+  padding: 0 16px; display: flex; flex-wrap: wrap; overflow-x: visible; flex-shrink: 0;
 }
 .tabbar::-webkit-scrollbar { height: 0; }
+.tab { flex: 1 1 auto; min-width: 0; white-space: nowrap;
+  font-size: clamp(10px, 2vw, 13px); padding: clamp(8px,1.5vw,13px) clamp(5px,1.5vw,14px); }
 .pro-teaser {
   position:fixed; top:16px; left:50%; transform:translate(-50%,-20px); opacity:0; z-index:900;
   display:flex; align-items:center; gap:16px; max-width:560px; width:calc(100% - 32px);
@@ -798,10 +800,10 @@ body.app-active {
   border-radius:14px;
   padding:20px 22px;
   margin-bottom:16px;
-  box-shadow:0 1px 2px rgba(31,58,42,0.04), 0 1px 0 rgba(31,58,42,0.02);
-  transition:box-shadow .18s var(--ease,ease), border-color .18s;
+  box-shadow:0 1px 3px rgba(31,58,42,0.04), 0 4px 14px rgba(31,58,42,0.06);
+  transition:box-shadow .25s cubic-bezier(.22,1,.36,1), border-color .18s, transform .18s;
 }
-.card:hover{ box-shadow:0 2px 10px rgba(31,58,42,0.06); }
+.card:hover{ box-shadow:0 4px 12px rgba(31,58,42,0.08), 0 12px 32px rgba(31,58,42,0.10); }
 .card.card-fijo{ border-left:3px solid var(--accent-border); }
 .card.card-var{ border-left:3px solid var(--brass); background:linear-gradient(to right, rgba(210,179,133,0.06) 0, var(--surface) 26px); }
 
@@ -870,7 +872,7 @@ body.app-active {
 .pview-bar{ padding:10px 4px 14px; }
 
 /* Modals — refined header & spacing */
-.mbox{ border-radius:16px; padding:26px 28px; box-shadow:0 18px 50px rgba(26,26,23,0.22); }
+.mbox{ border-radius:16px; padding:26px 28px; box-shadow:0 24px 64px rgba(26,26,23,0.22), 0 4px 16px rgba(26,26,23,0.10); }
 .mbox h3{ font-family:'DM Sans',sans-serif; font-weight:400; font-size:21px; }
 
 /* History items — premium card feel */
@@ -917,10 +919,13 @@ body.app-active {
   .ci-input { display: flex; }
   .ci-input input { min-width: 0; }
   /* Sticky patient header + tabbar — floating above scroll content */
-  .phdr { padding: 12px 14px; gap: 10px; box-shadow: 0 1px 0 rgba(31,58,42,0.06); position: sticky; top: 0; z-index: 4; }
-  .pav { width: 34px; height: 34px; font-size: 12px; }
-  .phn { font-size: 14px; }
-  .phm { font-size: 10.5px; }
+  .phdr { padding: 8px 12px; gap: 8px; box-shadow: 0 1px 0 rgba(31,58,42,0.06); position: sticky; top: 0; z-index: 4; max-height:80px; min-height:0; }
+  .pav { width: 32px; height: 32px; font-size: 11px; flex-shrink:0; }
+  .phn { font-size: 13px; line-height:1.2; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; }
+  .phm { font-size: 10px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:220px; }
+  /* Action buttons in phdr: show only icon on very narrow screens */
+  .phdr .ba { font-size:11px; padding:5px 8px; white-space:nowrap; }
+  .phdr-wa span.lbl { display:none; }
   .tabbar { padding: 0 10px; position: sticky; top: 60px; z-index: 3; box-shadow: 0 2px 4px rgba(31,58,42,0.04); }
   .tab { padding: 11px 12px; font-size: 12px; }
   .card { padding: 14px 14px; }
@@ -1131,6 +1136,8 @@ body.app-active {
 .dash-bar-n { font-size:12px; font-weight:600; color:var(--forest); width:22px; text-align:right; flex-shrink:0; }
 .dash-card.dc-admin { background:var(--surface); border:var(--border-default); box-shadow:none; padding:18px 20px; }
 .admin-dash-item { display:flex; align-items:center; justify-content:space-between; gap:8px; font-size:12.5px; color:var(--text); padding:6px 0; border-top:0.5px solid var(--border); }
+.admin-name-link { background:none; border:none; padding:0; font:inherit; font-size:12.5px; color:var(--forest); cursor:pointer; text-align:left; text-decoration:underline dotted var(--accent-border); min-height:44px; display:flex; align-items:center; }
+.admin-name-link:hover { color:var(--text); text-decoration:underline; }
 .admin-soporte-item { cursor:pointer; }
 .admin-soporte-item.unread { font-weight:600; color:var(--forest); }
 .admin-soporte-item.unread .admin-dash-time { color:var(--forest); }
@@ -3038,7 +3045,7 @@ html[data-theme="dark"] .card:focus-within{ box-shadow:0 8px 28px rgba(0,0,0,0.3
 #d_ref{ background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237A8A6E' stroke-width='1.8'%3E%3Cpath d='M16 3h5v5M21 3l-7 7M8 21H3v-5M3 21l7-7'/%3E%3C/svg%3E"); }
 
 /* ── 7 · ODONTOGRAMA: dientes con carácter (colores/semántica intactos) ── */
-.tooth{ border-radius:9px; transition:transform .13s var(--ease,ease), box-shadow .15s var(--ease,ease), background .12s; }
+.tooth{ border-radius:9px; transition:transform .13s var(--ease,ease), box-shadow .15s var(--ease,ease), background .12s; touch-action:manipulation; cursor:pointer; }
 .tooth:hover{ transform:translateY(-2px); box-shadow:0 5px 12px rgba(26,26,23,0.14); }
 .tooth .ts{ font-weight:600; }
 .tooth .tn{ font-size:8.5px; }
@@ -3333,6 +3340,47 @@ body.dnd-active .dcw-row{ cursor:grabbing; }
 .dcw-list{ overscroll-behavior:contain; }
 .dcw-off-title{ font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--text3); margin:14px 2px 6px; }
 .dcw-list-off{ max-height:none; opacity:.85; }
+
+/* ═══════════════════════════════════════════════════════════════════
+   v10.4 · POLISH PREMIUM — sombras, cursor, ripple, micro-animaciones
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Cursor dental SVG en odontograma — solo dispositivos con hover real (desktop) */
+@media (hover:hover) and (pointer:fine){
+  .tooth:hover{
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3E%3Ccircle cx='10' cy='10' r='4' fill='%231F3A2A'/%3E%3Cline x1='10' y1='1' x2='10' y2='7' stroke='%231F3A2A' stroke-width='2'/%3E%3Cline x1='10' y1='13' x2='10' y2='19' stroke='%231F3A2A' stroke-width='2'/%3E%3Cline x1='1' y1='10' x2='7' y2='10' stroke='%231F3A2A' stroke-width='2'/%3E%3Cline x1='13' y1='10' x2='19' y2='10' stroke='%231F3A2A' stroke-width='2'/%3E%3C/svg%3E") 10 10, crosshair;
+  }
+}
+
+/* Ripple en botones primarios */
+.bs{ position:relative; overflow:hidden; }
+.bs .ripple{
+  position:absolute; border-radius:50%;
+  background:rgba(255,255,255,0.30);
+  transform:scale(0); animation:dsRippleOut .45s linear;
+  pointer-events:none;
+}
+@keyframes dsRippleOut{ to{ transform:scale(4); opacity:0; } }
+
+/* Flash sutil al seleccionar paciente en sidebar */
+@keyframes dsPiFlash{
+  0%{ background:var(--accent-light); }
+  100%{ background:var(--mist); }
+}
+.pi.flash{ animation:dsPiFlash .22s ease forwards; }
+
+/* Animación de entrada del panel al cambiar de pestaña */
+@keyframes dsTabPanelIn{ from{ opacity:0; transform:translateY(3px); } to{ opacity:1; transform:none; } }
+#panel{ animation:dsTabPanelIn .15s var(--ease,ease); }
+
+/* Respeto total por prefers-reduced-motion (accesibilidad) */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    animation-duration:0.01ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:0.01ms !important;
+  }
+}
 </style>
 </head>
 <body>
@@ -3820,6 +3868,46 @@ const ESPECIALIDADES=[
   {key:'cirugia',label:'Cirugía'},
   {key:'prostodoncia',label:'Prostodoncia'}
 ];
+// Pestañas por defecto según especialidad (17 especialidades venezolanas).
+// ⚠️  Las claves son los STRINGS EXACTOS de ESP_ODONTO — así pendingEsp[0] hace match directo.
+// Lógica clínica por especialidad:
+//   General        → todo (scope completo de dx, operatorias, estética, récord y consultas)
+//   Endodoncia     → sin ops (no restaura) ni est (no hace estética)
+//   Ortodoncia     → sin ops ni est; seguimiento por cons y rec
+//   Periodoncia    → con ops (cirugía periodontal / implantes); sin est
+//   Cirugía        → con ops (hoja de intervención quirúrgica ≠ consulta); sin est
+//   Prostodoncia   → todo: preparaciones (ops) + selección de color / shade (est)
+//   Odontopediatría→ con ops (resinas pediátricas, coronas de acero); sin est
+//   Patología      → solo dx y seguimiento; sin ops ni est
+//   Radiología     → interpretación de imágenes; sin plan, ops ni est
+//   Forense        → identificación y análisis; sin plan, ops ni est
+//   Estética Dental→ todo (blanqueamiento, carillas — est es su razón de ser)
+//   Rehabilitación → todo (restauración integral + estética)
+//   Oclusión/DTM   → dx y férulas; sin ops ni est
+//   Láser          → con ops (procedimientos tisulares) y est (blanqueamiento láser)
+//   Odontogeriatría→ con ops; sin est (no típico en adultos mayores)
+//   Deporte        → con ops (guardas, traumatología); sin est
+//   Implantología  → con ops (colocación quirúrgica + restauración sobre implante); sin est
+// El admin puede ajustar manualmente en cualquier momento — esto es solo el punto de partida.
+const SPECIALTY_DEFAULT_TABS={
+  'Odontología General':                      ['datos','clinico','odonto','plan','ops','est','rec','cons'],
+  'Endodoncia':                               ['datos','clinico','odonto','plan','rec','cons'],
+  'Ortodoncia y Ortopedia Maxilofacial':      ['datos','clinico','odonto','plan','rec','cons'],
+  'Periodoncia e Implantología':              ['datos','clinico','odonto','plan','ops','rec','cons'],
+  'Cirugía Oral y Maxilofacial':              ['datos','clinico','odonto','plan','ops','rec','cons'],
+  'Prostodoncia (Prótesis Dental)':           ['datos','clinico','odonto','plan','ops','est','rec','cons'],
+  'Odontopediatría':                          ['datos','clinico','odonto','plan','ops','rec','cons'],
+  'Patología Oral y Maxilofacial':            ['datos','clinico','odonto','plan','rec','cons'],
+  'Radiología Oral y Maxilofacial':           ['datos','clinico','odonto','rec','cons'],
+  'Odontología Forense':                      ['datos','clinico','odonto','rec','cons'],
+  'Estética Dental':                          ['datos','clinico','odonto','plan','ops','est','rec','cons'],
+  'Rehabilitación Oral':                      ['datos','clinico','odonto','plan','ops','est','rec','cons'],
+  'Oclusión y Disfunción Temporomandibular':  ['datos','clinico','odonto','plan','rec','cons'],
+  'Láser en Odontología':                     ['datos','clinico','odonto','plan','ops','est','rec','cons'],
+  'Odontogeriatría':                          ['datos','clinico','odonto','plan','ops','rec','cons'],
+  'Odontología del Deporte':                  ['datos','clinico','odonto','plan','ops','rec','cons'],
+  'Implantología Oral':                       ['datos','clinico','odonto','plan','ops','rec','cons'],
+};
 const SPECIALTY_SCHEMAS={
   endodoncia:[
     {key:'pulpa',label:'Estado pulpar',type:'select',options:['','Vital','No vital','Necrótica']},
@@ -3923,6 +4011,8 @@ let invitesCollapsed = true;
 let adminFilesCollapsed = true;   // v9 — sección "Archivos subidos" del admin
 let adminFilesTipo = '';          // ''|'imagen'|'pdf'|'word'
 let adminFilesQ = '';
+let adminPacientesCollapsed = true;
+let adminPacientesQuery = '';
 let tabOrderCollapsed = true;
 let adminFilterPanelOpen = false;
 let invitacionesUnsub = null;
@@ -4502,12 +4592,17 @@ function bootstrapUserPerms(user){
       // v7.6f — capture chosen plan from signup (defaults to free)
       const pendingPlan=sessionStorage.getItem('ds_pending_plan')||'free';
       sessionStorage.removeItem('ds_pending_plan');
+      // Determinar tabs iniciales según especialidad elegida en el registro.
+      // pendingEsp[0] es un string completo de ESP_ODONTO (ej: "Endodoncia")
+      // que coincide directamente con las claves de SPECIALTY_DEFAULT_TABS.
+      const _espStr=pendingEsp&&pendingEsp[0]||null;
+      const _defaultTabs=(_espStr&&SPECIALTY_DEFAULT_TABS[_espStr])||[...ALL_TABS];
       const initial={
         email:user.email||'',
         name:pendingName,
         title:pendingTitle,
-        tabsAllowed:[...ALL_TABS],
-        tabOrder:[...ALL_TABS],
+        tabsAllowed:[..._defaultTabs],
+        tabOrder:[..._defaultTabs],
         especialidades:pendingEsp,
         status:'active',
         plan:pendingPlan,
@@ -5055,7 +5150,7 @@ async function guardar(p){
   // Fire-and-track: don't block the UI on server ack. Offline persistence queues
   // the write and syncs on reconnect — no data loss, modal can close right away.
   setDoc(doc(db,'pacientes',id),data)
-    .then(()=>{ss('ok','Sincronizado');ssRest();})
+    .then(()=>{ss('ok','Sincronizado');ssRest();_playSuccess();})
     .catch(()=>{ss('err','Sin conexión · guardado local, se sincronizará');});
   return id;
 }
@@ -5413,6 +5508,9 @@ window.seleccionar=function(id){
   if(idActual!==id){_imgActiveCat='rad';_imgFilters={cat:'',user:'',cons:'',fecha:''};_imgLightboxId=null;_docFilters={tipo:'',user:'',cons:'',fecha:''};_archVista='img';}
   idActual=id;tabActual='datos';viewActual='paciente';consultaView=null;editUnlocked=false;odontoView=null;planView=null;
   logAccess(id);
+  // Flash sutil en el ítem seleccionado
+  const _piEl=document.querySelector(`.pi[onclick*="${id}"]`);
+  if(_piEl){_piEl.classList.add('flash');setTimeout(()=>_piEl.classList.remove('flash'),220);}
   renderLista();renderPaciente();
   if(isMobile())document.getElementById('sidebar').classList.remove('open');
 }
@@ -6271,11 +6369,11 @@ function adminDashboardWidgetsHTML(){
   return `<div class="admin-dash-row admin-dash-row-4">
     <div class="dash-card dc-admin">
       <p class="dash-label">Usuarios conectados · ${online.length}</p>
-      ${online.length?online.map(u=>`<div class="admin-dash-item"><span class="pres-dot on"></span>${e(titleCase(u.name)||u.email||'Usuario')}</div>`).join(''):'<p class="admin-dash-empty">Nadie conectado ahora mismo</p>'}
+      ${online.length?online.map(u=>`<div class="admin-dash-item"><span class="pres-dot on"></span><button class="admin-name-link" onclick="impersonateUser('${e(u.uid)}')" title="Ver como ${e(titleCase(u.name)||u.email)}">${e(titleCase(u.name)||u.email||'Usuario')}</button></div>`).join(''):'<p class="admin-dash-empty">Nadie conectado ahora mismo</p>'}
     </div>
     <div class="dash-card dc-admin">
       <p class="dash-label">Últimos en desconectarse</p>
-      ${lastDisc.length?lastDisc.map(({u,at})=>`<div class="admin-dash-item"><span>${e(titleCase(u.name)||u.email||'Usuario')}</span><span class="admin-dash-time">${timeAgo(new Date(at).toISOString())}</span></div>`).join(''):'<p class="admin-dash-empty">Sin desconexiones recientes</p>'}
+      ${lastDisc.length?lastDisc.map(({u,at})=>`<div class="admin-dash-item"><button class="admin-name-link" onclick="impersonateUser('${e(u.uid)}')" title="Ver como ${e(titleCase(u.name)||u.email)}">${e(titleCase(u.name)||u.email||'Usuario')}</button><span class="admin-dash-time">${timeAgo(new Date(at).toISOString())}</span></div>`).join(''):'<p class="admin-dash-empty">Sin desconexiones recientes</p>'}
     </div>
     <div class="dash-card dc-admin">
       <p class="dash-label">Últimos pacientes</p>
@@ -6283,7 +6381,7 @@ function adminDashboardWidgetsHTML(){
     </div>
     <div class="dash-card dc-admin">
       <p class="dash-label">Últimos usuarios</p>
-      ${recentUsers.length?recentUsers.map(u=>`<div class="admin-dash-item"><span>${e(titleCase(u.name)||u.email||'Usuario')}</span><span class="admin-dash-time">${timeAgo(u.createdAt)}</span></div>`).join(''):'<p class="admin-dash-empty">Sin usuarios todavía</p>'}
+      ${recentUsers.length?recentUsers.map(u=>`<div class="admin-dash-item"><button class="admin-name-link" onclick="impersonateUser('${e(u.uid)}')" title="Ver como ${e(titleCase(u.name)||u.email)}">${e(titleCase(u.name)||u.email||'Usuario')}</button><span class="admin-dash-time">${timeAgo(u.createdAt)}</span></div>`).join(''):'<p class="admin-dash-empty">Sin usuarios todavía</p>'}
     </div>
     <div class="dash-card dc-admin">
       <p class="dash-label">Mensajes de soporte · ${soporteList.filter(m=>!m.leido).length} sin leer</p>
@@ -6407,7 +6505,13 @@ function renderAdmin(){
                 : `<span style="color:var(--text3)">Desconectado${discAgo?' · '+discAgo:''}</span>`}
             </div>`;
           })()}
-          ${(u.especialidades&&u.especialidades.length)?`<div class="admin-user-esp">${u.especialidades.map(s=>e(s)).join(' · ')}</div>`:''}
+          ${(u.especialidades&&u.especialidades.length)
+            ? `<div class="admin-user-esp" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:4px 0">
+                <span style="font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text3)">Esp.</span>
+                ${u.especialidades.map(s=>`<span style="font-size:11px;padding:2px 8px;border-radius:980px;background:var(--mist);color:var(--forest);font-weight:500;border:0.5px solid var(--accent-border)">${e(s)}</span>`).join('')}
+                ${SPECIALTY_DEFAULT_TABS[u.especialidades[0]]?`<span style="font-size:10px;color:var(--text3)">(${SPECIALTY_DEFAULT_TABS[u.especialidades[0]].length} tabs default)</span>`:''}
+              </div>`
+            : `<div style="font-size:11px;color:var(--text3);margin:4px 0">Sin especialidad registrada</div>`}
           <div class="admin-devices-row"><button class="admin-devices-toggle" onclick="adminToggleDevices('${u.uid}')"><span id="devchev-${u.uid}">▸</span> Dispositivos</button></div>
           <div class="admin-devices-panel" id="devpanel-${u.uid}" style="display:none"></div>
         </div>
@@ -6425,6 +6529,7 @@ function renderAdmin(){
       </div>
       <div class="admin-user-actions">
         <button class="ba admin-impersonate-btn" onclick="impersonateUser('${u.uid}')" title="Ver como este usuario">Ver como</button>
+        <button class="ba" onclick="adminResetTabsToDefault('${u.uid}')" title="Restaurar pestañas a los defaults de la especialidad del usuario">↺ Defaults esp.</button>
         <button class="bc" onclick="adminSetStatus('${u.uid}','${status==='inactive'?'active':'inactive'}')">${status==='inactive'?'Activar':'Desactivar'}</button>
         <button class="ba" onclick="adminExportUserPatients('${u.uid}','${e(titleCase(u.name)||u.email||uid)}')" title="Exportar datos de este usuario">↓ Datos</button>
         <button class="bd" onclick="adminRemoveUser('${u.uid}')" title="Quitar de la lista">Quitar</button>
@@ -6458,6 +6563,23 @@ function renderAdmin(){
   const noMatchesState=noMatches?`<div class="admin-empty">
     <p style="font-family:'DM Sans',sans-serif;font-size:16px;color:var(--text2);font-style:italic">Ningún usuario coincide con los filtros.</p>
   </div>`:'';
+  // ─── Sección colapsable "Pacientes" del admin ───────────────────────────────
+  const _pacAdm = viewAsUid ? pacientes : null; // solo disponible cuando hay usuario impersonado
+  const _pacQ = adminPacientesQuery.toLowerCase().trim();
+  const _pacFiltered = _pacAdm ? _pacAdm.filter(p=>!_pacQ||(p.nombre||'').toLowerCase().includes(_pacQ)||(p.ci||'').includes(_pacQ)) : [];
+  const pacientesAdminHTML=`<div class="admin-invites">
+    <div class="admin-invites-head">
+      <button class="invites-toggle" onclick="toggleAdminPacientes()"><span class="chev">${adminPacientesCollapsed?'▸':'▾'}</span> Pacientes${_pacAdm?` · ${_pacFiltered.length}`:''}</button>
+    </div>
+    ${adminPacientesCollapsed?'':(!viewAsUid?`<p class="ds-note" style="margin:6px 0">Selecciona un usuario con "Ver como" para buscar sus pacientes.</p>`:`
+    <div class="admin-files-bar" style="margin:6px 0 8px">
+      <input type="search" value="${e(adminPacientesQuery)}" placeholder="Nombre o cédula…" oninput="adminPacientesQuery=this.value;renderAdmin()" style="flex:1">
+    </div>
+    ${_pacFiltered.length===0?`<p class="ds-note">Sin resultados</p>`:`<div style="display:flex;flex-direction:column;gap:4px;max-height:260px;overflow-y:auto">${_pacFiltered.slice(0,50).map(p=>`<div class="admin-dash-item" style="cursor:pointer" onclick="abrirPaciente('${e(p.id)}')">
+        <span>${e(titleCase(p.nombre))}</span>
+        <span class="admin-dash-time">${e(p.ci||'')}${p.consultas&&p.consultas.length?' · '+p.consultas.length+' consulta'+(p.consultas.length===1?'':'s'):''}</span>
+      </div>`).join('')}</div>`}`}
+  </div>`;
   // ─── Item 3: global patient-tab order editor (admin only) ────────────────
   // Effective order = saved globalTabOrder, falling back to ALL_TABS for any
   // missing key (so newly added tabs still appear). Imágenes is plan-gated and
@@ -6549,6 +6671,7 @@ function renderAdmin(){
         </div>
       </div>`:''}
       ${invitesHTML}
+      ${pacientesAdminHTML}
       ${adminFilesHTML()}
       ${tabOrderHTML}
       ${isEmpty?emptyState:(noMatches?noMatchesState:`<div class="admin-users-grid">${userCards}</div>`)}
@@ -6725,6 +6848,7 @@ window.adminToggleDevices=async function(uid){
 };
 
 window.toggleInvites=function(){ invitesCollapsed=!invitesCollapsed; renderAdmin(); };
+window.toggleAdminPacientes=function(){ adminPacientesCollapsed=!adminPacientesCollapsed; renderAdmin(); };
 // ── v9 · Archivos subidos por los usuarios (auditoría del admin) ────────────
 // Recorre la data que el admin ya tiene en memoria (todas las /pacientes):
 // imágenes + documentos, con quién subió, paciente, fecha y tipo.
@@ -7325,6 +7449,28 @@ window.adminToggleTab=async function(uid,tabKey,nowChecked){
     toast('Error al guardar: '+err.message);
   }
 }
+// Restaurar pestañas a los defaults de la especialidad registrada del usuario
+window.adminResetTabsToDefault=async function(uid){
+  if(!isAdmin)return;
+  const user=allUsersList.find(u=>u.uid===uid);
+  if(!user)return;
+  const espStr=(user.especialidades&&user.especialidades[0])||null;
+  const defaultTabs=(espStr&&SPECIALTY_DEFAULT_TABS[espStr])||[...ALL_TABS];
+  const espLabel=espStr||'Odontología General (default)';
+  const tabLabels=defaultTabs.map(k=>TAB_LABELS[k]||k).join(', ');
+  if(!confirm(`Restaurar pestañas de ${titleCase(user.name||user.email||uid)} a los defaults de:\n"${espLabel}"\n\nQuedarán activas: ${tabLabels}\n\n¿Confirmar?`))return;
+  try{
+    await setDoc(doc(db,'users',uid),{
+      tabsAllowed:[...defaultTabs],
+      tabOrder:[...defaultTabs],
+      updatedAt:new Date().toISOString(),
+      updatedBy:'admin'
+    },{merge:true});
+    toast('Pestañas restauradas · '+espLabel);
+  }catch(err){
+    toast('Error: '+err.message);
+  }
+};
 function renderCalendar(){
   if(calendarView==='dia')renderCalendarDia();
   else renderCalendarMes();
@@ -8118,6 +8264,7 @@ window.imgDelete=async function(id){
   if(!im)return;
   if(!imgCanDelete(im)){ if(typeof toast==='function')toast('Solo quien la subió (o un admin) puede eliminarla.'); return; }
   if(!confirm(`¿Eliminar la imagen "${im.nombre||'Imagen'}"?\n\nEsta acción no se puede deshacer.`))return;
+  _playDelete();
   if(storage&&im.storagePath){
     try{ await deleteObject(stRef(storage,im.storagePath)); }
     catch(err){ console.warn('No se pudo borrar el archivo en Storage:',err.message); }
@@ -8482,7 +8629,18 @@ function renderTab(){
   else if(t==='est')renderEst();
   else if(t==='rec')renderRec();
   else if(t==='cons')renderCons();
-  else if(t==='img'){ if(_archVista==='doc')renderDocumentos(); else renderImagenes(); }
+  else if(t==='img'){
+    // Mostrar contenido inmediatamente: si el paciente no tiene imágenes pero sí
+    // documentos, cambiar a vista doc automáticamente; si tiene imágenes, mostrar img.
+    const _tabP=gp();
+    if(_tabP){
+      const _hasImgs=(_tabP.imagenes||[]).length>0;
+      const _hasDocs=(_tabP.documentos||[]).length>0;
+      if(!_hasImgs&&_hasDocs)_archVista='doc';
+      else _archVista='img';
+    }
+    if(_archVista==='doc')renderDocumentos(); else renderImagenes();
+  }
   else if(t==='doc')renderDocumentos();
 }
 
@@ -9218,7 +9376,7 @@ function renderOdonto(){
   function tooth(n,small=false){
     const{dominant,surfaces}=getToothState(pView,n);
     const cls=`tooth ${dominant}${small?' tooth-sm':''}${surfaces?' has-surfaces':''}`;
-    const handlers = `onclick="mDiente(${n})" oncontextmenu="rDiente(event,${n})"`;
+    const handlers = `onclick="mDiente(${n})" oncontextmenu="rDiente(event,${n})" onpointerdown="_toothLongPressStart(event,${n})" onpointerup="_toothLongPressCancel()" onpointerleave="_toothLongPressCancel()"`;
     return `<div class="${cls}" ${handlers} title="Diente ${n}">
       <span class="tn">${n}</span>
       <span class="ts">${SIMBOLOS[dominant]||''}</span>
@@ -9279,6 +9437,20 @@ function renderOdontoKeepScroll(){
   renderOdonto();
   if(_s>0)setTimeout(()=>{const p2=document.getElementById('panel');if(p2)p2.scrollTop=_s;},0);
 }
+// Long-press en diente = equivalente a clic derecho (restablecer) en táctil
+let _toothLongPressTimer=null;
+window._toothLongPressStart=function(ev,n){
+  if(ev.pointerType==='mouse')return; // solo para touch
+  _toothLongPressTimer=setTimeout(()=>{
+    _toothLongPressTimer=null;
+    rDiente({preventDefault:()=>{}},n);
+    // vibración háptica si está disponible
+    try{if(navigator.vibrate)navigator.vibrate(40);}catch(e){}
+  },500);
+};
+window._toothLongPressCancel=function(){
+  if(_toothLongPressTimer){clearTimeout(_toothLongPressTimer);_toothLongPressTimer=null;}
+};
 window.mDiente=async function(n){
   vizToothN=n;
   const p=gp();if(!p)return;
@@ -10286,6 +10458,7 @@ window.delCons=async function(cid){
   const c=(p.consultas||[]).find(c=>c.id===cid);if(!c)return;
   p.consultas=(p.consultas||[]).filter(x=>x.id!==cid);
   if(consultaView===cid)consultaView=null;
+  _playDelete();
   await guardar(p);renderLista();renderCons();
   undoToast('Consulta eliminada',async()=>{
     const now=gp();if(!now)return;
@@ -10535,6 +10708,27 @@ function _playClick(freq){
     osc.start(t); osc.stop(t+0.05);
   }catch(e){}
 }
+// Tono de éxito: dos notas ascendentes (guardar exitoso)
+function _playSuccess(){
+  if(!_soundsOn)return;
+  _playClick(620); setTimeout(()=>_playClick(820),80);
+}
+// Tono de error: nota grave sostenida (validación fallida)
+function _playError(){
+  if(!_soundsOn)return;
+  try{
+    if(!_audioCtx)_audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+    if(_audioCtx.state==='suspended')_audioCtx.resume();
+    const t=_audioCtx.currentTime,osc=_audioCtx.createOscillator(),gain=_audioCtx.createGain();
+    osc.type='sine'; osc.frequency.setValueAtTime(280,t);
+    gain.gain.setValueAtTime(0.0001,t);
+    gain.gain.exponentialRampToValueAtTime(0.06,t+0.01);
+    gain.gain.exponentialRampToValueAtTime(0.0001,t+0.18);
+    osc.connect(gain); gain.connect(_audioCtx.destination); osc.start(t); osc.stop(t+0.2);
+  }catch(e){}
+}
+// Tono de eliminación: igual que error (acción destructiva)
+function _playDelete(){ _playError(); }
 let _soundsOn=true;
 try{ _soundsOn=localStorage.getItem('ds_sounds')!=='0'; }catch(e){}
 window.toggleSounds=function(val){
@@ -10542,10 +10736,21 @@ window.toggleSounds=function(val){
   try{localStorage.setItem('ds_sounds',_soundsOn?'1':'0');}catch(e){}
   toast(_soundsOn?'Sonidos activados':'Sonidos desactivados');
 };
+// Listener unificado: sonidos de clic + ripple en botones primarios
 document.addEventListener('click',function(ev){
-  if(!_soundsOn)return;
   const t=ev.target.closest('button, .tab, .dash-qbtn, .pview-seg button, .filter-toggle-btn, .invites-toggle');
   if(!t||t.disabled)return;
+  // Ripple en botones .bs (independiente de sonidos)
+  if(t.classList.contains('bs')){
+    const r=document.createElement('span'); r.className='ripple';
+    const rect=t.getBoundingClientRect();
+    const size=Math.max(rect.width,rect.height);
+    r.style.cssText=`width:${size}px;height:${size}px;left:${ev.clientX-rect.left-size/2}px;top:${ev.clientY-rect.top-size/2}px`;
+    t.appendChild(r); setTimeout(()=>r.remove(),450);
+  }
+  // Sonidos
+  if(!_soundsOn)return;
+  if(t.classList.contains('bdel'))return; // deletes suenan desde sus funciones
   _playClick(t.classList.contains('tab')?620:t.classList.contains('bs')?820:740);
 },true);
 
