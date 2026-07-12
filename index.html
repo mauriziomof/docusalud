@@ -800,10 +800,10 @@ body.app-active {
   border-radius:14px;
   padding:20px 22px;
   margin-bottom:16px;
-  box-shadow:0 1px 3px rgba(31,58,42,0.04), 0 4px 14px rgba(31,58,42,0.06);
-  transition:box-shadow .25s cubic-bezier(.22,1,.36,1), border-color .18s, transform .18s;
+  box-shadow:0 1px 2px rgba(31,58,42,0.04), 0 1px 0 rgba(31,58,42,0.02);
+  transition:box-shadow .18s var(--ease,ease), border-color .18s;
 }
-.card:hover{ box-shadow:0 4px 12px rgba(31,58,42,0.08), 0 12px 32px rgba(31,58,42,0.10); }
+.card:hover{ box-shadow:0 2px 10px rgba(31,58,42,0.06); }
 .card.card-fijo{ border-left:3px solid var(--accent-border); }
 .card.card-var{ border-left:3px solid var(--brass); background:linear-gradient(to right, rgba(210,179,133,0.06) 0, var(--surface) 26px); }
 
@@ -872,7 +872,7 @@ body.app-active {
 .pview-bar{ padding:10px 4px 14px; }
 
 /* Modals — refined header & spacing */
-.mbox{ border-radius:16px; padding:26px 28px; box-shadow:0 24px 64px rgba(26,26,23,0.22), 0 4px 16px rgba(26,26,23,0.10); }
+.mbox{ border-radius:16px; padding:26px 28px; box-shadow:0 18px 50px rgba(26,26,23,0.22); }
 .mbox h3{ font-family:'DM Sans',sans-serif; font-weight:400; font-size:21px; }
 
 /* History items — premium card feel */
@@ -3340,47 +3340,6 @@ body.dnd-active .dcw-row{ cursor:grabbing; }
 .dcw-list{ overscroll-behavior:contain; }
 .dcw-off-title{ font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--text3); margin:14px 2px 6px; }
 .dcw-list-off{ max-height:none; opacity:.85; }
-
-/* ═══════════════════════════════════════════════════════════════════
-   v10.4 · POLISH PREMIUM — sombras, cursor, ripple, micro-animaciones
-   ═══════════════════════════════════════════════════════════════════ */
-
-/* Cursor dental SVG en odontograma — solo dispositivos con hover real (desktop) */
-@media (hover:hover) and (pointer:fine){
-  .tooth:hover{
-    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3E%3Ccircle cx='10' cy='10' r='4' fill='%231F3A2A'/%3E%3Cline x1='10' y1='1' x2='10' y2='7' stroke='%231F3A2A' stroke-width='2'/%3E%3Cline x1='10' y1='13' x2='10' y2='19' stroke='%231F3A2A' stroke-width='2'/%3E%3Cline x1='1' y1='10' x2='7' y2='10' stroke='%231F3A2A' stroke-width='2'/%3E%3Cline x1='13' y1='10' x2='19' y2='10' stroke='%231F3A2A' stroke-width='2'/%3E%3C/svg%3E") 10 10, crosshair;
-  }
-}
-
-/* Ripple en botones primarios */
-.bs{ position:relative; overflow:hidden; }
-.bs .ripple{
-  position:absolute; border-radius:50%;
-  background:rgba(255,255,255,0.30);
-  transform:scale(0); animation:dsRippleOut .45s linear;
-  pointer-events:none;
-}
-@keyframes dsRippleOut{ to{ transform:scale(4); opacity:0; } }
-
-/* Flash sutil al seleccionar paciente en sidebar */
-@keyframes dsPiFlash{
-  0%{ background:var(--accent-light); }
-  100%{ background:var(--mist); }
-}
-.pi.flash{ animation:dsPiFlash .22s ease forwards; }
-
-/* Animación de entrada del panel al cambiar de pestaña */
-@keyframes dsTabPanelIn{ from{ opacity:0; transform:translateY(3px); } to{ opacity:1; transform:none; } }
-#panel{ animation:dsTabPanelIn .15s var(--ease,ease); }
-
-/* Respeto total por prefers-reduced-motion (accesibilidad) */
-@media (prefers-reduced-motion:reduce){
-  *,*::before,*::after{
-    animation-duration:0.01ms !important;
-    animation-iteration-count:1 !important;
-    transition-duration:0.01ms !important;
-  }
-}
 </style>
 </head>
 <body>
@@ -3868,46 +3827,6 @@ const ESPECIALIDADES=[
   {key:'cirugia',label:'Cirugía'},
   {key:'prostodoncia',label:'Prostodoncia'}
 ];
-// Pestañas por defecto según especialidad (17 especialidades venezolanas).
-// ⚠️  Las claves son los STRINGS EXACTOS de ESP_ODONTO — así pendingEsp[0] hace match directo.
-// Lógica clínica por especialidad:
-//   General        → todo (scope completo de dx, operatorias, estética, récord y consultas)
-//   Endodoncia     → sin ops (no restaura) ni est (no hace estética)
-//   Ortodoncia     → sin ops ni est; seguimiento por cons y rec
-//   Periodoncia    → con ops (cirugía periodontal / implantes); sin est
-//   Cirugía        → con ops (hoja de intervención quirúrgica ≠ consulta); sin est
-//   Prostodoncia   → todo: preparaciones (ops) + selección de color / shade (est)
-//   Odontopediatría→ con ops (resinas pediátricas, coronas de acero); sin est
-//   Patología      → solo dx y seguimiento; sin ops ni est
-//   Radiología     → interpretación de imágenes; sin plan, ops ni est
-//   Forense        → identificación y análisis; sin plan, ops ni est
-//   Estética Dental→ todo (blanqueamiento, carillas — est es su razón de ser)
-//   Rehabilitación → todo (restauración integral + estética)
-//   Oclusión/DTM   → dx y férulas; sin ops ni est
-//   Láser          → con ops (procedimientos tisulares) y est (blanqueamiento láser)
-//   Odontogeriatría→ con ops; sin est (no típico en adultos mayores)
-//   Deporte        → con ops (guardas, traumatología); sin est
-//   Implantología  → con ops (colocación quirúrgica + restauración sobre implante); sin est
-// El admin puede ajustar manualmente en cualquier momento — esto es solo el punto de partida.
-const SPECIALTY_DEFAULT_TABS={
-  'Odontología General':                      ['datos','clinico','odonto','plan','ops','est','rec','cons'],
-  'Endodoncia':                               ['datos','clinico','odonto','plan','rec','cons'],
-  'Ortodoncia y Ortopedia Maxilofacial':      ['datos','clinico','odonto','plan','rec','cons'],
-  'Periodoncia e Implantología':              ['datos','clinico','odonto','plan','ops','rec','cons'],
-  'Cirugía Oral y Maxilofacial':              ['datos','clinico','odonto','plan','ops','rec','cons'],
-  'Prostodoncia (Prótesis Dental)':           ['datos','clinico','odonto','plan','ops','est','rec','cons'],
-  'Odontopediatría':                          ['datos','clinico','odonto','plan','ops','rec','cons'],
-  'Patología Oral y Maxilofacial':            ['datos','clinico','odonto','plan','rec','cons'],
-  'Radiología Oral y Maxilofacial':           ['datos','clinico','odonto','rec','cons'],
-  'Odontología Forense':                      ['datos','clinico','odonto','rec','cons'],
-  'Estética Dental':                          ['datos','clinico','odonto','plan','ops','est','rec','cons'],
-  'Rehabilitación Oral':                      ['datos','clinico','odonto','plan','ops','est','rec','cons'],
-  'Oclusión y Disfunción Temporomandibular':  ['datos','clinico','odonto','plan','rec','cons'],
-  'Láser en Odontología':                     ['datos','clinico','odonto','plan','ops','est','rec','cons'],
-  'Odontogeriatría':                          ['datos','clinico','odonto','plan','ops','rec','cons'],
-  'Odontología del Deporte':                  ['datos','clinico','odonto','plan','ops','rec','cons'],
-  'Implantología Oral':                       ['datos','clinico','odonto','plan','ops','rec','cons'],
-};
 const SPECIALTY_SCHEMAS={
   endodoncia:[
     {key:'pulpa',label:'Estado pulpar',type:'select',options:['','Vital','No vital','Necrótica']},
@@ -4592,17 +4511,12 @@ function bootstrapUserPerms(user){
       // v7.6f — capture chosen plan from signup (defaults to free)
       const pendingPlan=sessionStorage.getItem('ds_pending_plan')||'free';
       sessionStorage.removeItem('ds_pending_plan');
-      // Determinar tabs iniciales según especialidad elegida en el registro.
-      // pendingEsp[0] es un string completo de ESP_ODONTO (ej: "Endodoncia")
-      // que coincide directamente con las claves de SPECIALTY_DEFAULT_TABS.
-      const _espStr=pendingEsp&&pendingEsp[0]||null;
-      const _defaultTabs=(_espStr&&SPECIALTY_DEFAULT_TABS[_espStr])||[...ALL_TABS];
       const initial={
         email:user.email||'',
         name:pendingName,
         title:pendingTitle,
-        tabsAllowed:[..._defaultTabs],
-        tabOrder:[..._defaultTabs],
+        tabsAllowed:[...ALL_TABS],
+        tabOrder:[...ALL_TABS],
         especialidades:pendingEsp,
         status:'active',
         plan:pendingPlan,
@@ -5150,7 +5064,7 @@ async function guardar(p){
   // Fire-and-track: don't block the UI on server ack. Offline persistence queues
   // the write and syncs on reconnect — no data loss, modal can close right away.
   setDoc(doc(db,'pacientes',id),data)
-    .then(()=>{ss('ok','Sincronizado');ssRest();_playSuccess();})
+    .then(()=>{ss('ok','Sincronizado');ssRest();})
     .catch(()=>{ss('err','Sin conexión · guardado local, se sincronizará');});
   return id;
 }
@@ -5508,9 +5422,6 @@ window.seleccionar=function(id){
   if(idActual!==id){_imgActiveCat='rad';_imgFilters={cat:'',user:'',cons:'',fecha:''};_imgLightboxId=null;_docFilters={tipo:'',user:'',cons:'',fecha:''};_archVista='img';}
   idActual=id;tabActual='datos';viewActual='paciente';consultaView=null;editUnlocked=false;odontoView=null;planView=null;
   logAccess(id);
-  // Flash sutil en el ítem seleccionado
-  const _piEl=document.querySelector(`.pi[onclick*="${id}"]`);
-  if(_piEl){_piEl.classList.add('flash');setTimeout(()=>_piEl.classList.remove('flash'),220);}
   renderLista();renderPaciente();
   if(isMobile())document.getElementById('sidebar').classList.remove('open');
 }
@@ -6505,13 +6416,7 @@ function renderAdmin(){
                 : `<span style="color:var(--text3)">Desconectado${discAgo?' · '+discAgo:''}</span>`}
             </div>`;
           })()}
-          ${(u.especialidades&&u.especialidades.length)
-            ? `<div class="admin-user-esp" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:4px 0">
-                <span style="font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text3)">Esp.</span>
-                ${u.especialidades.map(s=>`<span style="font-size:11px;padding:2px 8px;border-radius:980px;background:var(--mist);color:var(--forest);font-weight:500;border:0.5px solid var(--accent-border)">${e(s)}</span>`).join('')}
-                ${SPECIALTY_DEFAULT_TABS[u.especialidades[0]]?`<span style="font-size:10px;color:var(--text3)">(${SPECIALTY_DEFAULT_TABS[u.especialidades[0]].length} tabs default)</span>`:''}
-              </div>`
-            : `<div style="font-size:11px;color:var(--text3);margin:4px 0">Sin especialidad registrada</div>`}
+          ${(u.especialidades&&u.especialidades.length)?`<div class="admin-user-esp">${u.especialidades.map(s=>e(s)).join(' · ')}</div>`:''}
           <div class="admin-devices-row"><button class="admin-devices-toggle" onclick="adminToggleDevices('${u.uid}')"><span id="devchev-${u.uid}">▸</span> Dispositivos</button></div>
           <div class="admin-devices-panel" id="devpanel-${u.uid}" style="display:none"></div>
         </div>
@@ -6529,7 +6434,6 @@ function renderAdmin(){
       </div>
       <div class="admin-user-actions">
         <button class="ba admin-impersonate-btn" onclick="impersonateUser('${u.uid}')" title="Ver como este usuario">Ver como</button>
-        <button class="ba" onclick="adminResetTabsToDefault('${u.uid}')" title="Restaurar pestañas a los defaults de la especialidad del usuario">↺ Defaults esp.</button>
         <button class="bc" onclick="adminSetStatus('${u.uid}','${status==='inactive'?'active':'inactive'}')">${status==='inactive'?'Activar':'Desactivar'}</button>
         <button class="ba" onclick="adminExportUserPatients('${u.uid}','${e(titleCase(u.name)||u.email||uid)}')" title="Exportar datos de este usuario">↓ Datos</button>
         <button class="bd" onclick="adminRemoveUser('${u.uid}')" title="Quitar de la lista">Quitar</button>
@@ -7449,28 +7353,6 @@ window.adminToggleTab=async function(uid,tabKey,nowChecked){
     toast('Error al guardar: '+err.message);
   }
 }
-// Restaurar pestañas a los defaults de la especialidad registrada del usuario
-window.adminResetTabsToDefault=async function(uid){
-  if(!isAdmin)return;
-  const user=allUsersList.find(u=>u.uid===uid);
-  if(!user)return;
-  const espStr=(user.especialidades&&user.especialidades[0])||null;
-  const defaultTabs=(espStr&&SPECIALTY_DEFAULT_TABS[espStr])||[...ALL_TABS];
-  const espLabel=espStr||'Odontología General (default)';
-  const tabLabels=defaultTabs.map(k=>TAB_LABELS[k]||k).join(', ');
-  if(!confirm(`Restaurar pestañas de ${titleCase(user.name||user.email||uid)} a los defaults de:\n"${espLabel}"\n\nQuedarán activas: ${tabLabels}\n\n¿Confirmar?`))return;
-  try{
-    await setDoc(doc(db,'users',uid),{
-      tabsAllowed:[...defaultTabs],
-      tabOrder:[...defaultTabs],
-      updatedAt:new Date().toISOString(),
-      updatedBy:'admin'
-    },{merge:true});
-    toast('Pestañas restauradas · '+espLabel);
-  }catch(err){
-    toast('Error: '+err.message);
-  }
-};
 function renderCalendar(){
   if(calendarView==='dia')renderCalendarDia();
   else renderCalendarMes();
@@ -8264,7 +8146,6 @@ window.imgDelete=async function(id){
   if(!im)return;
   if(!imgCanDelete(im)){ if(typeof toast==='function')toast('Solo quien la subió (o un admin) puede eliminarla.'); return; }
   if(!confirm(`¿Eliminar la imagen "${im.nombre||'Imagen'}"?\n\nEsta acción no se puede deshacer.`))return;
-  _playDelete();
   if(storage&&im.storagePath){
     try{ await deleteObject(stRef(storage,im.storagePath)); }
     catch(err){ console.warn('No se pudo borrar el archivo en Storage:',err.message); }
@@ -8629,18 +8510,7 @@ function renderTab(){
   else if(t==='est')renderEst();
   else if(t==='rec')renderRec();
   else if(t==='cons')renderCons();
-  else if(t==='img'){
-    // Mostrar contenido inmediatamente: si el paciente no tiene imágenes pero sí
-    // documentos, cambiar a vista doc automáticamente; si tiene imágenes, mostrar img.
-    const _tabP=gp();
-    if(_tabP){
-      const _hasImgs=(_tabP.imagenes||[]).length>0;
-      const _hasDocs=(_tabP.documentos||[]).length>0;
-      if(!_hasImgs&&_hasDocs)_archVista='doc';
-      else _archVista='img';
-    }
-    if(_archVista==='doc')renderDocumentos(); else renderImagenes();
-  }
+  else if(t==='img'){ if(_archVista==='doc')renderDocumentos(); else renderImagenes(); }
   else if(t==='doc')renderDocumentos();
 }
 
@@ -10458,7 +10328,6 @@ window.delCons=async function(cid){
   const c=(p.consultas||[]).find(c=>c.id===cid);if(!c)return;
   p.consultas=(p.consultas||[]).filter(x=>x.id!==cid);
   if(consultaView===cid)consultaView=null;
-  _playDelete();
   await guardar(p);renderLista();renderCons();
   undoToast('Consulta eliminada',async()=>{
     const now=gp();if(!now)return;
@@ -10708,27 +10577,6 @@ function _playClick(freq){
     osc.start(t); osc.stop(t+0.05);
   }catch(e){}
 }
-// Tono de éxito: dos notas ascendentes (guardar exitoso)
-function _playSuccess(){
-  if(!_soundsOn)return;
-  _playClick(620); setTimeout(()=>_playClick(820),80);
-}
-// Tono de error: nota grave sostenida (validación fallida)
-function _playError(){
-  if(!_soundsOn)return;
-  try{
-    if(!_audioCtx)_audioCtx=new(window.AudioContext||window.webkitAudioContext)();
-    if(_audioCtx.state==='suspended')_audioCtx.resume();
-    const t=_audioCtx.currentTime,osc=_audioCtx.createOscillator(),gain=_audioCtx.createGain();
-    osc.type='sine'; osc.frequency.setValueAtTime(280,t);
-    gain.gain.setValueAtTime(0.0001,t);
-    gain.gain.exponentialRampToValueAtTime(0.06,t+0.01);
-    gain.gain.exponentialRampToValueAtTime(0.0001,t+0.18);
-    osc.connect(gain); gain.connect(_audioCtx.destination); osc.start(t); osc.stop(t+0.2);
-  }catch(e){}
-}
-// Tono de eliminación: igual que error (acción destructiva)
-function _playDelete(){ _playError(); }
 let _soundsOn=true;
 try{ _soundsOn=localStorage.getItem('ds_sounds')!=='0'; }catch(e){}
 window.toggleSounds=function(val){
@@ -10736,21 +10584,10 @@ window.toggleSounds=function(val){
   try{localStorage.setItem('ds_sounds',_soundsOn?'1':'0');}catch(e){}
   toast(_soundsOn?'Sonidos activados':'Sonidos desactivados');
 };
-// Listener unificado: sonidos de clic + ripple en botones primarios
 document.addEventListener('click',function(ev){
+  if(!_soundsOn)return;
   const t=ev.target.closest('button, .tab, .dash-qbtn, .pview-seg button, .filter-toggle-btn, .invites-toggle');
   if(!t||t.disabled)return;
-  // Ripple en botones .bs (independiente de sonidos)
-  if(t.classList.contains('bs')){
-    const r=document.createElement('span'); r.className='ripple';
-    const rect=t.getBoundingClientRect();
-    const size=Math.max(rect.width,rect.height);
-    r.style.cssText=`width:${size}px;height:${size}px;left:${ev.clientX-rect.left-size/2}px;top:${ev.clientY-rect.top-size/2}px`;
-    t.appendChild(r); setTimeout(()=>r.remove(),450);
-  }
-  // Sonidos
-  if(!_soundsOn)return;
-  if(t.classList.contains('bdel'))return; // deletes suenan desde sus funciones
   _playClick(t.classList.contains('tab')?620:t.classList.contains('bs')?820:740);
 },true);
 
