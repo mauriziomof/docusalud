@@ -3348,9 +3348,9 @@ body.dnd-active .dcw-row{ cursor:grabbing; }
    ═══════════════════════════════════════════════════════ */
 
 /* Sidebar collapse */
-.sidebar { position:relative; }
+.sidebar { position:relative; overflow:visible !important; }
 .sidebar.collapsed { width:18px !important; min-width:18px !important; border-right:none !important; }
-.sidebar.collapsed > *:not(.sidebar-collapse-tab) { opacity:0; pointer-events:none; }
+.sidebar.collapsed > *:not(.sidebar-collapse-tab) { display:none !important; }
 .sidebar-collapse-tab {
   position:absolute; right:-14px; top:50%; transform:translateY(-50%);
   width:14px; height:48px; z-index:20;
@@ -5035,16 +5035,7 @@ window.toggleSidebarCollapse=function(){
   try{localStorage.setItem('ds_sidebar_collapsed',collapsed?'1':'0');}catch(e){}
 };
 // Restore collapse state on load
-(function(){
-  try{
-    if(localStorage.getItem('ds_sidebar_collapsed')==='1'){
-      const sb=document.getElementById('sidebar');
-      const tab=document.getElementById('sidebarCollapseTab');
-      if(sb)sb.classList.add('collapsed');
-      if(tab)tab.textContent='‹';
-    }
-  }catch(e){}
-})();
+/* Sidebar always starts expanded */
 function isMobile(){return window.innerWidth<=768}
 function checkMobile(){
   const btn=document.getElementById('menuBtn');
@@ -5618,7 +5609,7 @@ function renderEmpty(){
     const _espLabel=_esp?(_esp.split(' ').slice(0,2).join(' ')):null;
     greetSub=pacientes.length===0
       ?(_espLabel?`${_espLabel} · Tu consultorio empieza aquí.`:'Tu consultorio empieza aquí.')
-      :(_espLabel?`${_espLabel} · ${pacientes.length} paciente${pacientes.length===1?'':'s'}`:`${pacientes.length} paciente${pacientes.length===1?'':'s'} en tu consultorio`);
+      :(_espLabel?_espLabel:'');
   }else if(isAdmin&&!viewAsUid){
     greetMain='Hola, Admin';
   }else if(pacientes.length===0){
