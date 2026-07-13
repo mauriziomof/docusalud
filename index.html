@@ -18,8 +18,8 @@ window.dsLogoFB=function(img){
 (function(){try{if(localStorage.getItem('ds_theme')==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>DocuSalud — Historias clínicas para odontólogos</title>
-<meta name="description" content="Sistema de historias clínicas para odontólogos: pacientes, odontograma interactivo, citas y plan de tratamiento desde cualquier dispositivo. Empieza gratis.">
+<title>DocuSalud — Historias clínicas digitales</title>
+<meta name="description" content="DocuSalud — Historias clínicas digitales. Pacientes, consultas, odontograma y registros desde cualquier dispositivo.">
 <meta name="keywords" content="historia clinica odontologica, software dental, odontologia digital, expediente dental, docusalud, odontograma digital, software para odontologos venezuela, ficha dental online">
 <meta name="robots" content="index, follow">
 <meta name="theme-color" content="#1F3A2A">
@@ -3348,8 +3348,9 @@ body.dnd-active .dcw-row{ cursor:grabbing; }
    ═══════════════════════════════════════════════════════ */
 
 /* Sidebar collapse */
-.sidebar { position:relative; overflow:visible !important; }
-.sidebar.collapsed { width:0 !important; min-width:0 !important; border-right:none !important; overflow:hidden !important; }
+.sidebar { position:relative; }
+.sidebar.collapsed { width:18px !important; min-width:18px !important; border-right:none !important; }
+.sidebar.collapsed > *:not(.sidebar-collapse-tab) { opacity:0; pointer-events:none; }
 .sidebar-collapse-tab {
   position:absolute; right:-14px; top:50%; transform:translateY(-50%);
   width:14px; height:48px; z-index:20;
@@ -4297,14 +4298,9 @@ function logChange(accion,seccion,patientArg){
     const nowT=Date.now();
     if(nowT-last<8000)return;
     _logChangeTimers[key]=nowT;
-    p.records.push({
-      id:'c'+nowT.toString(),
-      fecha:hoy(),
-      hora:ahora(),
-      tipo:'edicion',
-      user:auth.currentUser?.email||'',
-      tratamiento:detalle
-    });
+    var _r2={id:'c'+nowT.toString(),fecha:hoy(),hora:ahora(),tipo:'edicion',user:(auth.currentUser&&auth.currentUser.email)||'',tratamiento:detalle};
+    if(seccion==='Odontograma'&&p.teeth){try{_r2.odontoSnapshot=JSON.parse(JSON.stringify(p.teeth));}catch(_e2){}}
+    p.records.push(_r2);
   }catch(err){/* nunca rompemos un guardado por la bitácora */}
 }
 
@@ -5223,6 +5219,7 @@ async function crear(data){
   }
   data.ownerUid = viewAsUid || currentUserUid || 'orphan';
   data.creadoEn = new Date().toISOString();
+  data.creadoPor = (auth.currentUser&&auth.currentUser.email)||'';
   if(!navigator.onLine){ ss('off','Guardado local · se sincronizará al reconectar'); } else { ss('ing','Guardando...'); }
   // Generate the doc id locally so we can return immediately (offline-safe).
   const ref=doc(collection(db,'pacientes'));
@@ -5680,6 +5677,7 @@ function _dashOrder(isPro){
     order=Array.isArray(saved)?saved.filter(k=>avail.includes(k)):[...DASH_DEFAULT_ORDER];
   }catch(e){ order=[...DASH_DEFAULT_ORDER]; }
   if(order.length===0)order=[...DASH_DEFAULT_ORDER].filter(k=>avail.includes(k));
+  if(avail.includes('clock_weather')&&order[0]!=='clock_weather'){order=order.filter(function(k){return k!=='clock_weather';});order.unshift('clock_weather');}
   // Si el usuario acaba de pasar a Pro/Clínica, sumamos sus widgets nuevos
   // automáticamente — no debería tener que ir a "Personalizar" a buscarlos.
   try{
@@ -6442,7 +6440,7 @@ function adminDashboardWidgetsHTML(){
     </div>
     <div class="dash-card dc-admin">
       <p class="dash-label">Últimos pacientes</p>
-      ${recentPatients.length?recentPatients.map(p=>`<div class="admin-dash-item"><button class="admin-name-link" onclick="adminGotoPaciente('${e(p.ownerUid||'')}','${e(p.id)}')" title="Ir a este paciente">${e(titleCase(p.nombre)||'Sin nombre')}</button><span class="admin-dash-time">${timeAgo(p.creadoEn)}</span></div>`).join(''):'<p class="admin-dash-empty">Sin pacientes registrados aún</p>'}
+      ${recentPatients.length?recentPatients.map(p=>`<div class="admin-dash-item"><button class="admin-name-link" onclick="adminGotoPaciente('${e(p.ownerUid||'')}','${e(p.id)}')" title="Ir a este paciente">${e(titleCase(p.nombre)||'Sin nombre')}</button><span class="admin-dash-time">${timeAgo(p.creadoEn)}${(()=>{var _ow=allUsersList.find(function(u){return u.uid===p.ownerUid;});return _ow&&_ow.name?' · '+e(titleCase(_ow.name).split(' ')[0]):'';})()}</span></div>`).join(''):'<p class="admin-dash-empty">Sin pacientes registrados aún</p>'}
     </div>
     <div class="dash-card dc-admin">
       <p class="dash-label">Últimos usuarios</p>
@@ -6644,7 +6642,7 @@ function renderAdmin(){
             ?`<p class="ds-note">Sin resultados</p>`
             :`<div style="display:flex;flex-direction:column;border:var(--border-default);border-radius:var(--r);max-height:260px;overflow-y:auto">${_pacFiltered.slice(0,50).map((p,i)=>`<div class="admin-dash-item" style="cursor:pointer;padding:8px 12px;${i>0?'border-top:0.5px solid var(--border)':''}" onclick="abrirPaciente('${e(p.id)}')">
               <span>${e(titleCase(p.nombre))}</span>
-              <span class="admin-dash-time">${e(p.ci||'')}${p.consultas&&p.consultas.length?' · '+p.consultas.length+' cita'+(p.consultas.length===1?'':'s'):''}</span>
+              <span class="admin-dash-time">${e(p.ci||'')}${p.consultas&&p.consultas.length?' · '+p.consultas.length+' cita'+(p.consultas.length===1?'':'s'):''}${(()=>{var _ow=allUsersList.find(function(u){return u.uid===p.ownerUid;});return _ow&&_ow.name?' · '+e(titleCase(_ow.name).split(' ')[0]):'';})()}</span>
             </div>`).join('')}</div>`}
         </div>`)}
   </div>`;
@@ -8528,51 +8526,27 @@ function archHeaderHTML(active){
   const hasFiles=nImg+nDoc>0;
   const _imp=viewAsUid?allUsersList.find(u=>u.uid===viewAsUid):null;
   const docOk=!documentosDisabledFor(_imp);
-  // Barra compacta cuando ya hay archivos — el grid queda visible sin scroll
-  const uploadInput=`<input type="file" id="archFileInput" accept="image/*,.pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" multiple style="display:none" onchange="archOnFiles(this.files)">`;
+  const uploadInput='<input type="file" id="archFileInput" accept="image/*,.pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" multiple style="display:none" onchange="archOnFiles(this.files)">';
   let heroHTML='';
   if(hasFiles){
     const c={rad:0,intra:0,doc:0,otros:0};
     (pt.imagenes||[]).forEach(im=>{const cat=im.categoria&&c[im.categoria]!==undefined?im.categoria:'otros';c[cat]++;});
     let nPdf=0,nWord=0; (pt.documentos||[]).forEach(d=>{if(d.tipo==='word')nWord++;else nPdf++;});
     const chips=[
-      c.rad?`<button type="button" class="arch-chip ac-rad" onclick="archChip('rad')">${c.rad} rad.</button>`:'',
-      c.intra?`<button type="button" class="arch-chip ac-intra" onclick="archChip('intra')">${c.intra} intra.</button>`:'',
-      c.doc?`<button type="button" class="arch-chip ac-imgdoc" onclick="archChip('doc')">${c.doc} esc.</button>`:'',
-      c.otros?`<button type="button" class="arch-chip ac-otros" onclick="archChip('otros')">${c.otros} otro${c.otros===1?'':'s'}</button>`:'',
-      nPdf?`<button type="button" class="arch-chip ac-pdf" onclick="archChip('pdf')">${nPdf} PDF</button>`:'',
-      nWord?`<button type="button" class="arch-chip ac-word" onclick="archChip('word')">${nWord} Word</button>`:''
+      c.rad?'<button type="button" class="arch-chip ac-rad" onclick="archChip(\'rad\')">'+c.rad+' rad.</button>':'',
+      c.intra?'<button type="button" class="arch-chip ac-intra" onclick="archChip(\'intra\')">'+c.intra+' intra.</button>':'',
+      c.doc?'<button type="button" class="arch-chip ac-imgdoc" onclick="archChip(\'doc\')">'+c.doc+' esc.</button>':'',
+      c.otros?'<button type="button" class="arch-chip ac-otros" onclick="archChip(\'otros\')">'+c.otros+' otro'+(c.otros===1?'':'s')+'</button>':'',
+      nPdf?'<button type="button" class="arch-chip ac-pdf" onclick="archChip(\'pdf\')">'+nPdf+' PDF</button>':'',
+      nWord?'<button type="button" class="arch-chip ac-word" onclick="archChip(\'word\')">'+nWord+' Word</button>':''
     ].filter(Boolean).join('');
-    heroHTML=`${uploadInput}<div class="arch-mini-bar">
-      <button type="button" class="ba arch-mini-upload-btn" onclick="document.getElementById('archFileInput').click()"
-        ondragover="event.preventDefault();this.classList.add('drag')"
-        ondragleave="this.classList.remove('drag')"
-        ondrop="event.preventDefault();this.classList.remove('drag');archOnFiles(event.dataTransfer.files)">
-        ${icon('plus',13)} Subir archivos
-      </button>${chips?`<div class="arch-chips-inline">${chips}</div>`:''}</div>`;
+    heroHTML=uploadInput+'<div class="arch-mini-bar"><button type="button" class="ba arch-mini-upload-btn" onclick="document.getElementById(\'archFileInput\').click()" ondragover="event.preventDefault();this.classList.add(\'drag\')" ondragleave="this.classList.remove(\'drag\')" ondrop="event.preventDefault();this.classList.remove(\'drag\');archOnFiles(event.dataTransfer.files)">'+icon('plus',13)+' Subir archivos</button>'+(chips?'<div class="arch-chips-inline">'+chips+'</div>':'')+'</div>';
   }else{
-    heroHTML=`${uploadInput}<div class="arch-hero" onclick="document.getElementById('archFileInput').click()"
-       ondragover="event.preventDefault();this.classList.add('drag')"
-       ondragleave="this.classList.remove('drag')"
-       ondrop="event.preventDefault();this.classList.remove('drag');archOnFiles(event.dataTransfer.files)">
-      <div class="arch-hero-art" aria-hidden="true">
-        <span class="aha aha-1">${icon('image',22)}</span>
-        <span class="aha aha-2">${icon('filetext',22)}</span>
-        <span class="aha aha-3">${icon('plus',16)}</span>
-      </div>
-      <div class="arch-hero-body">
-        <div class="arch-hero-t">Empieza la historia visual de ${e((titleCase(pt.nombre)||'este paciente').split(' ')[0])}</div>
-        <div class="arch-hero-s">Radiografías, fotos, consentimientos — todo junto al paciente, en la nube.</div>
-      </div>
-      <button type="button" class="bs arch-hero-btn" onclick="event.stopPropagation();document.getElementById('archFileInput').click()">${icon('plus',14)} Subir archivos</button>
-    </div>`;
+    heroHTML=uploadInput+'<div class="arch-hero" onclick="document.getElementById(\'archFileInput\').click()" ondragover="event.preventDefault();this.classList.add(\'drag\')" ondragleave="this.classList.remove(\'drag\')" ondrop="event.preventDefault();this.classList.remove(\'drag\');archOnFiles(event.dataTransfer.files)"><div class="arch-hero-art" aria-hidden="true"><span class="aha aha-1">'+icon('image',22)+'</span><span class="aha aha-2">'+icon('filetext',22)+'</span><span class="aha aha-3">'+icon('plus',16)+'</span></div><div class="arch-hero-body"><div class="arch-hero-t">Empieza la historia visual de '+e((titleCase(pt.nombre)||'este paciente').split(' ')[0])+'</div><div class="arch-hero-s">Radiografías, fotos, consentimientos — todo junto al paciente, en la nube.</div></div><button type="button" class="bs arch-hero-btn" onclick="event.stopPropagation();document.getElementById(\'archFileInput\').click()">'+icon('plus',14)+' Subir archivos</button></div>';
   }
-  return `
-    ${storage?'':`<div class="img-cloud-notice"><span class="ico">${icon('cloud',16)}</span><span>Sin nube — imágenes locales.</span></div>`}
-    ${heroHTML}
-    <div class="arch-seg">
-      <button type="button" class="${active==='img'?'on':''}" onclick="archVista('img')">${icon('image',13)} Imágenes${nImg?` · ${nImg}`:''}</button>
-      ${docOk?`<button type="button" class="${active==='doc'?'on':''}" onclick="archVista('doc')">${icon('filetext',13)} Documentos${nDoc?` · ${nDoc}`:''}</button>`:''}\n    </div>`;\n}
+  const segBtn=(k,lbl,n,ico)=>'<button type="button" class="'+(active===k?'on':'')+'" onclick="archVista(\''+k+'\')">'+ico+' '+lbl+(n?' · '+n:'')+' </button>';
+  return (storage?'':'<div class="img-cloud-notice"><span class="ico">'+icon('cloud',16)+'</span><span>Sin nube — imágenes locales.</span></div>')+heroHTML+'<div class="arch-seg">'+segBtn('img','Imágenes',nImg,icon('image',13))+(docOk?segBtn('doc','Documentos',nDoc,icon('filetext',13)):'')+' </div>';
+}
 window.archVista=function(k){ _archVista=(k==='doc'?'doc':'img'); renderTab(); };
 // Chip de resumen → salta directo al tipo con el filtro puesto
 window.archChip=function(kind){
@@ -8776,7 +8750,7 @@ function renderDatos(){
     ${_editToggle}
     ${_roBan}
     <div class="card card-fijo">
-      <div class="ct-row"><div class="ct">Datos personales ${pillFijo()}${infoBtn('Información fija del paciente: contacto, fecha de nacimiento y cédula. No cambia entre consultas. Para editar, activa "Editar" arriba.')}</div><div style="display:flex;align-items:center;gap:10px">${statusEl('datos')}${p.creadoEn?`<span class="ds-note" style="margin:0">Registrado el ${adminFmtDate(p.creadoEn)}</span>`:''}</div></div>
+      <div class="ct-row"><div class="ct">Datos personales ${pillFijo()}${infoBtn('Información fija del paciente: contacto, fecha de nacimiento y cédula. No cambia entre consultas. Para editar, activa "Editar" arriba.')}</div><div style="display:flex;align-items:center;gap:10px">${statusEl('datos')}${p.creadoEn?`<span class="ds-note" style="margin:0">Registrado el ${adminFmtDate(p.creadoEn)}${p.creadoPor?' · '+e(p.creadoPor.split('@')[0]):''}</span>`:''}</div></div>
       <div class="fg"><div class="f full"><label>Nombre y Apellido</label><input id="d_n" value="${e(titleCase(p.nombre)||'')}" ${ro}></div></div>
       <div class="fg3">
         <div class="f"><label>Fecha de nacimiento</label>${dsDateField('d_nac',p.nacimiento||'','',!!ro)}</div>
@@ -8863,7 +8837,7 @@ function _sino(id,v){
   return `<span class="sino" id="${id}_wrap"><input type="hidden" id="${id}" value="${e(v||'')}">${opt('','—','')}${opt('si','Sí',' si')}${opt('no','No',' no')}</span>`;
 }
 window.sinoSet=function(id,val){
-  if(typeof isReadOnly==='function'&&isReadOnly())return;
+  /* Sí/No siempre editables en historia clínica */
   const inp=document.getElementById(id); if(!inp)return;
   inp.value=val;
   const wrap=document.getElementById(id+'_wrap');
@@ -9573,13 +9547,13 @@ function _surfSVG(){
     l:{d:'M177.2,177.2 A95,95 0 0 1 42.8,177.2 L80.3,139.7 A42,42 0 0 0 139.7,139.7 Z',lx:110,ly:172},
     m:{d:'M42.8,177.2 A95,95 0 0 1 42.8,42.8 L80.3,80.3 A42,42 0 0 0 80.3,139.7 Z',lx:56,ly:114}
   };
-  const zone=(k,shape)=>`<g class="sfz st-${_surfSel[k]}" id="sfz_${k}" onclick="surfFace('${k}')"><title>${SURFACE_LABELS[k]} · ${SURF_STATE_LBL[_surfSel[k]]||_surfSel[k]}</title>${shape}<text class="sfz-l" x="${Z[k]?Z[k].lx:110}" y="${Z[k]?Z[k].ly:114}" text-anchor="middle" dominant-baseline="middle">${k.toUpperCase()}</text></g>`;
+  const zone=(k,shape)=>`<g class="sfz st-${_surfSel[k]}" id="sfz_${k}" onclick="surfFace('${k}')" oncontextmenu="event.preventDefault();surfFaceReset('${k}')"><title>${SURFACE_LABELS[k]} · ${SURF_STATE_LBL[_surfSel[k]]||_surfSel[k]}</title>${shape}<text class="sfz-l" x="${Z[k]?Z[k].lx:110}" y="${Z[k]?Z[k].ly:114}" text-anchor="middle" dominant-baseline="middle">${k.toUpperCase()}</text></g>`;
   return `<svg viewBox="0 0 220 220" class="surf-svg" xmlns="http://www.w3.org/2000/svg" aria-label="Diagrama de superficies del diente">
     ${zone('v',`<path d="${Z.v.d}"/>`)}
     ${zone('d',`<path d="${Z.d.d}"/>`)}
     ${zone('l',`<path d="${Z.l.d}"/>`)}
     ${zone('m',`<path d="${Z.m.d}"/>`)}
-    <g class="sfz st-${_surfSel.o}" id="sfz_o" onclick="surfFace('o')"><title>${SURFACE_LABELS.o} · ${SURF_STATE_LBL[_surfSel.o]||_surfSel.o}</title><circle cx="110" cy="110" r="38"/><text class="sfz-l" x="110" y="114" text-anchor="middle" dominant-baseline="middle">O</text></g>
+    <g class="sfz st-${_surfSel.o}" id="sfz_o" onclick="surfFace('o')" oncontextmenu="event.preventDefault();surfFaceReset('o')"><title>${SURFACE_LABELS.o} · ${SURF_STATE_LBL[_surfSel.o]||_surfSel.o}</title><circle cx="110" cy="110" r="38"/><text class="sfz-l" x="110" y="114" text-anchor="middle" dominant-baseline="middle">O</text></g>
   </svg>`;
 }
 function _surfPaletteHTML(){
@@ -9600,6 +9574,7 @@ function _surfRefresh(){
   if(rd)rd.innerHTML=_surfLegendHTML();
 }
 window.surfPick=function(s){ _surfPaint=s; _surfRefresh(); };
+window.surfFaceReset=function(face){if(!_surfSel)return;if(face==='all'){SURFACE_KEYS.forEach(function(k){_surfSel[k]='sano';});}else{_surfSel[face]='sano';}var sd=document.getElementById('surfDiagram');if(sd)sd.innerHTML=_surfSVG();var sr=document.getElementById('surfRead');if(sr)sr.innerHTML=_surfLegendHTML();};
 window.surfFace=function(k){
   if(!_surfSel)return;
   _surfSel[k]=(_surfSel[k]===_surfPaint)?'sano':_surfPaint;
@@ -10387,6 +10362,62 @@ function renderCons(){
   });
   document.getElementById('panel').innerHTML=html;
 }
+
+/* Specialty consultation fields */
+function _consBodyEspSection(cons){
+  var esp=currentUserPerms&&currentUserPerms.especialidades&&currentUserPerms.especialidades[0]||null;
+  if(!esp)return '';
+  var x=cons&&cons.clinicaExtra||{};
+  function si(id,lbl,val){return '<label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer"><input type="checkbox" id="cx_'+id+'"'+(val?' checked':'')+' style="width:14px;height:14px"> '+lbl+'</label>';}
+  function inp(lbl,id,ph,val){return '<div class="mf"><label style="font-size:11px">'+lbl+'</label><input id="cx_'+id+'" placeholder="'+(ph||'')+'" value="'+(val||'').replace(/"/g,"&quot;")+'"></div>';}
+  function sel(lbl,id,opts,val){return '<div class="mf"><label style="font-size:11px">'+lbl+'</label><select id="cx_'+id+'"><option value="">-</option>'+opts.map(function(o){return '<option'+(val===o?' selected':'')+'>'+(o||'')+'</option>';}).join('')+'</select></div>';}
+  function ta(lbl,id,ph,val){return '<div class="mf"><label style="font-size:11px">'+lbl+'</label><textarea id="cx_'+id+'" placeholder="'+(ph||'')+'" style="min-height:52px">'+(val||'')+'</textarea></div>';}
+  function g2(items){return '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">'+items+'</div>';}
+  var body='';
+  if(esp==='Endodoncia'){
+    body=g2(si('dolor','Dolor presente',x.dolor)+si('esp','Espontaneo',x.esp)+si('frio','Al frio',x.frio)+si('calor','Al calor',x.calor)+si('percv','Percusion vertical',x.percv)+si('palp','Palpacion apical',x.palp))
+      +inp('Escala dolor (1-10)','escala','5',x.escala)
+      +sel('Diagnostico pulpar','dxpulp',['Pulpa normal','Pulpitis reversible','Pulpitis irreversible','Necrosis pulpar'],x.dxpulp)
+      +sel('Diagnostico periapical','dxperi',['Normal','Periodontitis sintomatica','Periodontitis asintomatica','Absceso agudo','Absceso cronico'],x.dxperi)
+      +inp('Conductometria (mm)','conduc','Ej: 18mm',x.conduc);
+  } else if(esp==='Periodoncia e Implantolog\u00eda'){
+    body=inp('Sangrado al sondaje (%)','sangrado','Ej: 35%',x.sangrado)
+      +inp('Sondaje maximo (mm)','sondaje','',x.sondaje)
+      +inp('Indice de placa (%)','placa','',x.placa)
+      +g2(si('sg','Sacos gingivales',x.sg)+si('sp','Sacos periodontales',x.sp)+si('mov','Movilidad dentaria',x.mov)+si('furc','Lesion de furca',x.furc))
+      +ta('Hallazgos periodontales','hallazgos','Color, consistencia, contorno...',x.hallazgos);
+  } else if(esp==='Oclusi\u00f3n y Disfunci\u00f3n Temporomandibular'){
+    body=inp('Apertura bucal (mm)','apertura','Ej: 45mm',x.apertura)
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'+inp('Lateralidad D (mm)','latd','',x.latd)+inp('Lateralidad I (mm)','lati','',x.lati)+'</div>'
+      +g2(si('chq','Chasquido ATM',x.chq)+si('crep','Crepitacion',x.crep)+si('desv','Desviacion',x.desv)+si('dolm','Dolor muscular',x.dolm))
+      +sel('Escala Melzack (1-5)','melzack',['1 - Leve','2 - Moderado','3 - Intenso','4 - Muy intenso','5 - Intolerable'],x.melzack);
+  } else if(esp==='Patolog\u00eda Oral y Maxilofacial'){
+    body=inp('Tipo de lesion','tles','Mancha, ulcera, papula...',x.tles)
+      +inp('Tamano / extension','tamles','Ej: 1.5x0.8cm',x.tamles)
+      +inp('Color','colorles','',x.colorles)
+      +inp('Consistencia','consles','Blanda, firme, fluctuante...',x.consles)
+      +ta('Diagnostico diferencial','dxdif','',x.dxdif)
+      +inp('Examenes complementarios','excomp','Biopsia, cultivo...',x.excomp);
+  } else if(esp==='Odontopediatr\u00eda'){
+    body=sel('Conducta del nino','conducta',['Cooperador','Con capacidad potencial','Timido','Agresivo','Mimado','Miedoso','Desafiante'],x.conducta)
+      +sel('Tipo de denticion','denticion',['Primaria','Mixta','Permanente'],x.denticion)
+      +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">'+inp('CPOD','cpod','',x.cpod)+inp('ceo','ceo','',x.ceo)+inp('IHOS','ihos','',x.ihos)+'</div>';
+  }
+  if(!body)return '';
+  return '<details style="margin-top:14px;border:0.5px solid var(--accent-border);border-radius:10px;padding:10px 14px;background:var(--mist)"><summary style="font-size:12px;font-weight:600;color:var(--forest);cursor:pointer;list-style:none">\u25b6 Campos de especialidad</summary><div style="margin-top:10px">'+body+'</div></details>';
+}
+function _consEspFromModal(prev){
+  var esp=currentUserPerms&&currentUserPerms.especialidades&&currentUserPerms.especialidades[0]||null;
+  if(!esp)return prev||{};
+  function gv(id){var el=document.getElementById('cx_'+id);return el?el.value:((prev||{})[id]||'');}
+  function gc(id){var el=document.getElementById('cx_'+id);return el?el.checked:!!((prev||{})[id]);}
+  if(esp==='Endodoncia')return {dolor:gc('dolor'),esp:gc('esp'),frio:gc('frio'),calor:gc('calor'),percv:gc('percv'),palp:gc('palp'),escala:gv('escala'),dxpulp:gv('dxpulp'),dxperi:gv('dxperi'),conduc:gv('conduc')};
+  if(esp==='Periodoncia e Implantolog\u00eda')return {sangrado:gv('sangrado'),sondaje:gv('sondaje'),placa:gv('placa'),sg:gc('sg'),sp:gc('sp'),mov:gc('mov'),furc:gc('furc'),hallazgos:gv('hallazgos')};
+  if(esp==='Oclusi\u00f3n y Disfunci\u00f3n Temporomandibular')return {apertura:gv('apertura'),latd:gv('latd'),lati:gv('lati'),chq:gc('chq'),crep:gc('crep'),desv:gc('desv'),dolm:gc('dolm'),melzack:gv('melzack')};
+  if(esp==='Patolog\u00eda Oral y Maxilofacial')return {tles:gv('tles'),tamles:gv('tamles'),colorles:gv('colorles'),consles:gv('consles'),dxdif:gv('dxdif'),excomp:gv('excomp')};
+  if(esp==='Odontopediatr\u00eda')return {conducta:gv('conducta'),denticion:gv('denticion'),cpod:gv('cpod'),ceo:gv('ceo'),ihos:gv('ihos')};
+  return prev||{};
+}
 window.consBody=function(c){
   c=c||{};
   return `<div class="modal-grid-2">
@@ -10402,7 +10433,8 @@ window.consBody=function(c){
     <div class="mf"><label>Motivo de consulta</label><textarea id="m_mo" placeholder="Por qué viene hoy…">${e(c.motivo||'')}</textarea></div>
     <div class="mf"><label>Diagnóstico</label><textarea id="m_dg" placeholder="Diagnóstico de esta consulta…">${e(c.diagnostico||'')}</textarea></div>
     <div class="mf"><label>Observaciones en la oclusión</label><textarea id="m_oc" placeholder="Oclusión observada en esta consulta…">${e(c.oclusion||'')}</textarea></div>
-    <div class="mf"><label>Plan de tratamiento (de esta consulta)</label><textarea id="m_pl" placeholder="Plan propuesto en esta consulta…">${e(c.plan||'')}</textarea></div>`;
+    <div class="mf"><label>Plan de tratamiento (de esta consulta)</label><textarea id="m_pl" placeholder="Plan propuesto en esta consulta…">${e(c.plan||'')}</textarea></div>
+    ${_consBodyEspSection(c)}`;
 };
 // Variante recortada para el flujo de creación de paciente: el doctor aún no ha
 // examinado, así que Diagnóstico / Observaciones en la oclusión / Plan de
@@ -10432,7 +10464,8 @@ function _consFromModal(existing){
   return {...base,
     fecha:g('m_fe'),hora:g('m_ho'),tratamiento:g('m_tr').trim(),
     notas:g('m_no'),costo:g('m_co'),dientes:g('m_di'),
-    motivo:g('m_mo'),diagnostico:g('m_dg'),oclusion:g('m_oc'),plan:g('m_pl')
+    motivo:g('m_mo'),diagnostico:g('m_dg'),oclusion:g('m_oc'),plan:g('m_pl'),
+    clinicaExtra:_consEspFromModal(base.clinicaExtra||{})
   };
 }
 // ── v9 · Agendar consulta directo desde el calendario ("agenda primero") ──
@@ -10550,11 +10583,14 @@ function abrirModal(titulo,body,fn){
   modalFn=fn;
   const div=document.createElement('div');
   div.className='mbg';div.id='MB';
-  div.innerHTML=`<div class="mbox"><h3>${titulo}</h3>${body}<div class="mact"><button class="bc" onclick="cerrarModal()">Cancelar</button><button class="bs" onclick="confirmarModal()">Guardar</button></div></div>`;
+  div.onclick=function(ev){if(ev.target===div)_cerrarModalConConf();};
+  div.innerHTML=`<div class="mbox"><div class="mbox-hdr"><h3>${titulo}</h3><button type="button" class="mbox-close" onclick="_cerrarModalConConf()" title="Cerrar">✕</button></div>${body}<div class="mact"><button class="bc" onclick="_cerrarModalConConf()">Cancelar</button><button class="bs" onclick="confirmarModal()">Guardar</button></div></div>`;
   document.body.appendChild(div);
-  setTimeout(()=>{const f=div.querySelector('input,textarea,select');if(f)f.focus();initAutoGrow(div);},50);
+  setTimeout(function(){[].slice.call(div.querySelectorAll('input,textarea,select')).forEach(function(el){el.dataset.iv=el.value||'';});var f=div.querySelector('input,textarea,select');if(f)f.focus();initAutoGrow(div);},50);
 }
-function cerrarModal(){const m=document.getElementById('MB');if(m)m.remove();}
+function _mHasData(){try{var m=document.getElementById('MB');if(!m)return false;return [].slice.call(m.querySelectorAll('input,textarea,select')).some(function(el){return el.value&&el.value!==(el.dataset.iv||'');});}catch(e){return false;}}
+function _cerrarModalConConf(){if(_mHasData()&&!confirm('\u00bfCerrar sin guardar?'))return;cerrarModal();}
+function cerrarModal(){var m=document.getElementById('MB');if(m)m.remove();}
 async function confirmarModal(){
   if(!modalFn)return;
   const m=document.getElementById('MB');
