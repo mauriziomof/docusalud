@@ -339,7 +339,7 @@ body.app-active {
   letter-spacing: 0.02em; transition: opacity 0.12s;
 }
 .bnew:hover { opacity: 0.88; }
-.plist { flex: 1; overflow-y: auto; padding: 6px; }
+.plist { flex: 1; min-height: 0; overflow-y: auto; padding: 6px 6px 22px; }
 .pi {
   padding: 10px 11px; border-radius: var(--r);
   cursor: pointer; margin-bottom: 2px;
@@ -589,22 +589,32 @@ body.app-active {
 /* ── ODONTOGRAMA ────────────────────────────────────────────────────── */
 .ow { display: flex; flex-direction: column; align-items: center; gap: 4px; }
 .al { font-size: 9px; font-weight: 500; color: var(--text3); text-transform: uppercase; letter-spacing: 0.12em; }
-.tr { display: flex; gap: 3px; }
+.tr { display: flex; gap: 4px; }
 .tooth {
-  width: 30px; height: 38px; border: var(--border-default); border-radius: 5px;
+  width: 44px; height: 54px;
+  border: 1.5px solid var(--border); border-radius: 10px;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  cursor: pointer; background: var(--surface2); transition: all 0.1s; gap: 1px;
+  cursor: pointer; background: var(--surface2);
+  gap: 3px; flex-shrink: 0; overflow: hidden;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
-.tooth:hover { transform: translateY(-1px); border-color: var(--border2); }
-.tooth .tn { font-size: 8px; color: var(--text3); line-height: 1; }
-.tooth .ts { font-size: 10px; font-weight: 500; line-height: 1; }
-.tooth.caries { background: var(--danger-light); border-color: rgba(184,85,62,0.4); } .tooth.caries .ts { color: var(--terra); }
-.tooth.tratado { background: var(--accent-light); border-color: var(--accent-border); } .tooth.tratado .ts { color: var(--forest); }
-.tooth.ausente { opacity: .4; } .tooth.ausente .ts { color: var(--text3); }
-.tooth.corona { background: var(--info-light); border-color: rgba(74,107,124,0.35); } .tooth.corona .ts { color: var(--petrol); }
-.tooth.endodoncia { background: var(--warn-light); border-color: rgba(201,169,97,0.4); } .tooth.endodoncia .ts { color: var(--brass); }
-.tooth.protesis { background: #F0EBF7; border-color: rgba(120,80,160,0.3); } .tooth.protesis .ts { color: #785090; }
-.ml { width: 0.5px; background: var(--border2); height: 36px; margin: 0 3px; align-self: center; }
+.tooth:hover { border-color: var(--forest); box-shadow: 0 0 0 2px rgba(31,58,42,0.18); }
+.tooth .tn { font-size: 11px; color: var(--text3); line-height: 1; font-weight: 500; }
+.tooth .ts { font-size: 14px; font-weight: 700; line-height: 1; }
+/* v11 — misma paleta que la barra y el visualizador (ODONTO_PAL) */
+.tooth.caries { background: #F2BBA9; border-color: #B8553E; } .tooth.caries .ts { color: #7E3421; }
+.tooth.tratado { background: #B5DCC0; border-color: #2F5D3A; } .tooth.tratado .ts { color: #1F3A2A; }
+.tooth.ausente { background: #DEDCD1; border-color: #9A978A; opacity: .55; } .tooth.ausente .ts { color: var(--text3); }
+.tooth.corona { background: #B7D3E3; border-color: #4A6B7C; } .tooth.corona .ts { color: #2F4757; }
+.tooth.endodoncia { background: #EDD29B; border-color: #9A7A34; } .tooth.endodoncia .ts { color: #6B531F; }
+.tooth.protesis { background: #D7C5EE; border-color: #7850A0; } .tooth.protesis .ts { color: #57377A; }
+html[data-theme="dark"] .tooth.caries { background:#8A4B3B; border-color:#F2BBA9; } html[data-theme="dark"] .tooth.caries .ts { color:#F8D9CE; }
+html[data-theme="dark"] .tooth.tratado { background:#3E6B4A; border-color:#B5DCC0; } html[data-theme="dark"] .tooth.tratado .ts { color:#DFF0E4; }
+html[data-theme="dark"] .tooth.ausente { background:#2E2E27; border-color:#9A978A; } 
+html[data-theme="dark"] .tooth.corona { background:#3E5B6B; border-color:#B7D3E3; } html[data-theme="dark"] .tooth.corona .ts { color:#DCEAF3; }
+html[data-theme="dark"] .tooth.endodoncia { background:#77602F; border-color:#EDD29B; } html[data-theme="dark"] .tooth.endodoncia .ts { color:#F6E8C8; }
+html[data-theme="dark"] .tooth.protesis { background:#584A72; border-color:#D7C5EE; } html[data-theme="dark"] .tooth.protesis .ts { color:#EBE2F7; }
+.ml { width: 1.5px; background: var(--border); height: 52px; margin: 0 6px; align-self: center; border-radius:1px; }
 .tleg { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-bottom: 16px; }
 .leg {
   display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text2);
@@ -650,7 +660,7 @@ body.app-active {
 .ccc { font-size: 11px; font-weight: 500; color: var(--forest); background: var(--mist); padding: 2px 9px; border-radius: 20px; }
 
 /* ── MODAL ──────────────────────────────────────────────────────────── */
-.mbg { position: fixed; inset: 0; background: rgba(26,26,23,0.5); display: flex; align-items: center; justify-content: center; z-index: 500; padding: 16px; backdrop-filter: blur(2px); }
+.mbg { position: fixed; inset: 0; background: rgba(26,26,23,0.5); display: flex; align-items: center; justify-content: center; z-index: 1100; padding: 16px; backdrop-filter: blur(2px); }
 .mbox { background: var(--surface); border-radius: var(--rl); padding: 24px; width: 100%; max-width: 420px; border: var(--border-default); max-height: 90vh; overflow-y: auto; }
 .mbox h3 { font-family:'DM Sans',sans-serif; font-size: 20px; font-weight: 600; margin-bottom: 18px; color: var(--text); }
 .mact { display: flex; gap: 8px; justify-content: flex-end; margin-top: 18px; position:sticky; bottom:-2px; background:var(--surface); padding-top:12px; z-index:2; }
@@ -872,7 +882,21 @@ body.app-active {
 .pview-bar{ padding:10px 4px 14px; }
 
 .mbox{ border-radius:16px; padding:26px 28px; box-shadow:0 24px 64px rgba(26,26,23,0.22), 0 4px 16px rgba(26,26,23,0.10); }
-.mbox h3{ font-family:'DM Sans',sans-serif; font-weight:400; font-size:21px; position:sticky; top:-2px; z-index:2; background:var(--surface); padding-bottom:14px; margin-bottom:4px; }
+.mbox h3{ font-family:'DM Sans',sans-serif; font-weight:400; font-size:21px; }
+/* v11 — header de modal: título a la izquierda, ✕ a la derecha, sticky como bloque */
+.mbox-hdr{
+  display:flex; align-items:flex-start; justify-content:space-between; gap:12px;
+  position:sticky; top:-26px; z-index:3; background:var(--surface);
+  padding:2px 0 12px; margin:-2px 0 10px;
+}
+.mbox-hdr h3{ margin:0; padding:0; position:static; }
+.mbox-close{
+  flex-shrink:0; width:30px; height:30px; border-radius:50%;
+  border:var(--border-default); background:var(--surface2); color:var(--text2);
+  font-size:13px; line-height:1; cursor:pointer; display:inline-flex; align-items:center; justify-content:center;
+  transition:background .12s, color .12s;
+}
+.mbox-close:hover{ background:var(--danger-light); color:var(--terra); border-color:rgba(184,85,62,0.3); }
 
 /* History items — premium card feel */
 .hist-item{ border-radius:11px; padding:14px 16px; box-shadow:0 1px 2px rgba(31,58,42,0.03); }
@@ -929,9 +953,9 @@ body.app-active {
   .tab { padding: 11px 12px; font-size: 12px; }
   .card { padding: 14px 14px; }
   .mbox { padding: 18px; }
-  .tooth { width: 24px; height: 30px; }
+  .tooth { width: 32px; height: 40px; }
   .tooth .tn { font-size: 7px; }
-  .tooth .ts { font-size: 9px; }
+  .tooth .ts { font-size: 10px; }
   /* Odontograma móvil: scroll horizontal en vez de wrap — mantiene el layout visual */
   .odonto-chart-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 4px; }
   .ow { min-width: max-content; }
@@ -1328,9 +1352,9 @@ body.app-active {
 
 /* Mixed-dentition smaller teeth row (3.4.1) */
 .tr-decidua { display: flex; gap: 3px; opacity: 0.85; }
-.tooth-sm { width: 22px; height: 28px; }
-.tooth-sm .tn { font-size: 7px; }
-.tooth-sm .ts { font-size: 8px; }
+.tooth-sm { width: 28px; height: 34px; }
+.tooth-sm .tn { font-size: 8px; }
+.tooth-sm .ts { font-size: 10px; }
 .tooth.has-surfaces { box-shadow: inset 0 0 0 1px var(--brass); }
 
 /* Firmas (3.6.1, 3.6.2) */
@@ -1414,7 +1438,7 @@ body:has(.dot.ing) .topbar .brand svg { animation: logoBreathe 1.5s var(--ease) 
 
 /* Tooth hover — slightly more expressive lift */
 .tooth { transition: transform 0.12s var(--ease), border-color 0.12s var(--ease), box-shadow 0.12s var(--ease); }
-.tooth:hover { transform: translateY(-2px); box-shadow: 0 2px 4px rgba(31,58,42,0.08); }
+.tooth:hover { box-shadow: 0 0 0 2.5px rgba(31,58,42,0.25); }
 
 /* Patient list hover — soft sage tint + small lift, avatar scales up slightly */
 .pi { transition: background 0.12s var(--ease), border-color 0.12s var(--ease), transform 0.12s var(--ease); }
@@ -1840,19 +1864,19 @@ body:has(.dot.ing) .topbar .brand svg { animation: logoBreathe 1.5s var(--ease) 
 /* ── ODONTOGRAMA TOOTH VIZ (v4) ─────────────────────────────────────────── */
 
 /* Desktop two-column layout: chart left, viz right */
-.odonto-layout { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(280px, 1fr); gap: 24px; align-items: start; margin-top: 14px; }
-.odonto-chart-wrap { min-width: 0; }
+.odonto-layout { display: grid; grid-template-columns: 2.2fr 1fr; gap: 20px; align-items: start; margin-top: 14px; }
+.odonto-chart-wrap { min-width: 0; display: flex; flex-direction: column; align-items: center; padding: 4px 14px 4px; }
 .odonto-viz-wrap { min-width: 0; }
 
 .viz-panel {
-  background: var(--surface);
-  border: var(--border-default);
-  border-radius: var(--rl);
-  padding: 22px 22px 18px;
-  display: flex; flex-direction: column; gap: 14px;
-  position: sticky; top: 8px;
+  background: var(--mist);
+  border: 0.5px solid rgba(31,58,42,0.13);
+  border-radius: var(--r);
+  padding: 0;
+  display: flex; flex-direction: column; gap: 0; overflow: hidden;
 }
 .viz-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 44px; }
+.viz-info-col { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 10px; padding-top: 4px; }
 .viz-tooth-id { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
 .viz-tooth-num { font-family:'DM Sans',sans-serif; font-size: 30px; font-weight: 400; line-height: 1; color: var(--text); letter-spacing: -0.02em; }
 .viz-tooth-type { font-size: 10px; color: var(--text3); letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500; }
@@ -1864,10 +1888,9 @@ body:has(.dot.ing) .topbar .brand svg { animation: logoBreathe 1.5s var(--ease) 
 
 .viz-canvas {
   width: 100%; display: flex; justify-content: center; align-items: center;
-  padding: 18px 0;
+  padding: 16px 12px;
   background: radial-gradient(ellipse 70% 50% at 50% 40%, #FCFBF8 0%, var(--bone) 60%, var(--cream) 100%);
-  border-radius: var(--r);
-  min-height: 280px;
+  min-height: 220px;
   position: relative;
   overflow: hidden;
 }
@@ -1945,11 +1968,11 @@ body:has(.dot.ing) .topbar .brand svg { animation: logoBreathe 1.5s var(--ease) 
 
 /* Mobile — chart hides, viz becomes primary, picker scrolls horizontally */
 @media (max-width: 768px) {
-  .odonto-layout { grid-template-columns: 1fr; gap: 14px; }
+  .odonto-layout { grid-template-columns: 1fr; gap: 12px; }
   .odonto-chart-wrap { display: none; }
-  .viz-panel { position: static; padding: 14px 12px 12px; }
+  .viz-panel { position: static; padding: 0; border-radius: var(--r); }
   .viz-svg { max-width: 280px; }
-  .viz-canvas { min-height: 280px; }
+  .viz-canvas { min-height: 220px; }
   .viz-tooth-num { font-size: 28px; }
   .viz-pill { font-size: 11px; padding: 6px 9px; min-width: 32px; }
   .viz-quad-row { flex-direction: column; align-items: flex-start; gap: 4px; }
@@ -2172,10 +2195,10 @@ html{scroll-behavior:smooth}
 .feat-p{font-size:14px;color:var(--slate);line-height:1.65;letter-spacing:-.01em}
 .feat-vis{background:var(--surface2);border-radius:14px;border:.5px solid var(--border);padding:16px}
 .tooth-row{display:flex;gap:3px;justify-content:center}
-.tooth{width:21px;height:27px;border-radius:4px;border:.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:6.5px;font-weight:700;background:var(--bone);color:var(--olive)}
-.tooth.c{background:#FBE8E4;border-color:rgba(184,85,62,.3);color:var(--terra)}
-.tooth.t{background:var(--mist);border-color:rgba(31,58,42,.25);color:var(--forest)}
-.tooth.a{opacity:.4}
+.tooth-row .tooth{width:21px;height:27px;border-radius:4px;border:.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:6.5px;font-weight:700;background:var(--bone);color:var(--olive)}
+.tooth-row .tooth.c{background:#FBE8E4;border-color:rgba(184,85,62,.3);color:var(--terra)}
+.tooth-row .tooth.t{background:var(--mist);border-color:rgba(31,58,42,.25);color:var(--forest)}
+.tooth-row .tooth.a{opacity:.4}
 .cal-grid{display:flex;gap:4px}
 .cal-col{flex:1;border-radius:6px;padding:6px 5px;border:.5px solid var(--border);background:var(--bone)}
 .cal-day{font-size:8px;color:var(--olive);text-align:center;margin-bottom:4px;letter-spacing:.04em;text-transform:uppercase}
@@ -2388,7 +2411,7 @@ html[data-access="1"]{ --text2:#41413B; --text3:#535B4B; }
 html[data-access="1"][data-theme="dark"]{ --text2:#C6C6BA; --text3:#A8B49F; }
 html[data-access="1"] .f label,html[data-access="1"] .mf label{ font-size:11px; font-weight:700; }
 /* Tabs: letras pequeñas EN NEGRILLA — caben en una sola fila sin bajar */
-html[data-access="1"] .tab{ font-size:9.5px; font-weight:900; padding:9px 10px; letter-spacing:0.04em; text-transform:uppercase; white-space:nowrap; }
+html[data-access="1"] .tab{ font-size:10.5px; font-weight:700; padding:9px 11px; letter-spacing:0.03em; text-transform:uppercase; white-space:nowrap; }
 html[data-access="1"] .pi{ padding:14px 12px; }
 html[data-access="1"] .ba,html[data-access="1"] .bs,html[data-access="1"] .bc{ font-weight:600; }
 html[data-access="1"] .aj-desc,html[data-access="1"] .dash-greet-sub{ font-size:13px; }
@@ -2672,7 +2695,9 @@ a.ba{ text-decoration:none; }
 }
 
 /* ════════ v9.2 · ARCHIVOS (segmento Imágenes / Documentos) ════════ */
-.arch-seg{ display:inline-flex; gap:2px; background:var(--surface2); border:var(--border-default); border-radius:10px; padding:3px; margin-bottom:14px; }
+.arch-seg{ display:inline-flex; gap:2px; background:var(--surface2); border:var(--border-default); border-radius:10px; padding:3px; margin-bottom:12px; }
+.arch-stats{ margin-bottom:10px; }
+.arch-mini-bar{ margin-bottom:8px; padding:6px 2px; }
 .arch-seg button{
   display:inline-flex; align-items:center; gap:6px; white-space:nowrap;
   background:none; border:none; cursor:pointer; font-family:'DM Sans',sans-serif;
@@ -2687,7 +2712,7 @@ html[data-theme="dark"] .arch-seg button.on{ color:var(--mist); }
 /* ════════ v9.3 · ARCHIVOS VIVOS + WIDGETS NUEVOS ════════ */
 /* Hero de subida — invita, no estorba */
 .arch-hero{
-  display:flex; align-items:center; gap:18px; cursor:pointer; margin-bottom:14px;
+  display:flex; align-items:center; gap:18px; cursor:pointer; margin-bottom:10px;
   padding:20px 22px; border-radius:16px; border:1.5px dashed var(--accent-border);
   background:linear-gradient(120deg, var(--mist) 0%, var(--bone) 55%, var(--bone) 100%);
   transition:border-color .15s, box-shadow .2s var(--ease,ease), transform .2s var(--ease,ease);
@@ -2928,10 +2953,12 @@ html[data-theme="dark"] .ds-dp-btn .ic{ background:rgba(47,93,58,0.32); color:#9
 html[data-theme="dark"] .otbl tbody tr:hover .ds-dp-btn .ic{ color:#9CC8A8; }
 .otbl td,.ptbl td{ padding:6px 7px; }
 /* ── Odontograma: el panel del diente como pieza de vitrina ── */
-.viz-panel{ border-radius:18px; border:var(--border-default); box-shadow:0 14px 38px rgba(31,58,42,0.09); }
-html[data-theme="dark"] .viz-panel{ box-shadow:0 14px 38px rgba(0,0,0,0.35); }
+.viz-panel{ border-radius:var(--r); }
+html[data-theme="dark"] .viz-panel{ box-shadow:none; }
 .viz-tooth-num{ font-weight:600; letter-spacing:-0.03em; }
 .viz-pill{ border-radius:9px; padding:6px 9px; min-height:30px; }
+[data-theme="dark"] .viz-panel{ background:var(--surface2); border-color:rgba(255,255,255,0.08); }
+[data-theme="dark"] .viz-panel div[style*="rgba(31,58,42,0.05)"]{ background:rgba(255,255,255,0.04) !important; }
 .viz-pill:hover:not(.on){ transform:translateY(-1px); box-shadow:0 3px 8px rgba(26,26,23,0.08); }
 .viz-pill.on{ box-shadow:0 4px 12px rgba(31,58,42,0.28); }
 .viz-state-pill{ font-weight:600; }
@@ -3238,8 +3265,7 @@ html[data-theme="dark"] .rec-toolbar .ds-dp-btn:not(.empty) .val{ color:var(--mi
 
 /* ════════ v10.1 · VISUALIZADOR DEL DIENTE — de gris a vitrina clínica ════════ */
 .viz-canvas{
-  background:radial-gradient(ellipse 75% 58% at 50% 42%, #FFFFFF 0%, var(--bone) 55%, var(--mist) 130%);
-  border:0.5px solid var(--border); border-radius:14px;
+  background:radial-gradient(ellipse 75% 58% at 50% 42%, rgba(255,255,255,0.92) 0%, var(--bone) 55%, rgba(227,231,218,0.6) 130%);
 }
 html[data-theme="dark"] .viz-canvas{
   background:radial-gradient(ellipse 75% 58% at 50% 42%, #2C2C25 0%, var(--surface) 60%, rgba(47,93,58,0.20) 130%);
@@ -3385,12 +3411,8 @@ body.dnd-active .dcw-row{ cursor:grabbing; }
   .auth-links { margin-top:8px; }
 }
 
-/* Cursor dental SVG en odontograma — solo dispositivos con hover real (desktop) */
-@media (hover:hover) and (pointer:fine){
-  .tooth:hover{
-    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3E%3Ccircle cx='10' cy='10' r='4' fill='%231F3A2A'/%3E%3Cline x1='10' y1='1' x2='10' y2='7' stroke='%231F3A2A' stroke-width='2'/%3E%3Cline x1='10' y1='13' x2='10' y2='19' stroke='%231F3A2A' stroke-width='2'/%3E%3Cline x1='1' y1='10' x2='7' y2='10' stroke='%231F3A2A' stroke-width='2'/%3E%3Cline x1='13' y1='10' x2='19' y2='10' stroke='%231F3A2A' stroke-width='2'/%3E%3C/svg%3E") 10 10, crosshair;
-  }
-}
+/* v11 — cursor estándar de elemento seleccionable (se retiró la "mira") */
+.tooth{ cursor:pointer; }
 
 /* Ripple en botones primarios */
 .bs{ position:relative; overflow:hidden; }
@@ -3411,7 +3433,7 @@ body.dnd-active .dcw-row{ cursor:grabbing; }
 
 /* Animación de entrada del panel al cambiar de pestaña */
 @keyframes dsTabPanelIn{ from{ opacity:0; transform:translateY(3px); } to{ opacity:1; transform:none; } }
-#panel{ animation:dsTabPanelIn .15s var(--ease,ease); }
+#panel.tab-anim{ animation:dsTabPanelIn .15s var(--ease,ease); }
 
 /* Respeto total por prefers-reduced-motion (accesibilidad) */
 @media (prefers-reduced-motion:reduce){
@@ -3420,6 +3442,20 @@ body.dnd-active .dcw-row{ cursor:grabbing; }
     animation-iteration-count:1 !important;
     transition-duration:0.01ms !important;
   }
+}
+
+/* ════════ v10.6 · ODONTOGRAMA MÓVIL COMPACTO (#17) ════════ */
+@media (max-width:768px){
+  .viz-panel{ padding:12px 10px 10px; }
+  .viz-canvas{ min-height:200px; padding:8px 0; }
+  .viz-canvas-oclusal{ min-height:196px; padding:8px 4px; }
+  .viz-svg{ max-width:210px; }
+  .viz-canvas-oclusal .viz-svg{ max-width:230px; }
+  .tleg{ gap:5px; margin-bottom:10px; }
+  .leg{ padding:6px 11px; font-size:10.5px; }
+  .odonto-viewsel,.plan-viewsel{ padding:8px 10px; margin-bottom:10px; }
+  .viz-picker{ margin-top:8px; }
+  .odonto-hint{ margin-top:6px; font-size:10px; }
 }
 </style>
 </head>
@@ -3889,7 +3925,7 @@ const UPPER=[18,17,16,15,14,13,12,11,21,22,23,24,25,26,27,28];
 const LOWER=[48,47,46,45,44,43,42,41,31,32,33,34,35,36,37,38];
 const DECIDUOUS_UPPER=[55,54,53,52,51,61,62,63,64,65];
 const DECIDUOUS_LOWER=[85,84,83,82,81,71,72,73,74,75];
-const SIMBOLOS={sano:'',caries:'C',tratado:'T',ausente:'✕',corona:'Cor',endodoncia:'E',protesis:'P'};
+const SIMBOLOS={sano:'',caries:'C',tratado:'T',ausente:'✕',corona:'Co',endodoncia:'E',protesis:'P'};
 const SURFACE_KEYS=['m','d','o','v','l'];
 const SURFACE_LABELS={m:'Mesial',d:'Distal',o:'Oclusal',v:'Vestibular',l:'Palatal/Lingual'};
 const PROCS_GROUPED=[
@@ -3898,6 +3934,8 @@ const PROCS_GROUPED=[
   {label:'Instalación',procs:['Instalación de prótesis','Cementación de coronas','Cementación de carillas','Tipo y marca de cemento']}
 ];
 const PROC_NO_DATE=new Set(['tipo_y_marca_de_cemento']);
+const SHOFU_SHADES=['A1','A2','A3','A3.5','A4','B1','B2','B3','C1','C2','C3','D2','D3','Inc','BL','CV','CVX'];
+const COLOR_GUIDES={vita:{label:'Guía Vita',shades:null},shofu:{label:'Guía Shofu',shades:SHOFU_SHADES}};
 const VITA_SHADES=['A1','A2','A3','A3.5','A4','B1','B2','B3','B4','C1','C2','C3','C4','D2','D3','D4','OM1','OM2','OM3','BL1','BL2','BL3','BL4'];
 const FIBRA_OPTIONS=['Sí','No','N/A'];
 const ESP_ODONTO=['Odontología General','Endodoncia','Ortodoncia y Ortopedia Maxilofacial','Periodoncia e Implantología','Cirugía Oral y Maxilofacial','Prostodoncia (Prótesis Dental)','Odontopediatría','Patología Oral y Maxilofacial','Radiología Oral y Maxilofacial','Odontología Forense','Estética Dental','Rehabilitación Oral','Oclusión y Disfunción Temporomandibular','Láser en Odontología','Odontogeriatría','Odontología del Deporte','Implantología Oral'];
@@ -4101,6 +4139,17 @@ function titleCase(str){
 // Los valores legacy guardados en Firestore ('Dr.'/'Dra.') NO se tocan (additive-only);
 // solo se mapean al mostrarse. Los registros nuevos guardan ya 'Od.'/'Oda.'.
 function dispTitle(t){ return t==='Dr.'?'Od.':(t==='Dra.'?'Oda.':(t||'')); }
+// v11 — muestra el NOMBRE del profesional en vez del correo (el correo queda
+// como dato interno). Fallback seguro si no se puede resolver.
+function displayUserByEmail(email){
+  if(!email)return null;
+  const em=String(email).toLowerCase();
+  const u=(allUsersList||[]).find(x=>(x.email||'').toLowerCase()===em);
+  if(u&&u.name)return (dispTitle(u.title)+' '+titleCase(u.name)).trim();
+  if(currentUserPerms&&(currentUserPerms.email||'').toLowerCase()===em&&currentUserPerms.name)
+    return (dispTitle(currentUserPerms.title)+' '+titleCase(currentUserPerms.name)).trim();
+  return String(email).split('@')[0];
+}
 
 // ── Botón de información ("?") con explicación corta, para el título de cada pestaña ──
 function infoBtn(text){
@@ -4267,6 +4316,7 @@ function roToggleHTML(){
 }
 window.setEdicion=function(v){
   if(editUnlocked===v)return;
+  flushAutosaves();
   editUnlocked=v;
   if(editUnlocked)toast('Edición habilitada — los cambios se guardan automáticamente');
   else toast('Solo lectura activada');
@@ -4286,7 +4336,8 @@ function roBanner(){
 // logChange registra cambios significativos (no solo accesos) en el récord del paciente.
 // Es ADITIVO: respeta los registros existentes y reusa el mismo esquema {id,fecha,hora,tipo,user,tratamiento}.
 let _logChangeTimers={};
-function logChange(accion,seccion,patientArg){
+let _odontoSaving=false; // guard: evita doble-save en tap rápido
+function logChange(accion,seccion,patientArg,preSnap){
   try{
     const p=patientArg||gp(); if(!p)return;
     if(isAdmin)return; // los cambios del admin no ensucian el récord del dueño
@@ -4299,7 +4350,29 @@ function logChange(accion,seccion,patientArg){
     if(nowT-last<8000)return;
     _logChangeTimers[key]=nowT;
     var _r2={id:'c'+nowT.toString(),fecha:hoy(),hora:ahora(),tipo:'edicion',user:(auth.currentUser&&auth.currentUser.email)||'',tratamiento:detalle};
-    if(seccion==='Odontograma'&&p.teeth){try{_r2.odontoSnapshot=JSON.parse(JSON.stringify(p.teeth));}catch(_e2){}}
+    // FIX pérdida de data: el snapshot en CADA edición hacía crecer /pacientes/{id}
+    // sin límite (récords + copia completa del odontograma) hasta chocar con el
+    // tope de 1MB de Firestore → todos los guardados del paciente fallaban en
+    // silencio. Ahora: snapshot solo si cambió y máx. 1 cada 2 min; se conservan
+    // los 6 snapshots más recientes (el historial visual útil) y se liberan los viejos.
+    if(seccion==='Odontograma'&&p.teeth){
+      try{
+        const snapNow=JSON.stringify(p.teeth);
+        const snapToSave=preSnap!==undefined?preSnap:snapNow;
+        const prevSnaps=p.records.filter(r=>r&&r.odontoSnapshot);
+        const lastSnap=prevSnaps.length?prevSnaps[prevSnaps.length-1]:null;
+        const lastSnapKey='snap|'+p.id;
+        const lastSnapT=_logChangeTimers[lastSnapKey]||0;
+        const changed=!lastSnap||JSON.stringify(lastSnap.odontoSnapshot)!==snapNow;
+        if(changed&&(nowT-lastSnapT)>120000){
+          _r2.odontoSnapshot=JSON.parse(snapToSave);
+          _logChangeTimers[lastSnapKey]=nowT;
+          // poda: solo los 6 más recientes conservan snapshot
+          const withSnap=prevSnaps.slice();
+          while(withSnap.length>=6){ const old=withSnap.shift(); try{delete old.odontoSnapshot;}catch(_e3){} }
+        }
+      }catch(_e2){}
+    }
     p.records.push(_r2);
   }catch(err){/* nunca rompemos un guardado por la bitácora */}
 }
@@ -4321,6 +4394,8 @@ window.toggleAccess=function(on){
   document.documentElement.setAttribute('data-access',on?'1':'');
   localStorage.setItem('ds_access',on?'1':'');
   toast(on?'Optimizar lectura activado':'Optimizar lectura desactivado');
+  // Recalcular zoom del odontograma si está en pantalla
+  if(tabActual==='odonto'&&viewActual==='paciente')setTimeout(_odontoFitMobile,80);
   if(viewActual==='ajustes')renderAjustes();
 };
 
@@ -4715,10 +4790,19 @@ document.addEventListener('click',ev=>{
   const w=document.getElementById('profileMenuWrap');
   if(w&&!w.contains(ev.target))window.closeProfileMenu();
 });
-document.addEventListener('keydown',ev=>{ if(ev.key==='Escape'){ window.closeProfileMenu(); try{closeSideMenu();}catch(e){} } });
+document.addEventListener('keydown',ev=>{
+  if(ev.key!=='Escape')return;
+  window.closeProfileMenu();
+  try{closeSideMenu();}catch(e){}
+  // v11 — Escape cierra visor de imágenes, preview de PDF y calendario de fecha
+  try{ if(document.getElementById('imgLightbox'))window.imgCloseLightbox(); }catch(e){}
+  try{ const dp2=document.getElementById('docPreviewBox'); if(dp2)dp2.remove(); }catch(e){}
+  try{ dsDpClose(); }catch(e){}
+});
 
 // ─── v9 · AJUSTES ───────────────────────────────────────────────────────────
 window.openAjustes=function(){
+  flushAutosaves();
   viewActual='ajustes';
   renderAjustes();
 };
@@ -4749,6 +4833,13 @@ function renderAjustes(){
         </div>
         <div class="aj-row">
           <div class="aj-info">
+            <div class="aj-name">Sonidos</div>
+            <div class="aj-desc">Un tono breve al guardar con éxito y otro al eliminar.</div>
+          </div>
+          ${ajSwitch('ajSounds',(function(){try{return localStorage.getItem('ds_sounds')!=='0';}catch(e){return true;}})(),'toggleSounds();renderAjustes&&0;openAjustes()')}
+        </div>
+        <div class="aj-row">
+          <div class="aj-info">
             <div class="aj-name">Modo noche</div>
             <div class="aj-desc">Colores oscuros para ambientes con poca luz.</div>
           </div>
@@ -4776,6 +4867,7 @@ function renderAjustes(){
 
 // ─── PROFILE PAGE ──────────────────────────────────────────────────────────
 window.openProfile=function(){
+  flushAutosaves();
   if(!currentUserPerms && !isAdmin && !isTempBypass()){toast('Inicia sesión primero');return;}
   viewActual='profile';
   renderProfile();
@@ -5075,10 +5167,12 @@ window.toast=toast; // v9 — usada también desde handlers inline (p. ej. Whats
 
 // ─── AUTOSAVE (3.5.1, 3.5.2, 3.5.3, 3.6.8) ────────────────────────────────
 function getDebounce(){return isMobile()?3000:1000}
+const _autosaveRun={}; // formKey → ejecutor inmediato (para flush)
 function autosave(formKey,getData,statusElId){
   if(autosaveTimers[formKey])clearTimeout(autosaveTimers[formKey]);
   if(statusElId)updateSaveStatus(statusElId,'pending');
-  autosaveTimers[formKey]=setTimeout(async()=>{
+  const run=async()=>{
+    delete _autosaveRun[formKey]; delete autosaveTimers[formKey];
     if(statusElId)updateSaveStatus(statusElId,'saving');
     try{
       const data=getData();
@@ -5087,8 +5181,28 @@ function autosave(formKey,getData,statusElId){
     }catch(err){
       if(statusElId)updateSaveStatus(statusElId,'error');
     }
-  },getDebounce());
+  };
+  _autosaveRun[formKey]=run;
+  autosaveTimers[formKey]=setTimeout(run,getDebounce());
 }
+// FIX CRÍTICO (integridad de datos): ejecuta AHORA todo guardado pendiente,
+// mientras los campos siguen en pantalla. Se llama antes de cualquier
+// navegación que re-renderice (cambio de pestaña, de paciente, de vista).
+function flushAutosaves(){
+  const keys=Object.keys(_autosaveRun);
+  for(const k of keys){
+    try{ clearTimeout(autosaveTimers[k]); const fn=_autosaveRun[k]; delete _autosaveRun[k]; if(fn)fn(); }catch(e){}
+  }
+}
+window.flushAutosaves=flushAutosaves;
+// Al cerrar/recargar con cambios pendientes: guarda (la persistencia offline
+// de Firestore encola el write) y advierte al usuario.
+window.addEventListener('beforeunload',function(e){
+  if(Object.keys(_autosaveRun).length){
+    flushAutosaves();
+    e.preventDefault(); e.returnValue='';
+  }
+});
 function updateSaveStatus(id,state){
   const el=document.getElementById(id);
   if(!el)return;
@@ -5194,9 +5308,22 @@ async function guardar(p){
   if(_i>=0)pacientes[_i]={id,...data};
   // Fire-and-track: don't block the UI on server ack. Offline persistence queues
   // the write and syncs on reconnect — no data loss, modal can close right away.
+  // FIX: alarma temprana de tamaño (el tope de Firestore es ~1MB por documento)
+  try{
+    const _sz=JSON.stringify(data).length;
+    if(_sz>900000 && !window['_szWarn_'+id]){
+      window['_szWarn_'+id]=true;
+      toast('⚠ La ficha de este paciente está cerca del límite de tamaño — avisa a soporte');
+    }
+  }catch(_e){}
   setDoc(doc(db,'pacientes',id),data)
     .then(()=>{ss('ok','Sincronizado');ssRest();_playSuccess();})
-    .catch(()=>{ss('err','Sin conexión · guardado local, se sincronizará');});
+    .catch(err=>{
+      // FIX: antes todo fallo se disfrazaba de "sin conexión" — los errores
+      // reales (p. ej. documento demasiado grande) pasaban inadvertidos.
+      if(navigator.onLine){ ss('err','Error al guardar — reintenta'); toast('No se pudo guardar: '+((err&&err.message)||'error desconocido')); }
+      else ss('err','Sin conexión · guardado local, se sincronizará');
+    });
   return id;
 }
 async function crear(data){
@@ -5551,6 +5678,7 @@ function renderLista(){
 }
 
 window.seleccionar=function(id){
+  flushAutosaves();
   if(idActual!==id){_imgActiveCat='rad';_imgFilters={cat:'',user:'',cons:'',fecha:''};_imgLightboxId=null;_docFilters={tipo:'',user:'',cons:'',fecha:''};_archVista='img';}
   idActual=id;tabActual='datos';viewActual='paciente';consultaView=null;editUnlocked=false;odontoView=null;planView=null;
   logAccess(id);
@@ -6315,16 +6443,25 @@ async function dashLoadWeather(){
     const cw=j.current_weather;
     if(!cw)throw new Error('sin datos');
     const w=_wcode(cw.weathercode);
-    document.getElementById('dashWeatherTemp').textContent=Math.round(cw.temperature)+'°C';
-    document.getElementById('dashWeatherDesc').textContent=w.l;
-    document.getElementById('dashWeatherIco').innerHTML=icon(w.ico,26);
+    const _t2=document.getElementById('dashWeatherTemp');
+    const _d2=document.getElementById('dashWeatherDesc');
+    const _i2=document.getElementById('dashWeatherIco');
+    if(_t2)_t2.textContent=Math.round(cw.temperature)+'°C';
+    if(_d2)_d2.textContent=w.l;
+    if(_i2)_i2.innerHTML=icon(w.ico,26);
   }catch(e){
-    document.getElementById('dashWeatherTemp').textContent='—';
-    document.getElementById('dashWeatherDesc').textContent='No disponible';
-    document.getElementById('dashWeatherIco').innerHTML=icon('thermo',26);
+    // FIX: si el usuario ya salió del dashboard cuando responde el clima,
+    // los nodos no existen — no reventar (rechazo async en consola).
+    const _t=document.getElementById('dashWeatherTemp');
+    const _d=document.getElementById('dashWeatherDesc');
+    const _i=document.getElementById('dashWeatherIco');
+    if(_t)_t.textContent='—';
+    if(_d)_d.textContent='No disponible';
+    if(_i)_i.innerHTML=icon('thermo',26);
   }
 }
 window.toggleCalendar=function(){
+  flushAutosaves();
   if(viewActual==='calendario'){
     viewActual='paciente';
     if(idActual)renderPaciente();else renderEmpty();
@@ -6491,13 +6628,14 @@ function renderAdmin(){
   // (códigos, orden de tabs, archivos) re-renderiza y saltaba arriba solo.
   const _ap=document.querySelector('#mainArea .admin-panel');
   const _st=_ap?_ap.scrollTop:0;
-  const _hadFocusFiles=!!(document.activeElement&&document.activeElement.closest&&document.activeElement.closest('.admin-files-bar'));
+  const _hadFocusFiles=!!(document.activeElement&&document.activeElement.closest&&(document.activeElement.closest('.admin-files-bar')||document.activeElement.classList.contains('admin-pac-search')));
+  const _focusSel=document.activeElement&&document.activeElement.classList&&document.activeElement.classList.contains('admin-pac-search')?'.admin-pac-search':'.admin-files-bar input';
   const _selPos=_hadFocusFiles&&document.activeElement.selectionStart!=null?document.activeElement.selectionStart:null;
   if(_st>0||_hadFocusFiles)requestAnimationFrame(()=>{
     const p2=document.querySelector('#mainArea .admin-panel');
     if(p2&&_st>0)p2.scrollTop=_st;
     if(_hadFocusFiles){
-      const inp=document.querySelector('.admin-files-bar input');
+      const inp=document.querySelector(_focusSel);
       if(inp){ inp.focus(); if(_selPos!=null){try{inp.setSelectionRange(_selPos,_selPos);}catch(e){}} }
     }
   });
@@ -6628,10 +6766,10 @@ function renderAdmin(){
     ${adminPacientesCollapsed?'':(!viewAsUid
       ?`<p class="ds-note" style="margin:6px 0">Selecciona un usuario con "Ver como" para ver sus pacientes.</p>`
       :`<div style="display:flex;flex-direction:column;gap:6px">
-          <input type="search" value="${e(adminPacientesQuery)}" placeholder="Buscar por nombre o cédula…" oninput="adminPacientesQuery=this.value;renderAdmin()" style="width:100%;padding:7px 10px;border:var(--border-default);border-radius:var(--r);font-family:'DM Sans',sans-serif;font-size:13px;background:var(--surface2);color:var(--text)">
+          <input type="search" class="admin-pac-search" value="${e(adminPacientesQuery)}" placeholder="Buscar por nombre o cédula…" oninput="adminPacSetQ(this.value)" style="width:100%;padding:7px 10px;border:var(--border-default);border-radius:var(--r);font-family:'DM Sans',sans-serif;font-size:13px;background:var(--surface2);color:var(--text)">
           ${_pacFiltered.length===0
             ?`<p class="ds-note">Sin resultados</p>`
-            :`<div style="display:flex;flex-direction:column;border:var(--border-default);border-radius:var(--r);max-height:260px;overflow-y:auto">${_pacFiltered.slice(0,50).map((p,i)=>`<div class="admin-dash-item" style="cursor:pointer;padding:8px 12px;${i>0?'border-top:0.5px solid var(--border)':''}" onclick="abrirPaciente('${e(p.id)}')">
+            :`<div style="display:flex;flex-direction:column;border:var(--border-default);border-radius:var(--r);max-height:260px;overflow-y:auto">${_pacFiltered.slice(0,50).map((p,i)=>`<div class="admin-dash-item" style="cursor:pointer;padding:8px 12px;${i>0?'border-top:0.5px solid var(--border)':''}" onclick="seleccionar('${e(p.id)}')">
               <span>${e(titleCase(p.nombre))}</span>
               <span class="admin-dash-time">${e(p.ci||'')}${p.consultas&&p.consultas.length?' · '+p.consultas.length+' cita'+(p.consultas.length===1?'':'s'):''}${(()=>{var _ow=allUsersList.find(function(u){return u.uid===p.ownerUid;});return _ow&&_ow.name?' · '+e(titleCase(_ow.name).split(' ')[0]):'';})()}</span>
             </div>`).join('')}</div>`}
@@ -6959,6 +7097,9 @@ function adminFilesHTML(){
   </div>`;
 }
 window.toggleAdminFiles=function(){ adminFilesCollapsed=!adminFilesCollapsed; renderAdmin(); };
+window.renderAdmin=renderAdmin; // FIX: usado desde handlers inline
+let _apqT=null;
+window.adminPacSetQ=function(v){ adminPacientesQuery=v; if(_apqT)clearTimeout(_apqT); _apqT=setTimeout(()=>renderAdmin(),300); };
 window.adminFilesSetTipo=function(v){ adminFilesTipo=v; renderAdmin(); };
 let _afqT=null;
 window.adminFilesSetQ=function(v){ adminFilesQ=v; if(_afqT)clearTimeout(_afqT); _afqT=setTimeout(()=>renderAdmin(),350); };
@@ -7815,7 +7956,7 @@ function renderPaciente(){
         <button class="cons-nudge-x" onclick="document.getElementById('consNudge').remove()" title="Cerrar" aria-label="Cerrar">✕</button>
       </div>
     </div>`:''}
-    <div class="tabbar">${tabs.map(t=>`<button class="tab${tabActual===t.k?' on':''}" onclick="cambiarTab('${t.k}')">${t.l}</button>`).join('')}</div>
+    <div class="tabbar">${tabs.map(t=>`<button data-tab="${t.k}" class="tab${tabActual===t.k?' on':''}" onclick="cambiarTab('${t.k}')">${t.l}</button>`).join('')}</div>
     <div id="pviewBarSlot">${tabShowsPviewBar(tabActual)?pviewBar(p):''}</div>
     <div class="panel" id="panel"></div>`;
   renderTab();
@@ -7876,17 +8017,22 @@ window.toggleEdicion=function(){
 };
 
 window.volverInicio=function(){
+  flushAutosaves();
   idActual=null;viewActual='paciente';odontoView=null;planView=null;
   renderEmpty();renderLista();
 }
 
 window.cambiarTab=function(tab){
+  flushAutosaves();
+  const _prevTab=tabActual;
   tabActual=tab;
   document.querySelectorAll('.tab').forEach(b=>{
-    b.classList.toggle('on',b.textContent.startsWith(tabLabel(tab))||b.textContent.includes(tabLabel(tab)));
+    // v11 — activo por clave (el match por texto marcaba la pestaña equivocada)
+    b.classList.toggle('on',b.getAttribute('data-tab')===tab);
   });
   refreshPviewBarSlot();
   renderTab();
+  if(_prevTab!==tab){ const _pn2=document.getElementById('panel'); if(_pn2)_pn2.scrollTop=0; }
 }
 function tabLabel(k){
   return{datos:'Datos',clinico:'Historia',odonto:'Odontograma',plan:'Plan',ops:'Operatorias',est:'Proc',rec:'Récord',cons:'Consultas',img:'Archivos',doc:'Documentos'}[k]||k;
@@ -8289,6 +8435,8 @@ function imgRenderLightbox(){
 }
 // ── Editar info de una imagen (nombre, categoría, consulta asociada) ───────
 window.imgEditOpen=function(id){
+  if(document.getElementById('MB'))return; // modal ya abierto
+  window.imgCloseLightbox(); // cerrar el visor para que el modal quede en frente
   const p=gp(); if(!p)return;
   const im=(p.imagenes||[]).find(x=>x.id===id);
   if(!im)return;
@@ -8465,7 +8613,7 @@ function docUpload(files){
     const subidos=files.length-fallos;
     if(subidos>0&&fallos===0)toast(subidos===1?'Documento subido a la nube':`${subidos} documentos subidos a la nube`);
     else if(subidos>0)toast(`${subidos} subido${subidos===1?'':'s'} · ${fallos} fallaron — revisa tu conexión`);
-    else toast('No se pudieron subir los documentos. Revisa tu conexión e intenta de nuevo.');
+    else toast('No fue posible cargar el archivo. Inténtalo nuevamente. Si el problema continúa, comunícate con soporte.');
     renderDocumentos();
    }catch(err){
      console.error('docUpload falló:',err);
@@ -8538,7 +8686,7 @@ function archHeaderHTML(active){
   const segBtn=(k,lbl,n,ico)=>'<button type="button" class="'+(active===k?'on':'')+'" onclick="archVista(\''+k+'\')">'+ico+' '+lbl+(n?' · '+n:'')+' </button>';
   return (storage?'':'<div class="img-cloud-notice"><span class="ico">'+icon('cloud',16)+'</span><span>Sin nube — imágenes locales.</span></div>')+heroHTML+'<div class="arch-seg">'+segBtn('img','Imágenes',nImg,icon('image',13))+(docOk?segBtn('doc','Documentos',nDoc,icon('filetext',13)):'')+' </div>';
 }
-window.archVista=function(k){ _archVista=(k==='doc'?'doc':'img'); renderTab(); };
+window.archVista=function(k){ flushAutosaves(); _archVista=(k==='doc'?'doc':'img'); renderTab(); };
 // Chip de resumen → salta directo al tipo con el filtro puesto
 window.archChip=function(kind){
   if(kind==='pdf'||kind==='word'){ _archVista='doc'; _docFilters.tipo=kind; }
@@ -8730,7 +8878,7 @@ function renderDatos(){
   // Toggle de edición propio del tab Datos (la barra global no aparece aquí — item 2).
   // En vista por-consulta los datos quedan en solo lectura SIEMPRE; el toggle solo aplica en Consolidado.
   const _editToggle = consultaView===null
-    ? `<div class="datos-editbar">${roToggleHTML()}</div>`
+    ? roToggleHTML()
     : '';
   const _roBan = datosReadOnly()
     ? (consultaView!==null
@@ -8738,10 +8886,9 @@ function renderDatos(){
         : '')
     : '';
   document.getElementById('panel').innerHTML=`
-    ${_editToggle}
     ${_roBan}
     <div class="card card-fijo">
-      <div class="ct-row"><div class="ct">Datos personales ${pillFijo()}${infoBtn('Información fija del paciente: contacto, fecha de nacimiento y cédula. No cambia entre consultas. Para editar, activa "Editar" arriba.')}</div><div style="display:flex;align-items:center;gap:10px">${statusEl('datos')}${p.creadoEn?`<span class="ds-note" style="margin:0">Registrado el ${adminFmtDate(p.creadoEn)}${p.creadoPor?' · '+e(p.creadoPor.split('@')[0]):''}</span>`:''}</div></div>
+      <div class="ct-row" style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap"><div class="ct" style="margin-bottom:0">Datos personales ${pillFijo()}${infoBtn('Información fija del paciente: contacto, fecha de nacimiento y cédula. No cambia entre consultas.')}</div><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">${_editToggle}${statusEl('datos')}<span class="ds-note" style="margin:0">${p.creadoEn?`Registrado el ${adminFmtDate(p.creadoEn)}`:'Fecha de registro no disponible'}${p.creadoEn&&p.creadoPor?` · por ${e(displayUserByEmail(p.creadoPor)||'usuario no disponible')}`:p.creadoEn?' · usuario creador no disponible':''}</span></div></div>
       <div class="fg"><div class="f full"><label>Nombre y Apellido</label><input id="d_n" value="${e(titleCase(p.nombre)||'')}" ${ro}></div></div>
       <div class="fg3">
         <div class="f"><label>Fecha de nacimiento</label>${dsDateField('d_nac',p.nacimiento||'','',!!ro)}</div>
@@ -8781,6 +8928,7 @@ function renderDatos(){
 window.autosaveDatos=async function(){
   autosave('datos',()=>{
     if(typeof datosReadOnly==='function' && datosReadOnly())return null;
+    if(!document.getElementById('d_n'))return null; // el formulario ya no está en pantalla
     const p=gp();if(!p)return null;
     p.nombre=titleCase(g('d_n'))||p.nombre;
     p.nacimiento=g('d_nac');
@@ -8823,7 +8971,7 @@ const HABIT_LIST=[['fuma','Fuma'],['cafe','Café'],['drogas','Drogas'],['bruxism
 // antecedente eran 2 clics de dropdown; ahora es un tap con color semántico.
 // El valor vive en un input oculto con el MISMO id → autosaveClinico() intacto.
 function _sino(id,v){
-  const dis=(typeof isReadOnly==='function'&&isReadOnly());
+  const dis=false; // Sí/No siempre editables (decisión de Maurizio, guardado ya corregido)
   const opt=(val,lbl,cls)=>`<button type="button" class="sino-b${cls}${(v||'')===val?' on':''}" ${dis?'disabled':''} onclick="sinoSet('${id}','${val}')">${lbl}</button>`;
   return `<span class="sino" id="${id}_wrap"><input type="hidden" id="${id}" value="${e(v||'')}">${opt('','—','')}${opt('si','Sí',' si')}${opt('no','No',' no')}</span>`;
 }
@@ -8879,9 +9027,9 @@ function renderClinico(){
   // v8 — vista única (como Datos personales): sin Consolidado/Por-consulta. El
   // candado protege antecedentes/patologías; el historial de motivo/diagnóstico
   // es siempre de solo lectura aquí, y se amplía dando clic en cada consulta.
-  const _editToggle = `<div class="datos-editbar">${roToggleHTML()}</div>`;
+  const _editToggle = roToggleHTML();
   const fijaCard=`<div class="card card-fijo">
-      <div class="ct-row"><div class="ct">Historia clínica${infoBtn('Antecedentes y patologías del paciente, más el historial de motivo, diagnóstico y oclusión de cada consulta. Para editar una consulta puntual, ábrela desde el historial o desde Consultas.')}</div>${statusEl('clinico')}</div>
+      <div class="ct-row" style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap"><div class="ct" style="margin-bottom:0">Historia clínica${infoBtn('Antecedentes y patologías del paciente, más el historial de motivo, diagnóstico y oclusión de cada consulta. Para editar una consulta puntual, ábrela desde el historial o desde Consultas.')}</div><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">${_editToggle}${statusEl('clinico')}</div></div>
       <div class="f" style="margin-bottom:10px"><label>Antecedentes (resumen)</label><textarea id="c_an" oninput="autosaveClinico()" ${ro}>${e(p.antecedentes||'')}</textarea></div>
       <div class="f"><label>Patologías</label><textarea id="c_pa" oninput="autosaveClinico()" ${ro}>${e(p.patologias||'')}</textarea></div>
     </div>`;
@@ -8903,7 +9051,6 @@ function renderClinico(){
       <p style="font-size:11px;color:var(--text3);margin:8px 0 0">Ver todas en Archivos →</p>
     </div>`:'';
   document.getElementById('panel').innerHTML=`
-    ${_editToggle}
     ${roBanner()}
     ${fijaCard}
     ${antecedentesCard(p)}
@@ -8912,7 +9059,7 @@ function renderClinico(){
     ${specialtyHTML}`;
   if(isReadOnly()){
     document.querySelectorAll('#panel .card-fijo ~ .card select, #panel .card-fijo ~ .card textarea, #panel .card-fijo ~ .card input').forEach(el=>el.disabled=true);
-    document.querySelectorAll('#panel .ant-grid select, #panel .hab-grid select, #panel .hab-grid input, #panel #ant_otras, #panel #hab_otros, #panel .ant-grid .sino-b, #panel .hab-grid .sino-b').forEach(el=>el.disabled=true);
+    document.querySelectorAll('#panel .ant-grid select, #panel .hab-grid select, #panel .hab-grid input, #panel #ant_otras, #panel #hab_otros').forEach(el=>el.disabled=true);
   }
 }
 // Historial de motivo/diagnóstico/oclusión — de solo lectura; cada fila abre el
@@ -8945,6 +9092,7 @@ function motivoDiagnosticoHistorial(p){
 // Autosave del motivo/diagnóstico de una consulta puntual (vista Por consulta).
 window.autosaveConsClinico=function(cid){
   autosave('consclin_'+cid,()=>{
+    if(!document.getElementById('cv_mo'))return null;
     const p=gp();if(!p)return null;
     const c=(p.consultas||[]).find(x=>x.id===cid);if(!c)return null;
     c.motivo=g('cv_mo');
@@ -8957,7 +9105,11 @@ window.autosaveConsClinico=function(cid){
 }
 window.autosaveClinico=function(){
   autosave('clinico',()=>{
-    if(typeof isReadOnly==='function' && isReadOnly())return null;
+    if(!document.getElementById('c_an')&&!document.getElementById('ant_alergicos'))return null; // formulario fuera de pantalla
+    // FIX pérdida de data: los Sí/No son "siempre editables" (cambio de Maurizio),
+    // pero este guard descartaba su guardado con el candado puesto → el toque se
+    // veía en pantalla y desaparecía al recargar. Los campos realmente bloqueados
+    // están disabled y no pueden cambiar, así que guardar aquí es seguro.
     const p=gp();if(!p)return null;
     // motivo/diagnóstico ahora son por-consulta; aquí solo guardamos los campos FIJOS.
     p.antecedentes=g('c_an');p.patologias=g('c_pa'); // oclusión salió del bloque fijo (item 5): es por-consulta
@@ -9023,29 +9175,35 @@ function getSurfaceState(p,n,k){
   if(typeof t==='string')return t;
   return t[k]||'sano';
 }
+// v11 — PALETA ÚNICA del odontograma: barra, dientes y visualizador leen del
+// MISMO mapa (antes cada uno tenía sus tonos y no coincidían). Ligeramente más
+// viva, con variante nocturna, sin sacrificar contraste.
+const ODONTO_PAL={
+  caries:    {bg:'#F2BBA9', bd:'#B8553E'},
+  tratado:   {bg:'#B5DCC0', bd:'#2F5D3A'},
+  ausente:   {bg:'#DEDCD1', bd:'#9A978A'},
+  corona:    {bg:'#B7D3E3', bd:'#4A6B7C'},
+  endodoncia:{bg:'#EDD29B', bd:'#9A7A34'},
+  protesis:  {bg:'#D7C5EE', bd:'#7850A0'}
+};
+const ODONTO_PAL_DARK={
+  caries:    {bg:'#8A4B3B', bd:'#F2BBA9'},
+  tratado:   {bg:'#3E6B4A', bd:'#B5DCC0'},
+  ausente:   {bg:'#2E2E27', bd:'#9A978A'},
+  corona:    {bg:'#3E5B6B', bd:'#B7D3E3'},
+  endodoncia:{bg:'#77602F', bd:'#EDD29B'},
+  protesis:  {bg:'#584A72', bd:'#D7C5EE'}
+};
 // v10.1 — paleta clínica viva para el visualizador (research: cartas dentales
 // profesionales usan color pleno por condición, no beige plano; el marfil
 // cálido del diente sano hace que las condiciones salten a la vista).
 function surfaceColors(st){
   const dark=document.documentElement.getAttribute('data-theme')==='dark';
-  const map=dark?{
-    sano:{fill:'#33332B',stroke:'rgba(220,227,210,0.25)'},
-    caries:{fill:'#8A4B3B',stroke:'#E3A18F'},
-    tratado:{fill:'#3E6B4A',stroke:'#A9CDB2'},
-    ausente:{fill:'#2A2A24',stroke:'rgba(220,227,210,0.2)'},
-    corona:{fill:'#3E5B6B',stroke:'#A6C3D3'},
-    endodoncia:{fill:'#77602F',stroke:'#E0C48E'},
-    protesis:{fill:'#584A72',stroke:'#C3B1DC'}
-  }:{
-    sano:{fill:'#FBF8F0',stroke:'#D8D2C2'},
-    caries:{fill:'#E8A894',stroke:'#B8553E'},
-    tratado:{fill:'#AFD2B8',stroke:'#2F5D3A'},
-    ausente:{fill:'#E3E1D6',stroke:'#B4B1A4'},
-    corona:{fill:'#ACC9D9',stroke:'#4A6B7C'},
-    endodoncia:{fill:'#E6CB96',stroke:'#9A7A34'},
-    protesis:{fill:'#CCBAE3',stroke:'#7850A0'}
-  };
-  return map[st]||map.sano;
+  if(st==='sano'||!ODONTO_PAL[st]){
+    return dark?{fill:'#33332B',stroke:'rgba(220,227,210,0.25)'}:{fill:'#FBF8F0',stroke:'#D8D2C2'};
+  }
+  const c=(dark?ODONTO_PAL_DARK:ODONTO_PAL)[st];
+  return {fill:c.bg,stroke:c.bd};
 }
 // Outer shape per tooth type (returns SVG tag string for use inside clipPath + as visible border)
 function outerShapeSVG(type,attrs=''){
@@ -9143,13 +9301,13 @@ function renderRealisticLateral(p,n,states,type,upper,tState){
     const st=states[k];
     if(st==='sano'){
       // Invisible-but-clickable zone; faint label appears on hover via CSS
-      return `<g class="viz-edge-zone" data-surf="${k}" onclick="vizClickSurface('${k}')">
+      return `<g class="viz-edge-zone" data-surf="${k}" onclick="vizClickSurface('${k}')" oncontextmenu="event.preventDefault();vizResetSurface('${k}')">
         <circle cx="${cx}" cy="${cy}" r="11" fill="transparent"/>
         <text x="${cx}" y="${cy+3}" text-anchor="middle" class="viz-edge-faint" pointer-events="none">${k.toUpperCase()}</text>
       </g>`;
     }
     const sc=surfaceColors(st);
-    return `<g class="viz-edge-zone on" data-surf="${k}" onclick="vizClickSurface('${k}')">
+    return `<g class="viz-edge-zone on" data-surf="${k}" onclick="vizClickSurface('${k}')" oncontextmenu="event.preventDefault();vizResetSurface('${k}')">
       <circle cx="${cx}" cy="${cy}" r="8" fill="${sc.fill}" stroke="${sc.stroke}" stroke-width="1.3"/>
       <text x="${cx}" y="${cy+3}" text-anchor="middle" class="viz-edge-mark" pointer-events="none">${SIMBOLOS[st]||'·'}</text>
     </g>`;
@@ -9202,7 +9360,7 @@ function renderRealisticLateral(p,n,states,type,upper,tState){
 
     <g filter="url(#tooth-shadow-${n})">
       ${rootPaths}
-      <path d="${paths.crown}" fill="${crownFill}" stroke="#A89F8C" stroke-width="0.7" opacity="${crownOpacity}" class="viz-surf-large" data-surf="v" onclick="vizClickSurface('v')"/>
+      <path d="${paths.crown}" fill="${crownFill}" stroke="#A89F8C" stroke-width="0.7" opacity="${crownOpacity}" class="viz-surf-large" data-surf="v" onclick="vizClickSurface('v')" oncontextmenu="event.preventDefault();vizResetSurface('v')"/>
       ${showPulp && paths.pulpChamber ? `<path d="${paths.pulpChamber}" fill="url(#pulp-${n})" pointer-events="none"/>` : ''}
       ${stateOverlay}
       ${showPulp?`<path d="${paths.highlight}" fill="url(#enamel-shine-${n})" opacity="0.7" pointer-events="none"/>`:''}
@@ -9225,13 +9383,13 @@ function renderRefinedOcclusal(p,n,states,type,upper){
     const sc=f(k);
     const isAus=states[k]==='ausente';
     const fillAttr=isAus?`fill="url(#${ausPatId})"`:`fill="${sc.fill}"`;
-    return `<polygon points="${points}" ${fillAttr} stroke="${sc.stroke}" stroke-width="1.4" class="viz-surf ${states[k]!=='sano'?'on':''}" data-surf="${k}" onclick="vizClickSurface('${k}')"/>`;
+    return `<polygon points="${points}" ${fillAttr} stroke="${sc.stroke}" stroke-width="1.4" class="viz-surf ${states[k]!=='sano'?'on':''}" data-surf="${k}" onclick="vizClickSurface('${k}')" oncontextmenu="event.preventDefault();vizResetSurface('${k}')"/>`;
   };
   const surfRect=(k,x,y,w,h,rx)=>{
     const sc=f(k);
     const isAus=states[k]==='ausente';
     const fillAttr=isAus?`fill="url(#${ausPatId})"`:`fill="${sc.fill}"`;
-    return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${rx}" ${fillAttr} stroke="${sc.stroke}" stroke-width="1.4" class="viz-surf ${states[k]!=='sano'?'on':''}" data-surf="${k}" onclick="vizClickSurface('${k}')"/>`;
+    return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${rx}" ${fillAttr} stroke="${sc.stroke}" stroke-width="1.4" class="viz-surf ${states[k]!=='sano'?'on':''}" data-surf="${k}" onclick="vizClickSurface('${k}')" oncontextmenu="event.preventDefault();vizResetSurface('${k}')"/>`;
   };
   const cusps=decorCusps(type);
   // viewBox expanded horizontally so mesial/distal labels sit OUTSIDE the tooth rect cleanly.
@@ -9334,13 +9492,15 @@ function renderToothVizPanel(p,mode){
   const dominantBadge=isWhole?`<span class="viz-state-pill viz-state-${t}">${SIMBOLOS[t]||t} · ${t}</span>`:'';
   // Lateral view removed; we always render the oclusal cross-zone diagram.
   return `<div class="viz-panel">
-    <div class="viz-header">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:11px 14px 10px;background:rgba(31,58,42,0.05);border-bottom:0.5px solid rgba(31,58,42,0.1)">
       <div class="viz-tooth-id"><span class="viz-tooth-num">${n}</span><span class="viz-tooth-type">${toothPosLabel(n)}</span></div>
+      ${dominantBadge?dominantBadge:'<span style="font-size:11px;color:var(--text3)">Sin condición</span>'}
     </div>
     <div class="viz-canvas viz-canvas-oclusal">${renderToothVizSVG(p,n)}</div>
-    ${dominantBadge?`<div class="viz-badges">${dominantBadge}</div>`:''}
-    <div class="viz-hint">${estadoDiente==='seleccionar'?'<strong style="color:var(--forest)">Seleccionar</strong> · clic en un diente para verlo (no modifica)':'Estado activo: <strong style="color:var(--forest)">'+estadoDiente+'</strong> · clic en el diente para aplicar'}</div>
-    <div class="viz-picker">${vizToothPicker(p,mode)}</div>
+    <div style="padding:10px 14px;border-top:0.5px solid rgba(31,58,42,0.08)">
+      <div class="viz-hint" style="margin:0 0 10px">${estadoDiente==='seleccionar'?'Clic para ver · clic der. para restablecer':'<strong style="color:var(--forest)">${estadoDiente}</strong> activo · clic aplica · clic der. restablece'}</div>
+      <div class="viz-picker">${vizToothPicker(p,mode)}</div>
+    </div>
   </div>`;
 }
 window.vizSetTooth=function(n){vizToothN=n;renderOdonto();};
@@ -9350,6 +9510,7 @@ window.vizClickSurface=async function(k){
   const n=vizToothN;if(!n)return;
   // Modo neutral "Seleccionar": solo selecciona, no aplica ninguna condición ni marca.
   if(estadoDiente==='seleccionar'){return;}
+  const _snapBefore=JSON.stringify(p.teeth||{});
   // Bug 2: escribe en el objetivo activo (consolidado o instantánea de consulta).
   const tgt=odontoEditTarget(p);
   const cur=tgt.teeth[n];
@@ -9362,6 +9523,7 @@ window.vizClickSurface=async function(k){
   }else{
     surf={m:'sano',d:'sano',o:'sano',v:'sano',l:'sano'};
   }
+  // Click izquierdo siempre aplica estadoDiente (igual que el visor de dientes)
   surf[k]=estadoDiente;
   // If all sano → clear; if all same and not sano → store as string
   const vals=SURFACE_KEYS.map(s=>surf[s]);
@@ -9373,7 +9535,23 @@ window.vizClickSurface=async function(k){
     tgt.teeth[n]=surf;
   }
   tgt.commit();
-  logChange('Editó odontograma','Odontograma',p);
+  logChange(`Diente ${n} · cara ${k}`,'Odontograma',p,_snapBefore);
+  await guardar(p);renderOdonto();
+};
+window.vizResetSurface=async function(k){
+  const p=gp();if(!p)return;
+  const n=vizToothN;if(!n)return;
+  if(estadoDiente==='seleccionar'){return;}
+  const _snapBefore=JSON.stringify(p.teeth||{});
+  const tgt=odontoEditTarget(p);
+  const cur=tgt.teeth[n];
+  let surf;
+  if(typeof cur==='object'&&cur!==null){surf={...cur};}else if(typeof cur==='string'){surf={m:cur,d:cur,o:cur,v:cur,l:cur};}else{surf={m:'sano',d:'sano',o:'sano',v:'sano',l:'sano'};}
+  surf[k]='sano';
+  const vals=SURFACE_KEYS.map(s=>surf[s]);
+  if(vals.every(v=>v==='sano')){delete tgt.teeth[n];}else if(vals.every(v=>v===vals[0])){tgt.teeth[n]=vals[0];}else{tgt.teeth[n]=surf;}
+  tgt.commit();
+  logChange(`Restableció cara ${k} del diente ${n}`,'Odontograma',p,_snapBefore);
   await guardar(p);renderOdonto();
 };
 
@@ -9408,12 +9586,12 @@ function renderOdonto(){
   const mode=getOdontoMode(pView);
   const legs=[
     {k:'seleccionar',l:'Seleccionar',bg:'var(--surface)',bc:'var(--forest)',neutral:true},
-    {k:'caries',l:'Caries',bg:'var(--danger-light)',bc:'rgba(184,85,62,0.4)'},
-    {k:'tratado',l:'Tratado',bg:'var(--accent-light)',bc:'var(--accent-border)'},
-    {k:'ausente',l:'Ausente',bg:'var(--surface2)',bc:'var(--border)'},
-    {k:'corona',l:'Corona',bg:'var(--info-light)',bc:'rgba(74,107,124,0.35)'},
-    {k:'endodoncia',l:'Endodoncia',bg:'var(--warn-light)',bc:'rgba(201,169,97,0.4)'},
-    {k:'protesis',l:'Prótesis',bg:'#F0EBF7',bc:'rgba(120,80,160,0.3)'},
+    {k:'caries',l:'Caries',bg:ODONTO_PAL.caries.bg,bc:ODONTO_PAL.caries.bd},
+    {k:'tratado',l:'Tratado',bg:ODONTO_PAL.tratado.bg,bc:ODONTO_PAL.tratado.bd},
+    {k:'ausente',l:'Ausente',bg:ODONTO_PAL.ausente.bg,bc:ODONTO_PAL.ausente.bd},
+    {k:'corona',l:'Corona',bg:ODONTO_PAL.corona.bg,bc:ODONTO_PAL.corona.bd},
+    {k:'endodoncia',l:'Endodoncia',bg:ODONTO_PAL.endodoncia.bg,bc:ODONTO_PAL.endodoncia.bd},
+    {k:'protesis',l:'Prótesis',bg:ODONTO_PAL.protesis.bg,bc:ODONTO_PAL.protesis.bd},
     {k:'sano',l:'Restablecer',bg:'var(--surface2)',bc:'var(--border)'}
   ];
   function tooth(n,small=false){
@@ -9449,28 +9627,48 @@ function renderOdonto(){
   const vizPanel=renderToothVizPanel(pView,mode);
   document.getElementById('panel').innerHTML=`
     <div class="card card-fijo">
-      <div class="ct-row"><div class="ct">Odontograma${a!==null?' · '+a+' años':''}${infoBtn('Este es el odontograma vivo del paciente: lo que edites aquí se guarda al instante. Cuando creas una consulta nueva, queda guardada una foto de cómo estaba el odontograma justo en ese momento — esa foto ya no cambia después, aunque sigas editando aquí.')}</div>${statusEl('odonto')}</div>
+      <div class="ct-row"><div class="ct">Odontograma${infoBtn('Este es el odontograma vivo del paciente: lo que edites aquí se guarda al instante. Cuando creas una consulta nueva, queda guardada una foto de cómo estaba el odontograma justo en ese momento — esa foto ya no cambia después, aunque sigas editando aquí.')}</div>${statusEl('odonto')}</div>
       <div class="odonto-controls">
         <label class="ctl-lbl">Dentición:</label>
         <select onchange="setOdontoMode(this.value)">
           <option value="">Auto (${autoMode})</option>
           ${['permanente','decidua','mixta'].filter(m=>m!==autoMode).map(m=>`<option value="${m}"${odontoMode===m?' selected':''}>${m.charAt(0).toUpperCase()+m.slice(1)}</option>`).join('')}
         </select>
-        <label class="ctl-lbl"><input type="checkbox" id="surface-mode" ${surfaceMode?'checked':''} onchange="toggleSurfaceMode()"> Modo superficie</label>
+
       </div>
       <div class="tleg">${legs.map(l=>`<div class="leg${l.neutral?' leg-neutral':''}${l.k===estadoDiente?' sel':''}" onclick="setEst('${l.k}')">${l.neutral?`<div class="ld" style="background:var(--surface2);border:1.5px solid var(--forest);display:flex;align-items:center;justify-content:center"><svg width=\"8\" height=\"8\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\"><circle cx=\"11\" cy=\"11\" r=\"7\"/><path d=\"m20 20-3.5-3.5\"/></svg></div>`:`<div class="ld" style="background:${l.bg};border-color:${l.bc}"></div>`}${l.l}</div>`).join('')}</div>
       <div class="odonto-layout">
         <div class="odonto-chart-wrap">
           ${chart}
-          <p class="odonto-hint">${estadoDiente==='seleccionar'?'Modo Seleccionar: clic en un diente para verlo (no aplica condición) · Clic derecho restablece':((surfaceMode?'Modo superficie: clic abre el detalle por cara · ':'')+'Clic en un diente · Clic derecho para restablecer')}</p>
+          <p class="odonto-hint">${estadoDiente==='seleccionar'?'Modo Seleccionar: clic en un diente para verlo (no aplica condición) · Clic derecho restablece':'Clic en un diente aplica la condición · Clic derecho restablece · Las caras se editan en el panel del diente'}</p>
         </div>
         <div class="odonto-viz-wrap">${vizPanel}</div>
       </div>
       <div class="f" style="margin-top:14px"><label>Observaciones</label><textarea id="o_ob" oninput="autosaveObs()">${e(p.teeth_obs||'')}</textarea></div>
     </div>`;
+  setTimeout(_odontoFitMobile,0);
 }
 window.setOdontoMode=function(m){odontoMode=m||null;renderOdontoKeepScroll();}
-window.toggleSurfaceMode=function(){surfaceMode=document.getElementById('surface-mode').checked;}
+// v10.6 (#17) — en móvil el arco se ESCALA para caber completo en el ancho de
+// pantalla (sin scroll lateral); en desktop no interviene.
+function _odontoFitMobile(){
+  try{
+    const wrap=document.querySelector('#panel .odonto-chart-wrap');
+    if(!wrap)return;
+    wrap.style.zoom='';
+    const need=wrap.scrollWidth, have=wrap.clientWidth;
+    // "Optimizar lectura" aplica body{zoom:1.12} → el contenedor visual
+    // es 12% más grande de lo que reporta clientWidth en px CSS.
+    // Dividimos el espacio disponible entre 1.12 para compensar y
+    // evitar que los dientes desborden al costado en modo accesibilidad.
+    const accessZoom=document.documentElement.getAttribute('data-access')==='1'?1.12:1;
+    const effective=Math.floor((have-32)/accessZoom);
+    if(need>effective&&effective>100){ wrap.style.zoom=String(Math.max(0.5,effective/need)); }
+  }catch(e){}
+}
+window.addEventListener('resize',()=>{ if(tabActual==='odonto'&&viewActual==='paciente')setTimeout(_odontoFitMobile,80); });
+// v11 — "Modo superficie" eliminado: las caras se editan tocándolas en el
+// visualizador del diente (panel derecho), que es el flujo natural.
 window.setEst=function(st){estadoDiente=st;renderOdontoKeepScroll()}
 // Wrapper that preserves panel scroll when re-rendering the odontogram
 // (e.g. clicking a legend chip or changing dentition mode).
@@ -9497,26 +9695,29 @@ window._toothLongPressCancel=function(){
 window.mDiente=async function(n){
   vizToothN=n;
   const p=gp();if(!p)return;
-  // v10.3 fix — Modo superficie tiene prioridad: abre la carta de caras del
-  // diente sin importar la condición activa (antes, "Seleccionar" retornaba
-  // primero y el modo superficie quedaba muerto).
-  if(surfaceMode){renderOdontoKeepScroll();abrirSurfaceModal(n);return;}
-  // Modo neutral "Seleccionar": solo selecciona el diente y muestra su panel; NO modifica el odontograma.
   if(estadoDiente==='seleccionar'){renderOdontoKeepScroll();return;}
+  if(_odontoSaving)return; _odontoSaving=true;
+  const _snapBefore=JSON.stringify(p.teeth||{});
   const tgt=odontoEditTarget(p);
   if(estadoDiente==='sano')delete tgt.teeth[n];
   else tgt.teeth[n]=estadoDiente;
   tgt.commit();
-  logChange('Editó odontograma','Odontograma',p);
-  await guardar(p);renderOdonto();
+  // v11 — el Récord: snapshot del estado ANTERIOR al cambio + descripción exacta
+  logChange(estadoDiente==='sano'?`Restableció diente ${n}`:`Diente ${n} → ${estadoDiente}`,'Odontograma',p,_snapBefore);
+  try{await guardar(p);}finally{_odontoSaving=false;}
+  renderOdonto();
 }
 window.rDiente=async function(ev,n){
   ev.preventDefault();
   const p=gp();if(!p)return;
+  if(_odontoSaving)return; _odontoSaving=true;
+  const _snapBefore=JSON.stringify(p.teeth||{});
   const tgt=odontoEditTarget(p);
   if(tgt.teeth)delete tgt.teeth[n];
   tgt.commit();
-  await guardar(p);renderOdonto();
+  logChange(`Restableció diente ${n}`,'Odontograma',p,_snapBefore);
+  try{await guardar(p);}finally{_odontoSaving=false;}
+  renderOdonto();
 }
 window.autosaveObs=function(){
   autosave('odonto',()=>{const p=gp();if(!p)return null;p.teeth_obs=g('o_ob');return p;},'ss-odonto');
@@ -9620,7 +9821,7 @@ function getPlanConsulta(){
   if(planView===null){ return cs[0]||null; }
   return cs.find(c=>c.id===planView)||cs[0]||null;
 }
-window.setPlanView=function(v){ planView=(v===''||v==null)?null:v; renderPlan(); };
+window.setPlanView=function(v){ flushAutosaves(); planView=(v===''||v==null)?null:v; renderPlan(); };
 function renderPlan(){
   const p=gp();
   const cs=[...(p.consultas||[])].sort((a,b)=>((b.fecha||'')+(b.hora||'')).localeCompare((a.fecha||'')+(a.hora||'')));
@@ -9773,6 +9974,7 @@ window.guardarPresetOdontologo=function(){
 // ITEM 8: restauración/prótesis ahora son por-consulta.
 window.autosaveConsRest=function(){
   autosave('rest',()=>{
+    if(!document.getElementById('pt_re'))return null;
     const p=gp();if(!p)return null;
     const c=getPlanConsulta();if(!c)return null;
     c.restauracion=g('pt_re');c.material=g('pt_ma');c.color_dental=g('pt_cd');c.color_deseado=g('pt_cs');c.laboratorio=g('pt_la');c.indicaciones_tecnico=g('pt_in');c.obs_importantes=g('pt_ob');
@@ -9803,6 +10005,7 @@ function planHistorial(p,ro){
 }
 window.autosaveConsPlan=function(cid){
   autosave('consplan_'+cid,()=>{
+    if(!document.getElementById('pv_pl'))return null;
     const p=gp();if(!p)return null;
     const c=(p.consultas||[]).find(x=>x.id===cid);if(!c)return null;
     c.plan=g('pv_pl');
@@ -9869,7 +10072,7 @@ function renderOps(){
       <div class="opc-body">
         <div class="opc-date">${o.fecha?ff(o.fecha):'<span style="opacity:.6">Sin fecha</span>'}</div>
         <div class="opc-meta">
-          ${o.color?`<span class="opc-pill opc-vita" title="Color VITA"><span class="opc-swatch"></span>${e(o.color)}</span>`:''}
+          ${o.color?`<span class="opc-pill opc-vita" title="Color (${o.colorGuia==='shofu'?'Shofu':'Vita'})"><span class="opc-swatch"></span>${o.colorGuia==='shofu'?'Shofu ':''}${e(o.color)}</span>`:''}
           ${o.fibra?`<span class="opc-pill ${o.fibra==='Sí'?'opc-fibra-si':'opc-fibra'}" title="Fibra de vidrio">Fibra ${e(o.fibra)}</span>`:''}
         </div>
         ${o.marca?`<div class="opc-marca">${e(o.marca)}</div>`:''}
@@ -9898,8 +10101,14 @@ window.opComposer=function(idx){
   const o=(idx>=0&&ops0[idx])?ops0[idx]:{fecha:hoy(),ud:'',fibra:'',color:'',marca:''};
   const allTeeth=[...UPPER,...LOWER,...DECIDUOUS_UPPER,...DECIDUOUS_LOWER];
   const udOptions=allTeeth.map(t=>`<option value="${t}"${String(o.ud)===String(t)?' selected':''}>${t}</option>`).join('');
-  const colorOptions=VITA_SHADES.map(s=>`<option value="${s}"${o.color===s?' selected':''}>${s}</option>`).join('');
-  const extra=(o.color&&!VITA_SHADES.includes(o.color))?`<option value="${e(o.color)}" selected>${e(o.color)}</option>`:'';
+  const guia=o.colorGuia==='shofu'?'shofu':'vita';
+  const _mkColorOpts=(g2)=>{
+    const list=g2==='shofu'?SHOFU_SHADES:VITA_SHADES;
+    let out=list.map(s=>`<option value="${s}"${o.color===s&&guia===g2?' selected':''}>${s}</option>`).join('');
+    if(o.color&&guia===g2&&!list.includes(o.color))out+=`<option value="${e(o.color)}" selected>${e(o.color)}</option>`;
+    return out;
+  };
+  const colorOptions=_mkColorOpts(guia);
   const body=`
     <div class="modal-grid-2">
       <div class="mf"><label>Fecha</label>${dsDateField('opc_fe',o.fecha||'','')}</div>
@@ -9910,13 +10119,17 @@ window.opComposer=function(idx){
       <div class="seg3" id="opcFibSeg">${FIBRA_OPTIONS.map(f=>`<button type="button" class="${o.fibra===f?'on':''}" onclick="opcFib('${f}')">${f}</button>`).join('')}</div>
     </div>
     <div class="modal-grid-2">
-      <div class="mf"><label>Color (guía VITA)</label><select id="opc_color"><option value="">—</option>${colorOptions}${extra}</select></div>
-      <div class="mf"><label>Marca de resina</label><input id="opc_marca" placeholder="Ej: Filtek Z350" value="${e(o.marca||'')}"></div>
-    </div>`;
+      <div class="mf"><label>Guía de color</label><select id="opc_guia" onchange="opcGuia(this.value)">
+        <option value="vita"${guia==='vita'?' selected':''}>Vita clásica</option>
+        <option value="shofu"${guia==='shofu'?' selected':''}>Shofu</option>
+      </select></div>
+      <div class="mf"><label>Color</label><select id="opc_color"><option value="">—</option>${colorOptions}</select></div>
+    </div>
+    <div class="mf"><label>Marca de resina</label><input id="opc_marca" placeholder="Ej: Filtek Z350" value="${e(o.marca||'')}"></div>`;
   abrirModal(idx>=0?'Editar operatoria':'Registrar operatoria', body, async()=>{
     const np=gp(); if(!np)return;
     if(!np.operatorias)np.operatorias=[];
-    const nuevo={fecha:g('opc_fe'),ud:g('opc_ud'),fibra:g('opc_fibra'),color:g('opc_color'),marca:g('opc_marca').trim()};
+    const nuevo={fecha:g('opc_fe'),ud:g('opc_ud'),fibra:g('opc_fibra'),color:g('opc_color'),colorGuia:g('opc_guia')||'vita',marca:g('opc_marca').trim()};
     if(((nuevo.fecha||'')+(nuevo.ud||'')+(nuevo.fibra||'')+(nuevo.color||'')+(nuevo.marca||'')).trim()===''){
       toast('Completa al menos un dato del registro.');return;
     }
@@ -9926,6 +10139,12 @@ window.opComposer=function(idx){
     await guardar(np); cerrarModal(); renderOps();
     toast(idx>=0?'Registro actualizado':'Operatoria registrada');
   });
+};
+window.opcGuia=function(g2){
+  const sel=document.getElementById('opc_color'); if(!sel)return;
+  const list=g2==='shofu'?SHOFU_SHADES:VITA_SHADES;
+  const cur=sel.value;
+  sel.innerHTML='<option value="">—</option>'+list.map(s=>`<option value="${s}"${cur===s?' selected':''}>${s}</option>`).join('');
 };
 window.opcFib=function(f){
   const inp=document.getElementById('opc_fibra'); if(!inp)return;
@@ -10115,6 +10334,15 @@ function logAccess(patientId){
   const p=pacientes.find(x=>x.id===patientId);
   if(!p)return;
   if(!p.records)p.records=[];
+  // FIX integridad: los accesos se acumulaban para siempre — se conservan los
+  // 300 más recientes (los récords de edición/tratamiento no se tocan).
+  try{
+    const acc=p.records.filter(r=>r&&r.tipo==='acceso');
+    if(acc.length>=340){
+      const drop=new Set(acc.slice(0,acc.length-300).map(r=>r.id));
+      p.records=p.records.filter(r=>!(r&&r.tipo==='acceso'&&drop.has(r.id)));
+    }
+  }catch(e){}
   p.records.push({
     id:'a'+Date.now().toString(),
     fecha:hoy(),
@@ -10154,7 +10382,7 @@ function renderRec(){
       <div style="flex:1"></div>
       ${dsDateField('rec_datefilter',recordDateFilter||'',`onchange="setRecDate(this.value)"`)}
       ${recordDateFilter?`<button class="ba" onclick="setRecDate('')">Limpiar fecha</button>`:''}
-      <button class="ba" onclick="modalRec()">+ Agregar tratamiento</button>
+
     </div>
     <div class="card" style="padding:0;overflow:hidden"><div style="overflow-x:auto">
       <table class="rtbl" style="min-width:440px"><thead><tr><th style="width:110px">Fecha</th><th style="width:80px">Tipo</th><th>Detalle</th><th style="width:36px"></th></tr></thead>
@@ -10166,11 +10394,20 @@ function renderRec(){
           return `<tr>
             <td style="white-space:nowrap;color:var(--text3);font-size:11px">${ff(r.fecha)}${r.hora?' '+e(r.hora):''}</td>
             <td><span class="rec-tag rec-tag-${tipo}">${tipoLbl}</span></td>
-            <td>${e(r.tratamiento||'')}${r.user?` <span style="color:var(--text3);font-size:11px">· ${e(r.user)}</span>`:''}</td>
+            <td>${e(r.tratamiento||'')}${r.user?` <span style="color:var(--text3);font-size:11px">· ${e(displayUserByEmail(r.user)||r.user)}</span>`:''}<br>${r.odontoSnapshot?`<button class="ba" style="font-size:10px;padding:2px 8px;margin-top:4px" onclick="verSnapRec('${r.id}')">📷 Estado anterior</button>`:''}</td>
             <td>${tipo==='tratamiento'?`<button class="bdel" onclick="delRec('${r.id}')">✕</button>`:''}</td>
           </tr>`;
         }).join('')}</tbody></table></div></div>`;
 }
+window.verSnapRec=function(rid){
+  if(document.getElementById('MB'))return; // evitar duplicados
+  const p=gp();if(!p)return;
+  const r=(p.records||[]).find(x=>x.id===rid);
+  if(!r||!r.odontoSnapshot)return;
+  abrirModal('Estado anterior del odontograma · '+ff(r.fecha),
+    _miniOdontoChart(r.odontoSnapshot,p.nacimiento),
+    async function(){cerrarModal();});
+};
 window.setRecFilter=function(k){recordFilter=k;renderRec();};
 window.setRecDate=function(v){recordDateFilter=v||'';renderRec();};
 window.modalRec=function(){
@@ -10241,12 +10478,13 @@ function _miniOdontoChart(teeth,nacimiento){
 // Expande un diente del odontograma histórico — misma vista de caras del odontograma
 // real, pero de solo lectura (es una foto de esa consulta, no se edita desde aquí).
 window.expandVCTooth=function(n){
+  const existing=document.getElementById('VCT');if(existing)existing.remove();
   const fake={teeth:window._vcTeeth||{}};
   const{dominant}=getToothState(fake,n);
   const label={sano:'Sano',caries:'Caries',tratado:'Tratado',ausente:'Ausente',corona:'Corona',endodoncia:'Endodoncia',protesis:'Prótesis'}[dominant]||dominant;
   const svg=renderToothVizSVG(fake,n);
   const div=document.createElement('div');
-  div.className='mbg'; div.id='VCT'; div.style.zIndex='650';
+  div.className='mbg'; div.id='VCT'; div.style.zIndex='1200';
   div.innerHTML=`<div class="mbox" style="max-width:300px;text-align:center;position:relative">
     <button onclick="document.getElementById('VCT').remove()" style="position:absolute;top:14px;right:14px;border:none;background:none;font-size:18px;color:var(--text2);cursor:pointer">✕</button>
     <p style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.04em;margin:0 0 4px">Diente ${n} · ${toothPosLabel(n)}</p>
@@ -10356,58 +10594,69 @@ function renderCons(){
 
 /* Specialty consultation fields */
 function _consBodyEspSection(cons){
-  var esp=currentUserPerms&&currentUserPerms.especialidades&&currentUserPerms.especialidades[0]||null;
-  if(!esp)return '';
+  var esps=(currentUserPerms&&currentUserPerms.especialidades)||[];
+  if(!esps.length)return '';
   var x=cons&&cons.clinicaExtra||{};
   function si(id,lbl,val){return '<label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer"><input type="checkbox" id="cx_'+id+'"'+(val?' checked':'')+' style="width:14px;height:14px"> '+lbl+'</label>';}
-  function inp(lbl,id,ph,val){return '<div class="mf"><label style="font-size:11px">'+lbl+'</label><input id="cx_'+id+'" placeholder="'+(ph||'')+'" value="'+(val||'').replace(/"/g,"&quot;")+'"></div>';}
-  function sel(lbl,id,opts,val){return '<div class="mf"><label style="font-size:11px">'+lbl+'</label><select id="cx_'+id+'"><option value="">-</option>'+opts.map(function(o){return '<option'+(val===o?' selected':'')+'>'+(o||'')+'</option>';}).join('')+'</select></div>';}
-  function ta(lbl,id,ph,val){return '<div class="mf"><label style="font-size:11px">'+lbl+'</label><textarea id="cx_'+id+'" placeholder="'+(ph||'')+'" style="min-height:52px">'+(val||'')+'</textarea></div>';}
+  function inp(lbl,id,ph,val){return '<div class="mf"><label>'+lbl+'</label><input id="cx_'+id+'" placeholder="'+(ph||'')+'" value="'+(val||'').replace(/"/g,"&quot;")+'"></div>';}
+  function sel(lbl,id,opts,val){return '<div class="mf"><label>'+lbl+'</label><select id="cx_'+id+'"><option value="">-</option>'+opts.map(function(o){return '<option'+(val===o?' selected':'')+'>'+(o||'')+'</option>';}).join('')+'</select></div>';}
+  function ta(lbl,id,ph,val){return '<div class="mf"><label>'+lbl+'</label><textarea id="cx_'+id+'" placeholder="'+(ph||'')+'" style="min-height:52px">'+(val||'')+'</textarea></div>';}
   function g2(items){return '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">'+items+'</div>';}
-  var body='';
-  if(esp==='Endodoncia'){
-    body=g2(si('dolor','Dolor presente',x.dolor)+si('esp','Espontaneo',x.esp)+si('frio','Al frio',x.frio)+si('calor','Al calor',x.calor)+si('percv','Percusion vertical',x.percv)+si('palp','Palpacion apical',x.palp))
-      +inp('Escala dolor (1-10)','escala','5',x.escala)
-      +sel('Diagnostico pulpar','dxpulp',['Pulpa normal','Pulpitis reversible','Pulpitis irreversible','Necrosis pulpar'],x.dxpulp)
-      +sel('Diagnostico periapical','dxperi',['Normal','Periodontitis sintomatica','Periodontitis asintomatica','Absceso agudo','Absceso cronico'],x.dxperi)
-      +inp('Conductometria (mm)','conduc','Ej: 18mm',x.conduc);
-  } else if(esp==='Periodoncia e Implantolog\u00eda'){
-    body=inp('Sangrado al sondaje (%)','sangrado','Ej: 35%',x.sangrado)
-      +inp('Sondaje maximo (mm)','sondaje','',x.sondaje)
-      +inp('Indice de placa (%)','placa','',x.placa)
-      +g2(si('sg','Sacos gingivales',x.sg)+si('sp','Sacos periodontales',x.sp)+si('mov','Movilidad dentaria',x.mov)+si('furc','Lesion de furca',x.furc))
-      +ta('Hallazgos periodontales','hallazgos','Color, consistencia, contorno...',x.hallazgos);
-  } else if(esp==='Oclusi\u00f3n y Disfunci\u00f3n Temporomandibular'){
-    body=inp('Apertura bucal (mm)','apertura','Ej: 45mm',x.apertura)
-      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'+inp('Lateralidad D (mm)','latd','',x.latd)+inp('Lateralidad I (mm)','lati','',x.lati)+'</div>'
-      +g2(si('chq','Chasquido ATM',x.chq)+si('crep','Crepitacion',x.crep)+si('desv','Desviacion',x.desv)+si('dolm','Dolor muscular',x.dolm))
-      +sel('Escala Melzack (1-5)','melzack',['1 - Leve','2 - Moderado','3 - Intenso','4 - Muy intenso','5 - Intolerable'],x.melzack);
-  } else if(esp==='Patolog\u00eda Oral y Maxilofacial'){
-    body=inp('Tipo de lesion','tles','Mancha, ulcera, papula...',x.tles)
-      +inp('Tamano / extension','tamles','Ej: 1.5x0.8cm',x.tamles)
-      +inp('Color','colorles','',x.colorles)
-      +inp('Consistencia','consles','Blanda, firme, fluctuante...',x.consles)
-      +ta('Diagnostico diferencial','dxdif','',x.dxdif)
-      +inp('Examenes complementarios','excomp','Biopsia, cultivo...',x.excomp);
-  } else if(esp==='Odontopediatr\u00eda'){
-    body=sel('Conducta del nino','conducta',['Cooperador','Con capacidad potencial','Timido','Agresivo','Mimado','Miedoso','Desafiante'],x.conducta)
-      +sel('Tipo de denticion','denticion',['Primaria','Mixta','Permanente'],x.denticion)
-      +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">'+inp('CPOD','cpod','',x.cpod)+inp('ceo','ceo','',x.ceo)+inp('IHOS','ihos','',x.ihos)+'</div>';
-  }
-  if(!body)return '';
-  return '<details style="margin-top:14px;border:0.5px solid var(--accent-border);border-radius:10px;padding:10px 14px;background:var(--mist)"><summary style="font-size:12px;font-weight:600;color:var(--forest);cursor:pointer;list-style:none">\u25b6 Campos de especialidad</summary><div style="margin-top:10px">'+body+'</div></details>';
+  var sections=[];
+  esps.forEach(function(esp){
+    var bBody='';
+    if(esp==='Endodoncia'){
+      bBody=g2(si('dolor','Dolor presente',x.dolor)+si('esp','Espontaneo',x.esp)+si('frio','Al frio',x.frio)+si('calor','Al calor',x.calor)+si('percv','Percusion vertical',x.percv)+si('palp','Palpacion apical',x.palp))
+        +inp('Escala dolor (1-10)','escala','5',x.escala)
+        +sel('Diagnostico pulpar','dxpulp',['Pulpa normal','Pulpitis reversible','Pulpitis irreversible','Necrosis pulpar'],x.dxpulp)
+        +sel('Diagnostico periapical','dxperi',['Normal','Periodontitis sintomatica','Periodontitis asintomatica','Absceso agudo','Absceso cronico'],x.dxperi)
+        +inp('Conductometria (mm)','conduc','Ej: 18mm',x.conduc);
+    } else if(esp==='Periodoncia e Implantolog\u00eda'){
+      bBody=inp('Sangrado al sondaje (%)','sangrado','Ej: 35%',x.sangrado)
+        +inp('Sondaje maximo (mm)','sondaje','',x.sondaje)
+        +inp('Indice de placa (%)','placa','',x.placa)
+        +g2(si('sg','Sacos gingivales',x.sg)+si('sp','Sacos periodontales',x.sp)+si('mov','Movilidad dentaria',x.mov)+si('furc','Lesion de furca',x.furc))
+        +ta('Hallazgos periodontales','hallazgos','Color, consistencia, contorno...',x.hallazgos);
+    } else if(esp==='Oclusi\u00f3n y Disfunci\u00f3n Temporomandibular'){
+      bBody=inp('Apertura bucal (mm)','apertura','Ej: 45mm',x.apertura)
+        +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'+inp('Lateralidad D (mm)','latd','',x.latd)+inp('Lateralidad I (mm)','lati','',x.lati)+'</div>'
+        +g2(si('chq','Chasquido ATM',x.chq)+si('crep','Crepitacion',x.crep)+si('desv','Desviacion',x.desv)+si('dolm','Dolor muscular',x.dolm))
+        +sel('Escala Melzack (1-5)','melzack',['1 - Leve','2 - Moderado','3 - Intenso','4 - Muy intenso','5 - Intolerable'],x.melzack);
+    } else if(esp==='Patolog\u00eda Oral y Maxilofacial'){
+      bBody=inp('Tipo de lesion','tles','Mancha, ulcera, papula...',x.tles)
+        +inp('Tamano / extension','tamles','Ej: 1.5x0.8cm',x.tamles)
+        +inp('Color','colorles','',x.colorles)
+        +inp('Consistencia','consles','Blanda, firme, fluctuante...',x.consles)
+        +ta('Diagnostico diferencial','dxdif','',x.dxdif)
+        +inp('Examenes complementarios','excomp','Biopsia, cultivo...',x.excomp);
+    } else if(esp==='Odontopediatr\u00eda'){
+      bBody=sel('Conducta del nino','conducta',['Cooperador','Con capacidad potencial','Timido','Agresivo','Mimado','Miedoso','Desafiante'],x.conducta)
+        +sel('Tipo de denticion','denticion',['Primaria','Mixta','Permanente'],x.denticion)
+        +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">'+inp('CPOD','cpod','',x.cpod)+inp('ceo','ceo','',x.ceo)+inp('IHOS','ihos','',x.ihos)+'</div>';
+    }
+    if(bBody){
+      sections.push((esps.length>1?'<div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;margin:12px 0 4px">'+esp+'</div>':'')+bBody);
+    }
+  });
+  if(!sections.length)return '';
+  return '<div style="height:1px;background:var(--border-default);margin:14px 0 10px"></div>'
+    +'<div class="mf" style="margin-bottom:4px"><label>Campos de especialidad</label></div>'
+    +sections.join('');
 }
 function _consEspFromModal(prev){
-  var esp=currentUserPerms&&currentUserPerms.especialidades&&currentUserPerms.especialidades[0]||null;
-  if(!esp)return prev||{};
+  var esps=(currentUserPerms&&currentUserPerms.especialidades)||[];
+  if(!esps.length)return prev||{};
   function gv(id){var el=document.getElementById('cx_'+id);return el?el.value:((prev||{})[id]||'');}
   function gc(id){var el=document.getElementById('cx_'+id);return el?el.checked:!!((prev||{})[id]);}
-  if(esp==='Endodoncia')return {dolor:gc('dolor'),esp:gc('esp'),frio:gc('frio'),calor:gc('calor'),percv:gc('percv'),palp:gc('palp'),escala:gv('escala'),dxpulp:gv('dxpulp'),dxperi:gv('dxperi'),conduc:gv('conduc')};
-  if(esp==='Periodoncia e Implantolog\u00eda')return {sangrado:gv('sangrado'),sondaje:gv('sondaje'),placa:gv('placa'),sg:gc('sg'),sp:gc('sp'),mov:gc('mov'),furc:gc('furc'),hallazgos:gv('hallazgos')};
-  if(esp==='Oclusi\u00f3n y Disfunci\u00f3n Temporomandibular')return {apertura:gv('apertura'),latd:gv('latd'),lati:gv('lati'),chq:gc('chq'),crep:gc('crep'),desv:gc('desv'),dolm:gc('dolm'),melzack:gv('melzack')};
-  if(esp==='Patolog\u00eda Oral y Maxilofacial')return {tles:gv('tles'),tamles:gv('tamles'),colorles:gv('colorles'),consles:gv('consles'),dxdif:gv('dxdif'),excomp:gv('excomp')};
-  if(esp==='Odontopediatr\u00eda')return {conducta:gv('conducta'),denticion:gv('denticion'),cpod:gv('cpod'),ceo:gv('ceo'),ihos:gv('ihos')};
-  return prev||{};
+  var result={};
+  esps.forEach(function(esp){
+    if(esp==='Endodoncia')Object.assign(result,{dolor:gc('dolor'),esp:gc('esp'),frio:gc('frio'),calor:gc('calor'),percv:gc('percv'),palp:gc('palp'),escala:gv('escala'),dxpulp:gv('dxpulp'),dxperi:gv('dxperi'),conduc:gv('conduc')});
+    else if(esp==='Periodoncia e Implantolog\u00eda')Object.assign(result,{sangrado:gv('sangrado'),sondaje:gv('sondaje'),placa:gv('placa'),sg:gc('sg'),sp:gc('sp'),mov:gc('mov'),furc:gc('furc'),hallazgos:gv('hallazgos')});
+    else if(esp==='Oclusi\u00f3n y Disfunci\u00f3n Temporomandibular')Object.assign(result,{apertura:gv('apertura'),latd:gv('latd'),lati:gv('lati'),chq:gc('chq'),crep:gc('crep'),desv:gc('desv'),dolm:gc('dolm'),melzack:gv('melzack')});
+    else if(esp==='Patolog\u00eda Oral y Maxilofacial')Object.assign(result,{tles:gv('tles'),tamles:gv('tamles'),colorles:gv('colorles'),consles:gv('consles'),dxdif:gv('dxdif'),excomp:gv('excomp')});
+    else if(esp==='Odontopediatr\u00eda')Object.assign(result,{conducta:gv('conducta'),denticion:gv('denticion'),cpod:gv('cpod'),ceo:gv('ceo'),ihos:gv('ihos')});
+  });
+  return Object.keys(result).length?result:(prev||{});
 }
 window.consBody=function(c){
   c=c||{};
@@ -10591,6 +10840,7 @@ async function confirmarModal(){
   finally{ const m2=document.getElementById('MB'); const b2=m2&&m2.querySelector('.bs'); if(b2){ b2.disabled=false; b2.textContent=b2.dataset._t||'Guardar'; } }
 }
 window.cerrarModal=cerrarModal;window.confirmarModal=confirmarModal;
+window._cerrarModalConConf=_cerrarModalConConf; // FIX: se usa en onclick inline — sin esto, ✕ y Cancelar estaban muertos en TODOS los modales
 window.abrirModal=abrirModal;
 
 // ─── NEW PATIENT (3.2.1, 3.2.2, 3.2.3, 3.2.4) ─────────────────────────────
@@ -10706,12 +10956,13 @@ function abrirModalFlow(titulo,body,opts){
   modalFn=null;
   const div=document.createElement('div');
   div.className='mbg';div.id='MB';
-  div.innerHTML=`<div class="mbox"><h3>${titulo}</h3>${body}<div class="mact">
+  div.innerHTML=`<div class="mbox"><div class="mbox-hdr"><h3>${titulo}</h3><button type="button" class="mbox-close" id="flowX" title="Cerrar">✕</button></div>${body}<div class="mact">
       <button class="bc" id="flowSkip">${opts.omitirLabel||'Omitir'}</button>
       <button class="bs" id="flowSave">${opts.guardarLabel||'Guardar'}</button>
     </div></div>`;
   document.body.appendChild(div);
   div.querySelector('#flowSkip').onclick=()=>{ if(opts.omitir)opts.omitir(); };
+  const _fx=div.querySelector('#flowX'); if(_fx)_fx.onclick=()=>{ if(opts.omitir)opts.omitir(); else div.remove(); };
   div.querySelector('#flowSave').onclick=async()=>{
     const btn=div.querySelector('#flowSave');
     if(btn.disabled)return; btn.disabled=true; const t0=btn.textContent; btn.textContent='Guardando…';
@@ -10853,10 +11104,8 @@ document.addEventListener('click',function(ev){
     r.style.cssText=`width:${size}px;height:${size}px;left:${ev.clientX-rect.left-size/2}px;top:${ev.clientY-rect.top-size/2}px`;
     t.appendChild(r); setTimeout(()=>r.remove(),450);
   }
-  // Sonidos
-  if(!_soundsOn)return;
-  if(t.classList.contains('bdel'))return; // deletes suenan desde sus funciones
-  _playClick(t.classList.contains('tab')?620:t.classList.contains('bs')?820:740);
+  // Sonidos por clic: desactivados — el feedback sonoro queda reservado para
+  // guardar con éxito (_playSuccess) y eliminar (_playDelete), como en el listado.
 },true);
 
 // ─── INIT ─────────────────────────────────────────────────────────────────
