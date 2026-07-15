@@ -587,7 +587,7 @@ body.app-active {
 .ba:hover { background: var(--surface2); border-color: var(--border2); }
 
 /* ── ODONTOGRAMA ────────────────────────────────────────────────────── */
-.ow { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.ow { display: flex; flex-direction: column; align-items: center; gap: 4px; width: max-content; margin: 0 auto; }
 .al { font-size: 9px; font-weight: 500; color: var(--text3); text-transform: uppercase; letter-spacing: 0.12em; }
 .tr { display: flex; gap: 4px; }
 .tooth {
@@ -663,7 +663,7 @@ html[data-theme="dark"] .tooth.protesis { background:#584A72; border-color:#D7C5
 .mbg { position: fixed; inset: 0; background: rgba(26,26,23,0.5); display: flex; align-items: center; justify-content: center; z-index: 1100; padding: 16px; backdrop-filter: blur(2px); }
 .mbox { background: var(--surface); border-radius: var(--rl); padding: 24px; width: 100%; max-width: 420px; border: var(--border-default); max-height: 90vh; overflow-y: auto; }
 .mbox h3 { font-family:'DM Sans',sans-serif; font-size: 20px; font-weight: 600; margin-bottom: 18px; color: var(--text); }
-.mact { display: flex; gap: 8px; justify-content: flex-end; margin-top: 18px; position:sticky; bottom:-2px; background:var(--surface); padding-top:12px; z-index:2; }
+.mact { display: flex; gap: 8px; justify-content: flex-end; margin-top: 18px; }
 .bc { padding: 8px 14px; font-size: 12px; font-family: 'DM Sans', sans-serif; border: var(--border-default); border-radius: var(--r); background: transparent; color: var(--text2); cursor: pointer; }
 .mf { margin-bottom: 12px; }
 .mf label { display: block; font-size: 10px; font-weight: 500; color: var(--text3); margin-bottom: 4px; letter-spacing: 0.06em; text-transform: uppercase; }
@@ -886,7 +886,6 @@ html[data-theme="dark"] .tooth.protesis { background:#584A72; border-color:#D7C5
 /* v11 — header de modal: título a la izquierda, ✕ a la derecha, sticky como bloque */
 .mbox-hdr{
   display:flex; align-items:flex-start; justify-content:space-between; gap:12px;
-  position:sticky; top:-26px; z-index:3; background:var(--surface);
   padding:2px 0 12px; margin:-2px 0 10px;
 }
 .mbox-hdr h3{ margin:0; padding:0; position:static; }
@@ -949,8 +948,46 @@ html[data-theme="dark"] .tooth.protesis { background:#584A72; border-color:#D7C5
   /* Action buttons in phdr: show only icon on very narrow screens */
   .phdr .ba { font-size:11px; padding:5px 8px; white-space:nowrap; }
   .phdr-wa span.lbl { display:none; }
-  .tabbar { padding: 0 10px; position: sticky; top: 60px; z-index: 3; box-shadow: 0 2px 4px rgba(31,58,42,0.04); }
-  .tab { padding: 11px 12px; font-size: 12px; }
+  /* ── BARRA DE PESTAÑAS MÓVIL — scroll horizontal tipo pill bar ── */
+  .tabbar {
+    position: sticky; top: 60px; z-index: 3;
+    flex-wrap: nowrap;
+    overflow-x: auto; overflow-y: visible;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding: 6px 8px;
+    gap: 5px;
+    border-bottom: var(--border-default);
+    box-shadow: none;
+    /* Fade en los bordes para indicar que hay más pestañas */
+    -webkit-mask-image: linear-gradient(to right, transparent 0px, #000 14px, #000 calc(100% - 14px), transparent 100%);
+    mask-image: linear-gradient(to right, transparent 0px, #000 14px, #000 calc(100% - 14px), transparent 100%);
+  }
+  .tabbar::-webkit-scrollbar { display: none; }
+  .tab {
+    flex-shrink: 0;
+    scroll-snap-align: center;
+    padding: 7px 14px;
+    font-size: 12px;
+    font-weight: 500;
+    border-radius: 20px;
+    border-bottom: none !important;
+    color: var(--text3);
+    background: transparent;
+    white-space: nowrap;
+    transition: background 0.18s, color 0.18s;
+  }
+  .tab.on {
+    background: var(--forest);
+    color: var(--bone) !important;
+    font-weight: 600;
+    border-bottom: none !important;
+  }
+  .tab:not(.on):active {
+    background: rgba(31,58,42,0.08);
+    color: var(--text);
+  }
   .card { padding: 14px 14px; }
   .mbox { padding: 18px; }
   .tooth { width: 32px; height: 40px; }
@@ -1966,10 +2003,28 @@ body:has(.dot.ing) .topbar .brand svg { animation: logoBreathe 1.5s var(--ease) 
 }
 .odonto-hint { font-size: 11px; color: var(--text3); text-align: center; margin-top: 10px; letter-spacing: 0.02em; }
 
-/* Mobile — chart hides, viz becomes primary, picker scrolls horizontally */
+/* v12 — pasos intermedios: el chart cede espacio gradualmente, nunca se rompe */
+@media (max-width: 1180px) {
+  .odonto-layout { grid-template-columns: 1.7fr 1fr; gap: 14px; }
+  .tooth { width: 38px; height: 47px; }
+  .tooth .ts { font-size: 12px; }
+}
+@media (max-width: 1024px) {
+  .odonto-layout { grid-template-columns: 1fr; gap: 14px; }
+  .odonto-viz-wrap { max-width: 560px; margin: 0 auto; width: 100%; }
+}
+/* v12 — móvil: los dientes SIGUEN visibles y seleccionables (spec 390px):
+   chart compacto con scroll horizontal controlado + panel debajo */
 @media (max-width: 768px) {
   .odonto-layout { grid-template-columns: 1fr; gap: 12px; }
-  .odonto-chart-wrap { display: none; }
+  .odonto-chart-wrap { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 6px;
+    -webkit-mask-image: linear-gradient(90deg,#000 0,#000 calc(100% - 22px),transparent);
+    mask-image: linear-gradient(90deg,#000 0,#000 calc(100% - 22px),transparent); }
+  .tooth { width: 34px; height: 42px; }
+  .tooth .ts { font-size: 11px; }
+  .tooth .tn { font-size: 8.5px; }
+  .ml { height: 40px; margin: 0 4px; }
+  .odonto-hint { font-size: 10px; }
   .viz-panel { position: static; padding: 0; border-radius: var(--r); }
   .viz-svg { max-width: 280px; }
   .viz-canvas { min-height: 220px; }
@@ -1986,6 +2041,7 @@ body:has(.dot.ing) .topbar .brand svg { animation: logoBreathe 1.5s var(--ease) 
 [data-theme="dark"] .viz-canvas { background: linear-gradient(180deg, var(--surface2) 0%, var(--surface) 100%); }
 [data-theme="dark"] .viz-zone-lbl-lateral { fill: var(--text2); opacity: 0.25; }
 [data-theme="dark"] .viz-pill.on { background: var(--mist); color: var(--forest); border-color: var(--mist); }
+@media(max-width:768px){ [data-theme="dark"] .tab.on { background: var(--mist); color: var(--forest) !important; } }
 [data-theme="dark"] .viz-state-endodoncia { color: #d6c19a; }
 [data-theme="dark"] .viz-state-protesis { color: #b09cd0; background: rgba(120,80,160,0.18); }
 
@@ -3457,6 +3513,84 @@ body.dnd-active .dcw-row{ cursor:grabbing; }
   .viz-picker{ margin-top:8px; }
   .odonto-hint{ margin-top:6px; font-size:10px; }
 }
+
+/* ════════════════════════════════════════════════════════════════════════
+   v12 · SHELL DE MODAL · TOOLBARS · EMPTY STATES · ESPACIADO
+   Escala de espaciado del sistema: 8px (relacionados) · 14px (grupos) ·
+   24px (secciones). Aplicada en toolbars, headers y módulos.
+   ══════════════════════════════════════════════════════════════════════ */
+/* Shell: header natural / cuerpo scrollable / footer natural — el scrollbar
+   pertenece SOLO al cuerpo y nada queda debajo de los botones. */
+.mbox.mbox-shell{
+  display:flex; flex-direction:column; overflow:hidden;
+  max-height:min(90vh,860px); padding:0;
+}
+.mbox-shell .mbox-hdr{ padding:22px 26px 12px; margin:0; flex-shrink:0; }
+.mbox-shell .mbox-body{ flex:1 1 auto; min-height:0; overflow-y:auto; padding:2px 26px 16px; }
+.mbox-shell .mact{
+  flex-shrink:0; margin:0; padding:12px 26px 16px;
+  border-top:0.5px solid var(--border); background:var(--surface);
+}
+@media (max-width:768px){
+  .mbox.mbox-shell{ max-height:calc(100dvh - 24px); }
+  .mbox-shell .mbox-hdr{ padding:16px 16px 10px; }
+  .mbox-shell .mbox-body{ padding:2px 16px 12px; }
+  .mbox-shell .mact{ padding:10px 16px 12px; }
+}
+/* Botón destructivo sólido (confirmaciones) — nunca el verde de acciones positivas */
+.bd-solid{
+  background:var(--terra); color:#FBF1ED; border:none;
+  min-height:36px; padding:0 16px; font-weight:600;
+}
+.bd-solid:hover{ background:#A34936; color:#FBF1ED; }
+.bd-solid:disabled{ opacity:.6; cursor:wait; }
+/* Toolbar del calendario: TODOS los controles a 36px, centrados, mismo radio */
+.cal-nav{ gap:10px; align-items:center; }
+.cal-nav .ba, .cal-nav .bs, .cal-nav .cal-add-btn, .cal-view-btn{
+  min-height:36px !important; max-height:36px !important; height:36px;
+  display:inline-flex; align-items:center; justify-content:center;
+  border-radius:9px !important; padding-top:0 !important; padding-bottom:0 !important;
+  font-size:12.5px; line-height:1;
+}
+.cal-nav .cal-add-btn{ padding:0 16px !important; margin-left:2px; }
+/* ‹ Hoy › viaja como grupo compacto */
+.cal-nav .ba + .ba{ margin-left:-4px; }
+.cal-view-btn{ padding:0 14px; }
+.cal-nav .ba{ min-width:38px; }
+/* El popover del calendario SIEMPRE sobre el stack de overlays */
+.ds-dp-pop{ z-index:1300; }
+/* Espaciado del panel: contenido más cerca de la navegación, sin amontonar */
+.panel{ padding-top:18px; }
+.arch-mini-bar{ margin-bottom:10px; padding:4px 2px 10px; border-bottom:0.5px solid var(--border); }
+.arch-mini-bar .ct{ font-size:15px; }
+/* EmptyStates: misma altura de respiro en los tres módulos */
+.arch-empty{ min-height:230px; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+
+/* v12.1 — el contenedor del arco recorta controlado y puede encoger en el grid
+   (solo >768px; en móvil manda el modo scroll-x con máscara) */
+@media (min-width:769px){ .odonto-chart-wrap{ min-width:0; overflow:hidden; } }
+
+/* ════════ v12.1 · ALINEACIÓN GLOBAL + ESTADOS VERDES + RITMO ════════ */
+.cons-nudge{ align-items:center; }
+.cons-nudge-actions{ gap:8px; }
+.cons-nudge-actions .bs, .cons-nudge-actions button{ min-height:32px; max-height:32px; display:inline-flex; align-items:center; justify-content:center; }
+.cons-nudge-actions button:last-child{ width:32px; padding:0; border-radius:8px; }
+.arch-mini-bar{ align-items:center; }
+.arch-mini-upload-btn{ min-height:30px; max-height:30px; display:inline-flex; align-items:center; }
+.arch-chips-inline .arch-chip{ min-height:28px; max-height:28px; }
+.filter-toggle-btn{ min-height:32px; display:inline-flex; align-items:center; }
+.plist-chip{ min-height:28px; display:inline-flex; align-items:center; }
+.odonto-controls{ align-items:center; gap:12px; }
+.odonto-controls select{ height:34px; }
+.odonto-controls .ctl-lbl{ display:inline-flex; align-items:center; }
+.ba:hover{ color:var(--forest); border-color:var(--accent-border); }
+html[data-theme="dark"] .ba:hover{ color:var(--mist); }
+.bc:hover{ color:var(--forest); border-color:var(--accent-border); }
+html[data-theme="dark"] .bc:hover{ color:var(--mist); }
+.rec-chip:hover,.plist-chip:hover,.arch-seg button:hover{ border-color:var(--accent-border); color:var(--forest); }
+html[data-theme="dark"] .rec-chip:hover,html[data-theme="dark"] .plist-chip:hover,html[data-theme="dark"] .arch-seg button:hover{ color:var(--mist); }
+.ct-row{ margin-bottom:14px; }
+.odonto-viewsel,.plan-viewsel{ margin-bottom:14px; }
 </style>
 </head>
 <body>
@@ -4241,7 +4375,11 @@ function _dsDpPosition(id){
   let top=r.bottom+6;
   // Si no entra abajo en la ventana, se abre hacia arriba del campo.
   if(top+300>window.innerHeight)top=Math.max(10,r.top-306);
-  pop.style.position='fixed'; pop.style.left=left+'px'; pop.style.top=top+'px'; pop.style.zIndex='700';
+  pop.style.position='fixed'; pop.style.left=left+'px'; pop.style.top=top+'px';
+  // FIX CRÍTICO: los modales subieron a z-index 1100 (y el detalle de diente a
+  // 1200) — el calendario quedaba DEBAJO del overlay: existía en el DOM pero
+  // era invisible e inclicable. Ahora vive por encima de todo el stack.
+  pop.style.zIndex='1300';
 }
 function _dsDpReposition(){ if(_dpOpen)_dsDpPosition(_dpOpen); }
 function _dsDpOutside(ev){
@@ -7814,7 +7952,7 @@ function renderCalendarDia(){
     </div>
     <div class="panel">
       ${consultas.length===0?
-        `<div class="empty"><h3>Sin consultas</h3><p>No hay consultas agendadas para este día.</p><div style="display:flex;gap:8px;margin-top:14px;justify-content:center;flex-wrap:wrap"><button class="bs" onclick="calQuickCreate('${dateStr}')">+ Agendar consulta</button><button class="ba" onclick="calVerMes()">← Volver al mes</button></div></div>`:
+        `<div class="card" style="max-width:640px;margin:24px auto 0">${emptyStateHTML({icons:['calendar','plus','calendar'],title:'Sin consultas para este día',desc:'El '+ff(dateStr)+' está libre. Agenda una consulta para cualquier paciente y aparecerá aquí y en su ficha.',btnLabel:'+ Agendar consulta',onclick:"calQuickCreate('"+dateStr+"')"})}<div style="display:flex;justify-content:center;padding-bottom:22px"><button class="ba" style="min-height:36px" onclick="calVerMes()">← Volver al mes</button></div></div>`:
         `<div class="cal-agenda">${consultas.map(c=>{
           const motivo=(c.motivo&&c.motivo.trim())?c.motivo.trim():'';
           const trat=(c.tratamiento||'').trim();
@@ -7961,6 +8099,8 @@ function renderPaciente(){
     <div class="panel" id="panel"></div>`;
   renderTab();
   if(_showNudge)setTimeout(()=>{const el=document.getElementById('consNudge');if(el)el.remove();},60000);
+  // Móvil: centrar el pill de la pestaña activa al cargar el paciente
+  requestAnimationFrame(()=>{const el=document.querySelector('.tabbar .tab.on');if(el)el.scrollIntoView({behavior:'auto',block:'nearest',inline:'center'});});
 }
 let _nudgeShownFor=null;
 
@@ -8029,6 +8169,11 @@ window.cambiarTab=function(tab){
   document.querySelectorAll('.tab').forEach(b=>{
     // v11 — activo por clave (el match por texto marcaba la pestaña equivocada)
     b.classList.toggle('on',b.getAttribute('data-tab')===tab);
+  });
+  // Móvil: desplazar el pill activo al centro de la barra con animación suave
+  requestAnimationFrame(()=>{
+    const el=document.querySelector('.tabbar .tab.on');
+    if(el)el.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
   });
   refreshPviewBarSlot();
   renderTab();
@@ -8354,7 +8499,7 @@ function imgUpload(prepared){
           const sref=stRef(storage,path);
           await Promise.race([
             uploadBytes(sref,blob),
-            new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),15000))
+            new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),30000))
           ]);
           entry.storagePath=path;
           entry.downloadURL=await getDownloadURL(sref);
@@ -8373,7 +8518,7 @@ function imgUpload(prepared){
     await guardar(cur);
     cerrarModal();
     if(typeof toast==='function'){
-      if(fallos>0||!storage) toast(`${prepared.length===1?'Imagen guardada':prepared.length+' imágenes guardadas'} localmente — la nube no está disponible aún`);
+      if(fallos>0||!storage) toast('Archivo guardado localmente. Pendiente de sincronización — se subirá al reconectar.');
       else toast(prepared.length===1?'Imagen subida a la nube':`${prepared.length} imágenes subidas a la nube`);
     }
     renderImagenes();
@@ -8679,7 +8824,7 @@ function archHeaderHTML(active){
       nPdf?'<button type="button" class="arch-chip ac-pdf" onclick="archChip(\'pdf\')">'+nPdf+' PDF</button>':'',
       nWord?'<button type="button" class="arch-chip ac-word" onclick="archChip(\'word\')">'+nWord+' Word</button>':''
     ].filter(Boolean).join('');
-    heroHTML=uploadInput+'<div class="arch-mini-bar"><button type="button" class="ba arch-mini-upload-btn" onclick="document.getElementById(\'archFileInput\').click()" ondragover="event.preventDefault();this.classList.add(\'drag\')" ondragleave="this.classList.remove(\'drag\')" ondrop="event.preventDefault();this.classList.remove(\'drag\');archOnFiles(event.dataTransfer.files)">'+icon('plus',13)+' Subir archivos</button>'+(chips?'<div class="arch-chips-inline">'+chips+'</div>':'')+'</div>';
+    heroHTML=uploadInput+'<div class="arch-mini-bar"><div class="ct" style="margin:0;flex-shrink:0">Archivos</div><button type="button" class="ba arch-mini-upload-btn" onclick="document.getElementById(\'archFileInput\').click()" ondragover="event.preventDefault();this.classList.add(\'drag\')" ondragleave="this.classList.remove(\'drag\')" ondrop="event.preventDefault();this.classList.remove(\'drag\');archOnFiles(event.dataTransfer.files)">'+icon('plus',13)+' Subir archivos</button>'+(chips?'<div class="arch-chips-inline">'+chips+'</div>':'')+'</div>';
   }else{
     heroHTML=uploadInput+'<div class="arch-hero" onclick="document.getElementById(\'archFileInput\').click()" ondragover="event.preventDefault();this.classList.add(\'drag\')" ondragleave="this.classList.remove(\'drag\')" ondrop="event.preventDefault();this.classList.remove(\'drag\');archOnFiles(event.dataTransfer.files)"><div class="arch-hero-art" aria-hidden="true"><span class="aha aha-1">'+icon('image',22)+'</span><span class="aha aha-2">'+icon('filetext',22)+'</span><span class="aha aha-3">'+icon('plus',16)+'</span></div><div class="arch-hero-body"><div class="arch-hero-t">Empieza la historia visual de '+e((titleCase(pt.nombre)||'este paciente').split(' ')[0])+'</div><div class="arch-hero-s">Radiografías, fotos, consentimientos — todo junto al paciente, en la nube.</div></div><button type="button" class="bs arch-hero-btn" onclick="event.stopPropagation();document.getElementById(\'archFileInput\').click()">'+icon('plus',14)+' Subir archivos</button></div>';
   }
@@ -8880,12 +9025,16 @@ function renderDatos(){
   const _editToggle = consultaView===null
     ? roToggleHTML()
     : '';
+  const _roBanDatos = (consultaView===null && isReadOnly())
+    ? `<div class="ds-note ro-banner">${icon('lock',13)} <strong>Solo lectura</strong> — para modificar los datos del paciente, pulsa <em>“Editar”</em> en el control de arriba.</div>`
+    : '';
   const _roBan = datosReadOnly()
     ? (consultaView!==null
         ? `<div class="ds-note ro-banner">${icon('lock',13)} <strong>Solo lectura</strong> — los datos personales son información fija del paciente y no cambian con la consulta seleccionada. Vuelve a <em>Consolidado</em> para modificarlos.</div>`
         : '')
     : '';
   document.getElementById('panel').innerHTML=`
+    ${_roBanDatos}
     ${_roBan}
     <div class="card card-fijo">
       <div class="ct-row" style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap"><div class="ct" style="margin-bottom:0">Datos personales ${pillFijo()}${infoBtn('Información fija del paciente: contacto, fecha de nacimiento y cédula. No cambia entre consultas.')}</div><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">${_editToggle}${statusEl('datos')}<span class="ds-note" style="margin:0">${p.creadoEn?`Registrado el ${adminFmtDate(p.creadoEn)}`:'Fecha de registro no disponible'}${p.creadoEn&&p.creadoPor?` · por ${e(displayUserByEmail(p.creadoPor)||'usuario no disponible')}`:p.creadoEn?' · usuario creador no disponible':''}</span></div></div>
@@ -8945,9 +9094,65 @@ window.autosaveDatos=async function(){
     return p;
   },'ss-datos');
 }
-window.eliminarP=async function(){
+// v12 — modal de confirmación propio de DocuSalud (reemplaza a confirm()).
+window.dsConfirm=function(opts){
+  const old=document.getElementById('DSC'); if(old)old.remove();
+  const div=document.createElement('div');
+  div.className='mbg'; div.id='DSC';
+  div.onclick=ev=>{ if(ev.target===div)div.remove(); };
+  div.innerHTML=`<div class="mbox mbox-shell" style="max-width:400px">
+    <div class="mbox-hdr"><h3>${opts.title||'Confirmar'}</h3><button type="button" class="mbox-close" onclick="document.getElementById('DSC').remove()" title="Cerrar">✕</button></div>
+    <div class="mbox-body">${opts.body||''}<div id="dscErr" style="font-size:12px;color:var(--terra);min-height:14px;margin-top:8px"></div></div>
+    <div class="mact"><button class="bc" onclick="document.getElementById('DSC').remove()">Cancelar</button><button class="bd bd-solid" id="dscOk">${opts.confirmLabel||'Confirmar'}</button></div>
+  </div>`;
+  document.body.appendChild(div);
+  const btn=div.querySelector('#dscOk');
+  btn.onclick=async()=>{
+    if(btn.disabled)return;
+    btn.disabled=true; const t0=btn.textContent; btn.textContent=opts.busyLabel||'Procesando…';
+    try{
+      await opts.onConfirm();
+      const d2=document.getElementById('DSC'); if(d2)d2.remove();
+    }catch(err){
+      const e2=div.querySelector('#dscErr');
+      if(e2)e2.textContent='No se pudo completar: '+((err&&err.message)||'error desconocido')+' — intenta de nuevo.';
+      btn.disabled=false; btn.textContent=t0;
+    }
+  };
+};
+window.eliminarP=function(){
   const p=gp();if(!p)return;
-  if(!confirm(`¿Eliminar a "${p.nombre}"?\n\nIrá a la Papelera (en Ajustes) y podrás restaurarlo durante 30 días.`))return;
+  const pid=p.id;
+  dsConfirm({
+    title:'Enviar a Papelera',
+    confirmLabel:'Enviar a Papelera',
+    busyLabel:'Enviando…',
+    body:`<p style="font-size:13.5px;color:var(--text);margin:0 0 8px"><strong>${e(titleCase(p.nombre)||'Paciente')}</strong>${p.ci?' · '+e(p.ci):''}</p>
+      <p style="font-size:12.5px;color:var(--text2);line-height:1.6;margin:0">El paciente pasará a la <strong>Papelera</strong> (Ajustes) y podrás restaurarlo durante <strong>30 días</strong>. Después de ese plazo se elimina definitivamente.</p>`,
+    onConfirm:async()=>{
+      const np=pacientes.find(x=>x.id===pid);
+      if(!np)throw new Error('paciente no encontrado');
+      np.deleted=true; np.deletedEn=new Date().toISOString();
+      // Confirmación REAL del backend antes de cerrar (sin optimismo aquí)
+      const{id,...data}=np;
+      if(!data.ownerUid&&currentUserUid)data.ownerUid=currentUserUid;
+      await setDoc(doc(db,'pacientes',id),data);
+      pacientes=pacientes.filter(x=>x.id!==pid);
+      if(!_pacientesTrash.find(x=>x.id===pid))_pacientesTrash.push(np);
+      rebuildConsultasIndex();
+      idActual=null;
+      renderLista(); renderEmpty();
+      _playDelete();
+      undoToast(`${np.nombre} movido a la papelera`,async()=>{
+        await papeleraRestore(pid);
+        idActual=pid;renderLista();renderPaciente();
+      });
+    }
+  });
+};
+window._eliminarP_legacy=async function(){
+  const p=gp();if(!p)return;
+  if(!confirm('x'))return;
   // v9 — soft-delete: nada se borra de inmediato; 30 días de gracia en la Papelera.
   p.deleted=true; p.deletedEn=new Date().toISOString();
   await guardar(p);
@@ -9578,6 +9783,8 @@ function odontoEditTarget(p){
   return {teeth:p.teeth, commit:()=>{}};
 }
 function renderOdonto(){
+  // v12.1 — si el usuario ya navegó cuando termina un guardado, no reventar
+  if(!document.getElementById('panel'))return;
   const p=gp();
   // v8 — el odontograma es siempre el consolidado vivo (sin selector). El historial
   // de cómo estaba en cada consulta se ve desde el visual de esa consulta
@@ -9646,7 +9853,7 @@ function renderOdonto(){
       </div>
       <div class="f" style="margin-top:14px"><label>Observaciones</label><textarea id="o_ob" oninput="autosaveObs()">${e(p.teeth_obs||'')}</textarea></div>
     </div>`;
-  setTimeout(_odontoFitMobile,0);
+  setTimeout(()=>{ _odontoFitMobile(); _odontoObserve(); },0);
 }
 window.setOdontoMode=function(m){odontoMode=m||null;renderOdontoKeepScroll();}
 // v10.6 (#17) — en móvil el arco se ESCALA para caber completo en el ancho de
@@ -9656,17 +9863,35 @@ function _odontoFitMobile(){
     const wrap=document.querySelector('#panel .odonto-chart-wrap');
     if(!wrap)return;
     wrap.style.zoom='';
-    const need=wrap.scrollWidth, have=wrap.clientWidth;
+    const ow=wrap.querySelector('.ow');
+    // el arco vive a ancho natural (max-content): su ancho ES la necesidad real
+    const need=(ow?ow.scrollWidth:wrap.scrollWidth), have=wrap.clientWidth;
     // "Optimizar lectura" aplica body{zoom:1.12} → el contenedor visual
     // es 12% más grande de lo que reporta clientWidth en px CSS.
     // Dividimos el espacio disponible entre 1.12 para compensar y
     // evitar que los dientes desborden al costado en modo accesibilidad.
+    // v12 — en móvil (≤768) NO se comprime con zoom: dientes a tamaño táctil
+    // con scroll horizontal controlado (la máscara indica que hay más).
+    if(window.innerWidth<=768){ wrap.style.zoom=''; return; }
     const accessZoom=document.documentElement.getAttribute('data-access')==='1'?1.12:1;
     const effective=Math.floor((have-32)/accessZoom);
-    if(need>effective&&effective>100){ wrap.style.zoom=String(Math.max(0.5,effective/need)); }
+    if(need>effective&&effective>100){ wrap.style.zoom=String(Math.max(0.55,effective/need)); }
   }catch(e){}
 }
 window.addEventListener('resize',()=>{ if(tabActual==='odonto'&&viewActual==='paciente')setTimeout(_odontoFitMobile,80); });
+// v12.1 — el ajuste reacciona al TAMAÑO DEL CONTENEDOR (sidebar, ventana angosta,
+// paneles laterales del navegador), no solo al resize de la ventana.
+let _odontoRO=null;
+function _odontoObserve(){
+  try{
+    if(_odontoRO)_odontoRO.disconnect();
+    const wrap=document.querySelector('#panel .odonto-chart-wrap');
+    if(!wrap||typeof ResizeObserver==='undefined')return;
+    let _t=null;
+    _odontoRO=new ResizeObserver(()=>{ if(_t)clearTimeout(_t); _t=setTimeout(_odontoFitMobile,60); });
+    _odontoRO.observe(wrap);
+  }catch(e){}
+}
 // v11 — "Modo superficie" eliminado: las caras se editan tocándolas en el
 // visualizador del diente (panel derecho), que es el flujo natural.
 window.setEst=function(st){estadoDiente=st;renderOdontoKeepScroll()}
@@ -9827,12 +10052,13 @@ function renderPlan(){
   const cs=[...(p.consultas||[])].sort((a,b)=>((b.fecha||'')+(b.hora||'')).localeCompare((a.fecha||'')+(a.hora||'')));
   // Estado vacío amable cuando no hay consultas.
   if(cs.length===0){
-    document.getElementById('panel').innerHTML=`<div class="card"><div class="empty" style="height:auto;padding:36px 0;gap:14px">
-        <div style="display:flex;justify-content:center;color:var(--text3)">${icon('clipboard',34)}</div>
-        <h3 style="font-family:'DM Sans',sans-serif;font-weight:600;font-size:18px">Aún no hay un plan de tratamiento</h3>
-        <p style="font-family:'DM Sans',sans-serif;color:var(--text2);text-align:center;max-width:380px;line-height:1.6">El plan de tratamiento se guarda dentro de cada consulta — junto con la restauración o prótesis, otros especialistas que intervengan, y las firmas de conformidad. Crea la primera consulta del paciente para empezar a registrarlo.</p>
-        <button class="bs" onclick="modalCons()" style="margin-top:4px">+ Crear consulta y plan</button>
-      </div></div>`;
+    document.getElementById('panel').innerHTML=`<div class="card card-fijo">
+      <div class="ct-row" style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+        <div class="ct" style="margin-bottom:0">Plan de tratamiento${infoBtn('El plan se guarda dentro de cada consulta, junto con la restauración o prótesis, especialistas y firmas de conformidad.')}</div>
+        <button class="bs" onclick="modalCons()">+ Crear consulta y plan</button>
+      </div>
+      ${emptyStateHTML({icons:['clipboard','edit','clipboard'],title:'Aún no hay un plan de tratamiento',desc:'El plan vive dentro de cada consulta — con la restauración o prótesis, los especialistas que intervengan y las firmas de conformidad.',btnLabel:'+ Crear consulta y plan',onclick:'modalCons()'})}
+    </div>`;
     return;
   }
   if(planView!==null && !cs.some(c=>c.id===planView))planView=null;
@@ -10086,13 +10312,18 @@ function renderOps(){
         <div style="display:flex;align-items:center;gap:10px">${statusEl('ops')}<button class="bs" onclick="opComposer(-1)">+ Registrar operatoria</button></div>
       </div>
       ${reales.length?`<div class="opc-grid">${cards}</div>`
-      :`<div class="arch-empty" style="padding:30px 18px">
-          <div class="arch-empty-icons">${icon('edit',24)}${icon('clipboard',24)}${icon('edit',24)}</div>
-          <p class="arch-empty-t">Aún no hay operatorias registradas</p>
-          <p class="arch-empty-s">Cada restauración queda como una tarjeta: diente, color VITA, fibra y marca — legible de un vistazo.</p>
-          <button type="button" class="bs" onclick="opComposer(-1)">+ Registrar la primera</button>
-        </div>`}
+      :emptyStateHTML({icons:['edit','clipboard','edit'],title:'Aún no hay operatorias registradas',desc:'Cada restauración queda como una tarjeta: diente, color, fibra y marca — legible de un vistazo.',btnLabel:'+ Registrar operatoria',onclick:'opComposer(-1)'})}
     </div>`;
+}
+// v12 — EmptyState del sistema: los tres módulos clínicos (Plan, Operatorias,
+// Proc. estéticos) comparten EXACTAMENTE la misma anatomía de estado vacío.
+function emptyStateHTML(o){
+  return `<div class="arch-empty" style="padding:32px 18px">
+    <div class="arch-empty-icons">${(o.icons||['clipboard']).map(i2=>icon(i2,24)).join('')}</div>
+    <p class="arch-empty-t">${o.title||''}</p>
+    <p class="arch-empty-s">${o.desc||''}</p>
+    ${o.btnLabel?`<button type="button" class="bs" onclick="${o.onclick}">${o.btnLabel}</button>`:''}
+  </div>`;
 }
 // Compositor de operatoria: captura/edición enfocada en un modal.
 window.opComposer=function(idx){
@@ -10214,12 +10445,7 @@ function renderEst(){
       <div style="display:flex;align-items:center;gap:10px">${statusEl('est')}<button class="bs" onclick="estComposer()">+ Registrar procedimiento</button></div>
     </div>`;
   if(!grupos.length){
-    html+=`<div class="arch-empty" style="padding:30px 18px">
-      <div class="arch-empty-icons">${icon('clipboard',24)}${icon('calendar',24)}${icon('clipboard',24)}</div>
-      <p class="arch-empty-t">Aún no hay procedimientos registrados</p>
-      <p class="arch-empty-s">Impresiones, provisionales, pruebas de porcelana, cementaciones… cada procedimiento guarda su propia línea de tiempo de fechas y observaciones.</p>
-      <button type="button" class="bs" onclick="estComposer()">+ Registrar el primero</button>
-    </div>`;
+    html+=emptyStateHTML({icons:['clipboard','calendar','clipboard'],title:'Aún no hay procedimientos registrados',desc:'Impresiones, provisionales, pruebas de porcelana, cementaciones… cada procedimiento guarda su propia línea de tiempo de fechas y observaciones.',btnLabel:'+ Registrar procedimiento',onclick:'estComposer()'});
   }else{
     for(const grupo of grupos){
       html+=`<div class="proc-group"><div class="proc-group-title">${grupo.label}</div>`;
@@ -10548,7 +10774,7 @@ window.abrirVisualConsulta=function(cid){
       <p style="font-size:11px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:.04em;margin:0 0 8px">Plan de tratamiento</p>
       <p style="font-size:13px;margin:0 0 12px;${planTxt?'':'color:var(--text3);font-style:italic'}">${planTxt||'Sin plan registrado en esta consulta'}</p>
       <button class="bs" style="width:100%;margin-bottom:8px" onclick="document.getElementById('VC').remove();setPlanView('${cid}');cambiarTab('plan')">Plan de tratamiento</button>
-      <button class="bc" style="width:100%" onclick="document.getElementById('VC').remove();editCons('${cid}')">Editar consulta</button>
+      <button class="bc" style="width:100%" onclick="document.getElementById('VC').remove();editCons('${cid}',true)">Editar consulta</button>
     </div>
   </div>`;
   document.body.appendChild(div);
@@ -10762,7 +10988,7 @@ window.modalCons=function(){
       await guardar(p);cerrarModal();renderLista();renderPaciente();toast('Consulta registrada');
     });
 }
-window.editCons=function(cid){
+window.editCons=function(cid,fromDetail){
   const p=gp();if(!p)return;
   const c=(p.consultas||[]).find(x=>x.id===cid);if(!c){toast('Consulta no encontrada');return;}
   abrirModal('Editar consulta', consBody(c),
@@ -10787,6 +11013,17 @@ window.editCons=function(cid){
       logChange('Editó consulta','Consultas',now);
       await guardar(now);cerrarModal();renderLista();renderPaciente();toast('Consulta actualizada');
     });
+  // v12.1 — al entrar desde el detalle de la consulta, "Cancelar" se convierte
+  // en "← Volver": regresa al detalle en vez de dejarte en la lista.
+  if(fromDetail){
+    setTimeout(()=>{
+      const m=document.getElementById('MB'); if(!m)return;
+      const bc=m.querySelector('.mact .bc');
+      if(bc){ bc.innerHTML='← Volver'; bc.onclick=(ev)=>{ ev&&ev.preventDefault&&ev.preventDefault(); cerrarModal(); if(window.abrirVisualConsulta)window.abrirVisualConsulta(cid); }; }
+      const x=m.querySelector('.mbox-close');
+      if(x){ x.onclick=()=>{ cerrarModal(); if(window.abrirVisualConsulta)window.abrirVisualConsulta(cid); }; }
+    },60);
+  }
 }
 window.checkConflict=function(currentCid){
   const fecha=g('m_fe');const hora=g('m_ho');
@@ -10824,7 +11061,9 @@ function abrirModal(titulo,body,fn){
   const div=document.createElement('div');
   div.className='mbg';div.id='MB';
   div.onclick=function(ev){if(ev.target===div)_cerrarModalConConf();};
-  div.innerHTML=`<div class="mbox"><div class="mbox-hdr"><h3>${titulo}</h3><button type="button" class="mbox-close" onclick="_cerrarModalConConf()" title="Cerrar">✕</button></div>${body}<div class="mact"><button class="bc" onclick="_cerrarModalConConf()">Cancelar</button><button class="bs" onclick="confirmarModal()">Guardar</button></div></div>`;
+  // v12 — SHELL: header natural / cuerpo flex:1 con SU PROPIO scroll / footer
+  // natural. El scrollbar pertenece solo al cuerpo; nada queda bajo el footer.
+  div.innerHTML=`<div class="mbox mbox-shell"><div class="mbox-hdr"><h3>${titulo}</h3><button type="button" class="mbox-close" onclick="_cerrarModalConConf()" title="Cerrar">✕</button></div><div class="mbox-body">${body}</div><div class="mact"><button class="bc" onclick="_cerrarModalConConf()">Cancelar</button><button class="bs" onclick="confirmarModal()">Guardar</button></div></div>`;
   document.body.appendChild(div);
   setTimeout(function(){[].slice.call(div.querySelectorAll('input,textarea,select')).forEach(function(el){el.dataset.iv=el.value||'';});var f=div.querySelector('input,textarea,select');if(f)f.focus();initAutoGrow(div);},50);
 }
@@ -10956,7 +11195,7 @@ function abrirModalFlow(titulo,body,opts){
   modalFn=null;
   const div=document.createElement('div');
   div.className='mbg';div.id='MB';
-  div.innerHTML=`<div class="mbox"><div class="mbox-hdr"><h3>${titulo}</h3><button type="button" class="mbox-close" id="flowX" title="Cerrar">✕</button></div>${body}<div class="mact">
+  div.innerHTML=`<div class="mbox mbox-shell"><div class="mbox-hdr"><h3>${titulo}</h3><button type="button" class="mbox-close" id="flowX" title="Cerrar">✕</button></div><div class="mbox-body">${body}</div><div class="mact">
       <button class="bc" id="flowSkip">${opts.omitirLabel||'Omitir'}</button>
       <button class="bs" id="flowSave">${opts.guardarLabel||'Guardar'}</button>
     </div></div>`;
