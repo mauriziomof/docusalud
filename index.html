@@ -810,10 +810,10 @@ html[data-theme="dark"] .tooth.protesis { background:#584A72; border-color:#D7C5
   border-radius:14px;
   padding:20px 22px;
   margin-bottom:16px;
-  box-shadow:0 1px 2px rgba(31,58,42,0.04), 0 1px 0 rgba(31,58,42,0.02);
-  transition:box-shadow .18s var(--ease,ease), border-color .18s;
+  box-shadow:0 1px 3px rgba(31,58,42,0.04), 0 4px 14px rgba(31,58,42,0.06);
+  transition:box-shadow .25s cubic-bezier(.22,1,.36,1), border-color .18s, transform .18s;
 }
-.card:hover{ box-shadow:0 2px 10px rgba(31,58,42,0.06); }
+.card:hover{ box-shadow:0 4px 12px rgba(31,58,42,0.08), 0 12px 32px rgba(31,58,42,0.10); }
 .card.card-fijo{ border-left:3px solid var(--accent-border); }
 .card.card-var{ border-left:3px solid var(--brass); background:linear-gradient(to right, rgba(210,179,133,0.06) 0, var(--surface) 26px); }
 
@@ -881,12 +881,7 @@ html[data-theme="dark"] .tooth.protesis { background:#584A72; border-color:#D7C5
 /* Pview bar — slightly more polished */
 .pview-bar{ padding:10px 4px 14px; }
 
-<<<<<<< HEAD
-/* Modals — refined header & spacing */
-.mbox{ border-radius:16px; padding:26px 28px; box-shadow:0 18px 50px rgba(26,26,23,0.22); }
-=======
 .mbox{ border-radius:16px; padding:26px 28px; box-shadow:0 24px 64px rgba(26,26,23,0.22), 0 4px 16px rgba(26,26,23,0.10); }
->>>>>>> ec7942927b100fb31bbb994cdb271d79d5df76a0
 .mbox h3{ font-family:'DM Sans',sans-serif; font-weight:400; font-size:21px; }
 /* v11 — header de modal: título a la izquierda, ✕ a la derecha, sticky como bloque */
 .mbox-hdr{
@@ -995,13 +990,16 @@ html[data-theme="dark"] .tooth.protesis { background:#584A72; border-color:#D7C5
   }
   .card { padding: 14px 14px; }
   .mbox { padding: 18px; }
-  .tooth { width: 32px; height: 40px; }
+  .tooth { width: auto; min-width: 0; height: clamp(36px, 10.5vw, 46px); }
   .tooth .tn { font-size: 7px; }
   .tooth .ts { font-size: 10px; }
-  /* Odontograma móvil: scroll horizontal en vez de wrap — mantiene el layout visual */
-  .odonto-chart-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 4px; }
-  .ow { min-width: max-content; }
-  .ml { height: 28px; }
+  /* v13 · Odontograma móvil: TODAS las piezas visibles sin scroll horizontal.
+     Cada arcada envuelve en 2 filas de 8 (una por cuadrante). */
+  .odonto-chart-wrap { overflow-x: hidden; padding-bottom: 4px; }
+  .ow { width: 100%; min-width: 0; }
+  .tr { display: grid; grid-template-columns: repeat(8, minmax(0,1fr)); gap: 4px; width: 100%; }
+  .tr .ml { display: none; }
+  .tr-decidua { display: grid; grid-template-columns: repeat(10, minmax(0,1fr)); gap: 4px; width: 100%; }
   /* Bottom nav: subtle top elevation */
   .bottom-nav { display: flex; box-shadow: 0 -1px 0 rgba(31,58,42,0.06), 0 -4px 12px rgba(31,58,42,0.05); }
   #menuBtn { display: block !important; }
@@ -2022,13 +2020,14 @@ body:has(.dot.ing) .topbar .brand svg { animation: logoBreathe 1.5s var(--ease) 
    chart compacto con scroll horizontal controlado + panel debajo */
 @media (max-width: 768px) {
   .odonto-layout { grid-template-columns: 1fr; gap: 12px; }
-  .odonto-chart-wrap { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 6px;
-    -webkit-mask-image: linear-gradient(90deg,#000 0,#000 calc(100% - 22px),transparent);
-    mask-image: linear-gradient(90deg,#000 0,#000 calc(100% - 22px),transparent); }
-  .tooth { width: 34px; height: 42px; }
-  .tooth .ts { font-size: 11px; }
-  .tooth .tn { font-size: 8.5px; }
-  .ml { height: 40px; margin: 0 4px; }
+  .odonto-chart-wrap { display: block; overflow-x: hidden; padding-bottom: 6px; }
+  .ow { width: 100%; min-width: 0; }
+  .tr { display: grid; grid-template-columns: repeat(8, minmax(0,1fr)); gap: 4px; width: 100%; }
+  .tr .ml { display: none; }
+  .tr-decidua { display: grid; grid-template-columns: repeat(10, minmax(0,1fr)); gap: 4px; width: 100%; }
+  .tooth { width: auto; min-width: 0; height: clamp(40px, 11.5vw, 52px); }
+  .tooth .ts { font-size: clamp(10px, 3vw, 12px); }
+  .tooth .tn { font-size: clamp(8px, 2.3vw, 9.5px); }
   .odonto-hint { font-size: 10px; }
   .viz-panel { position: static; padding: 0; border-radius: var(--r); }
   .viz-svg { max-width: 280px; }
@@ -3023,6 +3022,83 @@ html[data-theme="dark"] .viz-panel{ box-shadow:none; }
 .viz-pill:hover:not(.on){ transform:translateY(-1px); box-shadow:0 3px 8px rgba(26,26,23,0.08); }
 .viz-pill.on{ box-shadow:0 4px 12px rgba(31,58,42,0.28); }
 .viz-state-pill{ font-weight:600; }
+/* v13 · Picker de dientes colapsable (desktop) */
+.viz-picker-details summary{ font-size:12px; color:var(--text2); cursor:pointer; padding:4px 0; user-select:none; }
+.viz-picker-details summary:hover{ color:var(--text); }
+.viz-picker-details[open] summary{ margin-bottom:8px; }
+/* ── v13.1 · Archivos: rediseño según mockup aprobado ── */
+.arch-head{ display:flex; align-items:flex-start; justify-content:space-between; gap:14px; margin:2px 0 14px; }
+.arch-title{ font-family:'DM Sans',sans-serif; font-size:15px; font-weight:600; letter-spacing:0.005em;
+  color:var(--forest); line-height:1.25; padding-left:10px; border-left:3px solid var(--brass); }
+.arch-sub{ font-size:12px; color:var(--text2); margin-top:4px; padding-left:13px; }
+.arch-upload-main{ flex-shrink:0; display:inline-flex; align-items:center; gap:6px; }
+.arch-upload-main.drag{ outline:2px dashed var(--brass); outline-offset:2px; }
+.arch-tabs{ display:inline-flex; gap:6px; background:var(--surface2); border:var(--border-default); border-radius:12px; padding:4px; margin-bottom:14px; }
+.arch-tab{ display:inline-flex; align-items:center; gap:7px; padding:8px 16px; border:none; border-radius:9px;
+  background:transparent; color:var(--text2); font-family:'DM Sans',sans-serif; font-size:13px; font-weight:500; cursor:pointer;
+  transition:background .15s,color .15s,box-shadow .15s; }
+.arch-tab.on{ background:var(--surface); color:var(--text); font-weight:600; box-shadow:0 1px 3px rgba(31,58,42,0.10), inset 0 -2px 0 var(--brass); }
+.arch-tab:not(.on):hover{ color:var(--text); }
+.arch-tab-n{ font-size:11px; font-weight:600; background:var(--surface2); border:0.5px solid var(--border); color:var(--text2);
+  border-radius:8px; padding:1px 7px; min-width:14px; text-align:center; }
+.arch-tab.on .arch-tab-n{ background:var(--accent-light); color:var(--forest); border-color:transparent; }
+.arch-filtercard{ padding:12px 14px; }
+.arch-filters{ display:flex; align-items:flex-end; gap:12px; flex-wrap:wrap; }
+.arch-search{ display:flex; align-items:center; gap:8px; flex:1 1 180px; min-width:160px;
+  background:var(--surface2); border:0.5px solid var(--border2); border-radius:10px; padding:8px 11px; color:var(--text3); }
+.arch-search input{ border:none; background:transparent; outline:none; width:100%; font-family:'DM Sans',sans-serif; font-size:13px; color:var(--text); }
+.arch-filters .img-filter{ display:flex; flex-direction:column; gap:4px; flex:1 1 140px; min-width:130px; }
+.arch-filters .img-filter label{ font-size:10.5px; font-weight:600; letter-spacing:.03em; color:var(--text3); }
+.arch-clear{ display:inline-flex; align-items:center; gap:6px; border:none; background:transparent; color:var(--text2);
+  font-family:'DM Sans',sans-serif; font-size:12.5px; cursor:pointer; padding:8px 6px; border-radius:8px; flex-shrink:0; }
+.arch-clear:hover{ color:var(--text); background:var(--surface2); }
+.arch-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:16px; }
+.arch-card{ margin:0; background:var(--surface); border:var(--border-default); border-radius:14px; overflow:hidden;
+  transition:box-shadow .15s var(--ease), transform .15s var(--ease); }
+.arch-card:hover{ box-shadow:0 8px 22px rgba(31,58,42,0.12); transform:translateY(-1px); }
+.arch-card-img{ position:relative; height:150px; background:var(--surface2); cursor:pointer; }
+.arch-card-img img{ width:100%; height:100%; object-fit:cover; display:block; }
+.arch-cat-chip{ position:absolute; top:10px; left:10px; font-size:9.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase;
+  padding:4px 9px; border-radius:7px; background:var(--mist); color:var(--forest); box-shadow:0 1px 4px rgba(26,26,23,0.18); }
+.arch-cat-chip.cat-otros{ background:#EDE4D3; color:#6B5A3E; }
+.arch-cat-chip.cat-intra{ background:#E5EDF0; color:#4A6B7C; }
+.arch-cat-chip.cat-doc{ background:#F7F1E0; color:#9A7A34; }
+.arch-card-menu{ position:absolute; top:8px; right:8px; width:30px; height:30px; border-radius:50%; border:none; cursor:pointer;
+  background:rgba(250,249,246,0.95); color:var(--text); font-size:15px; line-height:1; display:flex; align-items:center; justify-content:center;
+  box-shadow:0 1px 5px rgba(26,26,23,0.22); }
+.arch-card-menu:hover{ background:#fff; }
+.arch-card-body{ padding:11px 13px 12px; }
+.arch-card-name{ display:flex; align-items:center; gap:7px; font-size:13px; font-weight:600; color:var(--text); }
+.arch-card-name svg{ color:var(--sage); flex-shrink:0; }
+.arch-card-name span{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.arch-card-meta{ display:flex; align-items:center; gap:14px; margin-top:7px; font-size:11.5px; color:var(--text2); }
+.arch-card-meta span{ display:inline-flex; align-items:center; gap:5px; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.arch-card-meta svg{ color:var(--text3); flex-shrink:0; }
+.arch-card-pop{ background:var(--surface); border:var(--border-default); border-radius:12px; box-shadow:0 10px 28px rgba(26,26,23,0.18);
+  padding:5px; min-width:160px; display:flex; flex-direction:column; }
+.arch-card-pop button,.arch-card-pop a{ display:flex; align-items:center; gap:9px; padding:9px 11px; border:none; background:transparent;
+  color:var(--text); font-family:'DM Sans',sans-serif; font-size:12.5px; cursor:pointer; border-radius:8px; text-decoration:none; text-align:left; }
+.arch-card-pop button:hover,.arch-card-pop a:hover{ background:var(--surface2); }
+.arch-card-pop .pop-danger{ color:var(--terra); }
+[data-theme="dark"] .arch-card-menu{ background:rgba(30,30,25,0.9); color:var(--text); }
+[data-theme="dark"] .arch-cat-chip{ box-shadow:none; }
+@media (max-width:768px){
+  .arch-head{ flex-direction:column; }
+  .arch-upload-main{ width:100%; justify-content:center; }
+  .arch-tabs{ width:100%; } .arch-tab{ flex:1; justify-content:center; }
+  .arch-filters{ align-items:stretch; } .arch-search{ flex-basis:100%; }
+  .arch-grid{ grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:10px; }
+  .arch-card-img{ height:120px; }
+}
+/* ── v13 · Teléfono internacional: selector de país + número ── */
+.tel-row{ display:flex; gap:6px; align-items:center; }
+.tel-row .tel-cc{ flex:0 0 112px; max-width:112px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  padding:9px 6px; border-radius:10px; border:0.5px solid var(--border2); background:var(--surface2); color:var(--text);
+  font-family:'DM Sans',sans-serif; font-size:13px; }
+.tel-row .tel-cc:focus{ border-color:var(--forest); background:var(--surface); outline:none; }
+.tel-row input{ flex:1; min-width:0; }
+.tel-warn{ font-size:11px; color:#9A7A34; margin:4px 0 0; font-style:italic; }
+[data-theme="dark"] .tel-row .tel-cc{ background:var(--surface2); color:var(--text); }
 /* ── Plan de tratamiento: firmas y estado de guardado ── */
 .firma-canvas{ border:1.5px dashed var(--border2) !important; border-radius:12px; background:var(--field); transition:border-color .15s; }
 .firma-canvas:hover{ border-color:var(--sage); }
@@ -3429,8 +3505,6 @@ body.dnd-active .dcw-row{ cursor:grabbing; }
 .dcw-list{ overscroll-behavior:contain; }
 .dcw-off-title{ font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--text3); margin:14px 2px 6px; }
 .dcw-list-off{ max-height:none; opacity:.85; }
-<<<<<<< HEAD
-=======
 
 /* ═══════════════════════════════════════════════════════
    v10.5 — SIDEBAR COLAPSABLE + ARCH MINI BAR
@@ -3598,7 +3672,6 @@ html[data-theme="dark"] .bc:hover{ color:var(--mist); }
 html[data-theme="dark"] .rec-chip:hover,html[data-theme="dark"] .plist-chip:hover,html[data-theme="dark"] .arch-seg button:hover{ color:var(--mist); }
 .ct-row{ margin-bottom:14px; }
 .odonto-viewsel,.plan-viewsel{ margin-bottom:14px; }
->>>>>>> ec7942927b100fb31bbb994cdb271d79d5df76a0
 </style>
 </head>
 <body>
@@ -3953,7 +4026,7 @@ window.showApp = function(opts){ window._pendingShowApp = opts || {}; };
       <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg><span class="lbl">Importar</span>
     </button>
     <input type="file" id="impFile" style="display:none" accept=".json,.csv" onchange="importar(event)">
-    <button class="tbtn" onclick="window.print()" title="Imprimir" aria-label="Imprimir">
+    <button class="tbtn" onclick="imprimirPDF()" title="Imprimir" aria-label="Imprimir">
       <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg><span class="lbl">Imprimir</span>
     </button>
     <div class="profile-menu-wrap" id="profileMenuWrap" style="display:none">
@@ -4032,7 +4105,7 @@ window.showApp = function(opts){ window._pendingShowApp = opts || {}; };
 <div class="toast" id="toast"></div>
 
 <script type="module">
-import { collection, onSnapshot, doc, getDoc, setDoc, addDoc, deleteDoc, query, where, getDocs, increment } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { collection, onSnapshot, doc, getDoc, setDoc, addDoc, deleteDoc, query, where, getDocs, increment, waitForPendingWrites } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged, signOut, updateProfile, updatePassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -4089,6 +4162,46 @@ const ESPECIALIDADES=[
   {key:'cirugia',label:'Cirugía'},
   {key:'prostodoncia',label:'Prostodoncia'}
 ];
+// Pestañas por defecto según especialidad (17 especialidades venezolanas).
+// ⚠️  Las claves son los STRINGS EXACTOS de ESP_ODONTO — así pendingEsp[0] hace match directo.
+// Lógica clínica por especialidad:
+//   General        → todo (scope completo de dx, operatorias, estética, récord y consultas)
+//   Endodoncia     → sin ops (no restaura) ni est (no hace estética)
+//   Ortodoncia     → sin ops ni est; seguimiento por cons y rec
+//   Periodoncia    → con ops (cirugía periodontal / implantes); sin est
+//   Cirugía        → con ops (hoja de intervención quirúrgica ≠ consulta); sin est
+//   Prostodoncia   → todo: preparaciones (ops) + selección de color / shade (est)
+//   Odontopediatría→ con ops (resinas pediátricas, coronas de acero); sin est
+//   Patología      → solo dx y seguimiento; sin ops ni est
+//   Radiología     → interpretación de imágenes; sin plan, ops ni est
+//   Forense        → identificación y análisis; sin plan, ops ni est
+//   Estética Dental→ todo (blanqueamiento, carillas — est es su razón de ser)
+//   Rehabilitación → todo (restauración integral + estética)
+//   Oclusión/DTM   → dx y férulas; sin ops ni est
+//   Láser          → con ops (procedimientos tisulares) y est (blanqueamiento láser)
+//   Odontogeriatría→ con ops; sin est (no típico en adultos mayores)
+//   Deporte        → con ops (guardas, traumatología); sin est
+//   Implantología  → con ops (colocación quirúrgica + restauración sobre implante); sin est
+// El admin puede ajustar manualmente en cualquier momento — esto es solo el punto de partida.
+const SPECIALTY_DEFAULT_TABS={
+  'Odontología General':                      ['datos','clinico','odonto','plan','ops','est','rec','cons'],
+  'Endodoncia':                               ['datos','clinico','odonto','plan','rec','cons'],
+  'Ortodoncia y Ortopedia Maxilofacial':      ['datos','clinico','odonto','plan','rec','cons'],
+  'Periodoncia e Implantología':              ['datos','clinico','odonto','plan','ops','rec','cons'],
+  'Cirugía Oral y Maxilofacial':              ['datos','clinico','odonto','plan','ops','rec','cons'],
+  'Prostodoncia (Prótesis Dental)':           ['datos','clinico','odonto','plan','ops','est','rec','cons'],
+  'Odontopediatría':                          ['datos','clinico','odonto','plan','ops','rec','cons'],
+  'Patología Oral y Maxilofacial':            ['datos','clinico','odonto','plan','rec','cons'],
+  'Radiología Oral y Maxilofacial':           ['datos','clinico','odonto','rec','cons'],
+  'Odontología Forense':                      ['datos','clinico','odonto','rec','cons'],
+  'Estética Dental':                          ['datos','clinico','odonto','plan','ops','est','rec','cons'],
+  'Rehabilitación Oral':                      ['datos','clinico','odonto','plan','ops','est','rec','cons'],
+  'Oclusión y Disfunción Temporomandibular':  ['datos','clinico','odonto','plan','rec','cons'],
+  'Láser en Odontología':                     ['datos','clinico','odonto','plan','ops','est','rec','cons'],
+  'Odontogeriatría':                          ['datos','clinico','odonto','plan','ops','rec','cons'],
+  'Odontología del Deporte':                  ['datos','clinico','odonto','plan','ops','rec','cons'],
+  'Implantología Oral':                       ['datos','clinico','odonto','plan','ops','rec','cons'],
+};
 const SPECIALTY_SCHEMAS={
   endodoncia:[
     {key:'pulpa',label:'Estado pulpar',type:'select',options:['','Vital','No vital','Necrótica']},
@@ -4604,6 +4717,16 @@ window.checkLogin = async function(){
 }
 
 window.cerrarSesion = async function(){
+  // v13 · no limpiar sesión con cambios clínicos sin sincronizar sin avisar
+  try{
+    if(Object.keys(_autosaveRun||{}).length)flushAutosaves();
+    if(!navigator.onLine){
+      const seguir=confirm('Tienes cambios que podrían no estar sincronizados y no hay conexión. Si cierras sesión ahora podrías perderlos.\n\n¿Cerrar sesión de todos modos?');
+      if(!seguir)return;
+    }else{
+      await Promise.race([waitForPendingWrites(db),new Promise(r=>setTimeout(r,8000))]);
+    }
+  }catch(e){}
   sessionStorage.removeItem('ds_temp_bypass');
   isAdmin=false;
   viewAsUid=null;
@@ -4809,12 +4932,17 @@ function bootstrapUserPerms(user){
       // v7.6f — capture chosen plan from signup (defaults to free)
       const pendingPlan=sessionStorage.getItem('ds_pending_plan')||'free';
       sessionStorage.removeItem('ds_pending_plan');
+      // Determinar tabs iniciales según especialidad elegida en el registro.
+      // pendingEsp[0] es un string completo de ESP_ODONTO (ej: "Endodoncia")
+      // que coincide directamente con las claves de SPECIALTY_DEFAULT_TABS.
+      const _espStr=pendingEsp&&pendingEsp[0]||null;
+      const _defaultTabs=(_espStr&&SPECIALTY_DEFAULT_TABS[_espStr])||[...ALL_TABS];
       const initial={
         email:user.email||'',
         name:pendingName,
         title:pendingTitle,
-        tabsAllowed:[...ALL_TABS],
-        tabOrder:[...ALL_TABS],
+        tabsAllowed:[..._defaultTabs],
+        tabOrder:[..._defaultTabs],
         especialidades:pendingEsp,
         status:'active',
         plan:pendingPlan,
@@ -4935,9 +5063,9 @@ function renderAjustes(){
         <div class="aj-row">
           <div class="aj-info">
             <div class="aj-name">Sonidos</div>
-            <div class="aj-desc">Un tono breve al guardar con éxito y otro al eliminar.</div>
+            <div class="aj-desc">Un tono sutil con cada clic en la interfaz.</div>
           </div>
-          ${ajSwitch('ajSounds',(function(){try{return localStorage.getItem('ds_sounds')!=='0';}catch(e){return true;}})(),'toggleSounds();renderAjustes&&0;openAjustes()')}
+          ${ajSwitch('ajSounds',(function(){try{return localStorage.getItem('ds_sounds')!=='0';}catch(e){return true;}})(),'toggleSounds()')}
         </div>
         <div class="aj-row">
           <div class="aj-info">
@@ -5252,8 +5380,26 @@ const _agObs=new MutationObserver(()=>initAutoGrow(document));
 document.addEventListener('DOMContentLoaded',()=>{ const ma=document.getElementById('mainArea'); if(ma)_agObs.observe(ma,{childList:true,subtree:true}); initAutoGrow(document); });
 // ── v7.1 connection state hints (#10) ─────────────────────────────────────
 window.addEventListener('offline',()=>ss('off','Sin conexión · los cambios se guardan localmente'));
-if(!navigator.onLine){ ss('off','Sin conexión · los cambios se guardan localmente'); }
-window.addEventListener('online',()=>{ ss('ing','Reconectando…'); setTimeout(()=>ss('ok','Sincronizado'),1500); });
+if(!navigator.onLine){
+  ss('off','Sin conexión · los cambios se guardan localmente');
+  // v13 · recuperación tras recarga offline: la app abre desde el caché del SW,
+  // Firestore restaura los datos y la cola pendiente desde IndexedDB.
+  setTimeout(()=>{ try{toast('Estás trabajando sin conexión. Recuperamos los cambios guardados en este dispositivo y los sincronizaremos cuando vuelva internet.');}catch(e){} },1200);
+}
+// v13 · "Sincronizado" solo cuando el backend CONFIRMA la cola pendiente
+window.addEventListener('online',async()=>{
+  ss('ing','Sincronizando cambios pendientes…');
+  try{
+    await Promise.race([
+      waitForPendingWrites(db),
+      new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),25000))
+    ]);
+    ss('ok','Sincronizado');
+    toast('Todos los cambios fueron sincronizados.');
+  }catch(e){
+    ss('err','No fue posible sincronizar algunos cambios · tu información sigue guardada en este dispositivo');
+  }
+});
 function gp(){return pacientes.find(p=>p.id===idActual)}
 function g(id){const el=document.getElementById(id);return el?el.value:''}
 function e(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
@@ -5296,6 +5442,34 @@ function flushAutosaves(){
   }
 }
 window.flushAutosaves=flushAutosaves;
+// v13 · Aviso de conflicto entre dispositivos (elección explícita, sin merge silencioso)
+let _confAvisoT=0;
+function _conflictoAviso(){
+  const now=Date.now(); if(now-_confAvisoT<30000)return; _confAvisoT=now;
+  if(typeof window.dsConfirm==='function'){
+    window.dsConfirm({
+      title:'Cambios en otro dispositivo',
+      body:'<p style="font-size:13px;line-height:1.5;margin:0">Este registro fue modificado en otro dispositivo. Revisa las diferencias antes de continuar.<br><br><strong>Conservar mis cambios</strong> guarda lo que editaste aquí (sobrescribe lo remoto en los campos editados).<br><strong>Cancelar</strong> descarta tu edición local y muestra la versión remota.</p>',
+      confirmLabel:'Conservar mis cambios',
+      onConfirm:async()=>{ flushAutosaves(); }
+    });
+    // Si el usuario cancela (cierra el diálogo), descartamos la edición local pendiente
+    const _obs=new MutationObserver(()=>{
+      if(!document.getElementById('DSC')){
+        _obs.disconnect();
+        if(Object.keys(_autosaveRun).length){
+          for(const k in autosaveTimers){try{clearTimeout(autosaveTimers[k]);}catch(e){}}
+          for(const k of Object.keys(_autosaveRun))delete _autosaveRun[k];
+          rerenderCurrent();
+        }
+      }
+    });
+    _obs.observe(document.body,{childList:true});
+    setTimeout(()=>{try{_obs.disconnect();}catch(e){}},120000);
+  } else {
+    toast('Este registro fue modificado en otro dispositivo. Revisa las diferencias antes de continuar.');
+  }
+}
 // Al cerrar/recargar con cambios pendientes: guarda (la persistencia offline
 // de Firestore encola el write) y advierte al usuario.
 window.addEventListener('beforeunload',function(e){
@@ -5372,6 +5546,9 @@ function setupPacientesListener(){
     // We DO re-render for calendar/admin, and for changes arriving from other devices
     // (those arrive well after 2500 ms from the last self-save).
     const _selfSave = (Date.now() - _lastSelfSaveTime) < 2500;
+    // v13 · conflicto: el paciente abierto cambió desde OTRO dispositivo mientras
+    // aquí hay edición sin guardar → nunca sobrescribir en silencio.
+    if(!_selfSave && idActual && Object.keys(_autosaveRun).length){ _conflictoAviso(); }
     if(!_selfSave || viewActual==='calendario' || viewActual==='admin'){
       rerenderCurrent();
     }
@@ -5402,6 +5579,7 @@ function rerenderCurrent(){
 async function guardar(p){
   const{id,...data}=p;
   if(!data.ownerUid&&currentUserUid)data.ownerUid=currentUserUid;
+  data.updatedAt=new Date().toISOString(); p.updatedAt=data.updatedAt; // v13 · versionado
   _lastSelfSaveTime=Date.now(); // mark that WE triggered this save
   if(!navigator.onLine){ ss('off','Guardado local · se sincronizará al reconectar'); } else { ss('ing','Guardando...'); }
   // Optimistic local apply so the UI reflects the change immediately, even offline.
@@ -5418,18 +5596,13 @@ async function guardar(p){
     }
   }catch(_e){}
   setDoc(doc(db,'pacientes',id),data)
-<<<<<<< HEAD
     .then(()=>{ss('ok','Sincronizado');ssRest();})
-    .catch(()=>{ss('err','Sin conexión · guardado local, se sincronizará');});
-=======
-    .then(()=>{ss('ok','Sincronizado');ssRest();_playSuccess();})
     .catch(err=>{
       // FIX: antes todo fallo se disfrazaba de "sin conexión" — los errores
       // reales (p. ej. documento demasiado grande) pasaban inadvertidos.
       if(navigator.onLine){ ss('err','Error al guardar — reintenta'); toast('No se pudo guardar: '+((err&&err.message)||'error desconocido')); }
       else ss('err','Sin conexión · guardado local, se sincronizará');
     });
->>>>>>> ec7942927b100fb31bbb994cdb271d79d5df76a0
   return id;
 }
 async function crear(data){
@@ -5443,6 +5616,7 @@ async function crear(data){
   }
   data.ownerUid = viewAsUid || currentUserUid || 'orphan';
   data.creadoEn = new Date().toISOString();
+  data.updatedAt = data.creadoEn; // v13
   data.creadoPor = (auth.currentUser&&auth.currentUser.email)||'';
   if(!navigator.onLine){ ss('off','Guardado local · se sincronizará al reconectar'); } else { ss('ing','Guardando...'); }
   // Generate the doc id locally so we can return immediately (offline-safe).
@@ -5788,6 +5962,9 @@ window.seleccionar=function(id){
   if(idActual!==id){_imgActiveCat='rad';_imgFilters={cat:'',user:'',cons:'',fecha:''};_imgLightboxId=null;_docFilters={tipo:'',user:'',cons:'',fecha:''};_archVista='img';}
   idActual=id;tabActual='datos';viewActual='paciente';consultaView=null;editUnlocked=false;odontoView=null;planView=null;
   logAccess(id);
+  // Flash sutil en el ítem seleccionado
+  const _piEl=document.querySelector(`.pi[onclick*="${id}"]`);
+  if(_piEl){_piEl.classList.add('flash');setTimeout(()=>_piEl.classList.remove('flash'),220);}
   renderLista();renderPaciente();
   if(isMobile())document.getElementById('sidebar').classList.remove('open');
 }
@@ -5823,7 +6000,7 @@ function renderEmpty(){
   const todayConsultas=[];
   for(const p of pacientes){
     for(const c of(p.consultas||[])){
-      if(c.fecha===today)todayConsultas.push({...c,patientName:titleCase(p.nombre),patientId:p.id,patientPhone:p.telefono||''});
+      if(c.fecha===today)todayConsultas.push({...c,patientName:titleCase(p.nombre),patientId:p.id,patientPhone:p.telefono||'',patientCC:p.telefono_cc||''});
     }
   }
   todayConsultas.sort((a,b)=>(a.hora||'00:00').localeCompare(b.hora||'00:00'));
@@ -5925,22 +6102,92 @@ function _dashOrder(isPro){
   }catch(e){}
   return order;
 }
-// v9.3 — Regla de números para WhatsApp: los teléfonos se guardan en formato
-// local (p. ej. "0414-1234567"). Para wa.me: se quita el 0 inicial y se
-// antepone el código de país +1 → "0414…" → "1414…", "0787…" → "1787…".
-// Si el número ya viene con 1 adelante (11+ dígitos), no se duplica.
-function waPhone(phone){
-  let d=(phone||'').replace(/[^0-9]/g,'');
+// ── v13 · TELÉFONOS INTERNACIONALES ─────────────────────────────────────────
+// Antes (v9.3) se anteponía "+1" a todo número — incorrecto para Venezuela y
+// el resto del mercado. Ahora: selector explícito de país + E.164.
+// Aditivo: campos nuevos telefono_cc / telefono2_cc / telefonoE164; los campos
+// telefono/telefono2 existentes NO se tocan ni migran.
+const DS_PAISES=[
+ {f:'\u{1F1FB}\u{1F1EA}',n:'Venezuela',c:'58',len:[9,11]},
+ {f:'\u{1F1FA}\u{1F1F8}',n:'Estados Unidos',c:'1',len:[10,10]},
+ {f:'\u{1F1E8}\u{1F1E6}',n:'Canad\u00e1',c:'1',len:[10,10]},
+ {f:'\u{1F1E8}\u{1F1F4}',n:'Colombia',c:'57',len:[10,10]},
+ {f:'\u{1F1F2}\u{1F1FD}',n:'M\u00e9xico',c:'52',len:[10,10]},
+ {f:'\u{1F1E6}\u{1F1F7}',n:'Argentina',c:'54',len:[10,11]},
+ {f:'\u{1F1E7}\u{1F1F7}',n:'Brasil',c:'55',len:[10,11]},
+ {f:'\u{1F1E8}\u{1F1F1}',n:'Chile',c:'56',len:[9,9]},
+ {f:'\u{1F1F5}\u{1F1EA}',n:'Per\u00fa',c:'51',len:[9,9]},
+ {f:'\u{1F1EA}\u{1F1E8}',n:'Ecuador',c:'593',len:[8,9]},
+ {f:'\u{1F1F5}\u{1F1E6}',n:'Panam\u00e1',c:'507',len:[7,8]},
+ {f:'\u{1F1E8}\u{1F1F7}',n:'Costa Rica',c:'506',len:[8,8]},
+ {f:'\u{1F1E9}\u{1F1F4}',n:'Rep. Dominicana',c:'1',len:[10,10]},
+ {f:'\u{1F1F5}\u{1F1F7}',n:'Puerto Rico',c:'1',len:[10,10]},
+ {f:'\u{1F1FA}\u{1F1FE}',n:'Uruguay',c:'598',len:[8,9]},
+ {f:'\u{1F1F5}\u{1F1FE}',n:'Paraguay',c:'595',len:[9,9]},
+ {f:'\u{1F1E7}\u{1F1F4}',n:'Bolivia',c:'591',len:[8,8]},
+ {f:'\u{1F1EC}\u{1F1F9}',n:'Guatemala',c:'502',len:[8,8]},
+ {f:'\u{1F1ED}\u{1F1F3}',n:'Honduras',c:'504',len:[8,8]},
+ {f:'\u{1F1F8}\u{1F1FB}',n:'El Salvador',c:'503',len:[8,8]},
+ {f:'\u{1F1F3}\u{1F1EE}',n:'Nicaragua',c:'505',len:[8,8]},
+ {f:'\u{1F1EA}\u{1F1F8}',n:'Espa\u00f1a',c:'34',len:[9,9]},
+ {f:'\u{1F1EE}\u{1F1F9}',n:'Italia',c:'39',len:[8,11]},
+ {f:'\u{1F1F5}\u{1F1F9}',n:'Portugal',c:'351',len:[9,9]},
+ {f:'\u{1F1EB}\u{1F1F7}',n:'Francia',c:'33',len:[9,9]},
+ {f:'\u{1F1E9}\u{1F1EA}',n:'Alemania',c:'49',len:[9,12]},
+ {f:'\u{1F1EC}\u{1F1E7}',n:'Reino Unido',c:'44',len:[10,10]},
+ {f:'\u{1F1F3}\u{1F1F1}',n:'Pa\u00edses Bajos',c:'31',len:[9,9]},
+ {f:'\u{1F1E7}\u{1F1EA}',n:'B\u00e9lgica',c:'32',len:[8,9]},
+ {f:'\u{1F1E8}\u{1F1ED}',n:'Suiza',c:'41',len:[9,9]},
+ {f:'\u{1F1EE}\u{1F1EA}',n:'Irlanda',c:'353',len:[9,9]}
+];
+// Normaliza a dígitos E.164 (sin '+'). No duplica el prefijo si el usuario lo escribió.
+function telNorm(cc,num){
+  let d=(num||'').replace(/[^0-9]/g,'');
   if(!d)return null;
-  d=d.replace(/^0+/,'');            // elimina el/los 0 iniciales
+  d=d.replace(/^0+/,'');
+  const c=(cc||'').replace(/[^0-9]/g,'');
+  if(!c)return null;
   if(!d)return null;
-  if(!(d.length>=11&&d.startsWith('1')))d='1'+d;  // código de país +1
-  return d;
+  if(d.startsWith(c)&&d.length>=c.length+7)return d;
+  return c+d;
 }
-function waLink(phone,text){
-  const digits=waPhone(phone);
+function telE164(cc,num){const d=telNorm(cc,num);return d?('+'+d):null;}
+// Muestra legible: +58 412-1234567
+function telDisplay(cc,num){
+  if(!num)return '';
+  const c=(cc||'').replace(/[^0-9]/g,'');
+  if(!c)return num;
+  let d=(num||'').replace(/[^0-9]/g,'').replace(/^0+/,'');
+  if(d.startsWith(c)&&d.length>=c.length+7)d=d.slice(c.length);
+  return '+'+c+' '+(d.length>7?(d.slice(0,3)+'-'+d.slice(3)):d);
+}
+function telValida(cc,num){
+  const c=(cc||'').replace(/[^0-9]/g,'');
+  let d=(num||'').replace(/[^0-9]/g,'').replace(/^0+/,'');
+  if(d.startsWith(c)&&d.length>=c.length+7)d=d.slice(c.length);
+  const p=DS_PAISES.find(x=>x.c===c);
+  const min=p?p.len[0]:7, max=p?p.len[1]:12;
+  return d.length>=min&&d.length<=max;
+}
+const MSG_WA_SIN_CC='El n\u00famero de este paciente no tiene un c\u00f3digo de pa\u00eds v\u00e1lido. Edita el tel\u00e9fono antes de abrir WhatsApp.';
+// waPhone v2: exige código de país explícito o un número ya internacional (+…).
+// NUNCA asume +1. Números legados sin código → null (el caller muestra aviso).
+function waPhone(phone,cc){
+  if(cc){const d=telNorm(cc,phone);return (d&&d.length>=8&&d.length<=15)?d:null;}
+  const raw=(phone||'').trim();
+  if(raw.startsWith('+')){const d=raw.replace(/[^0-9]/g,'');return (d.length>=8&&d.length<=15)?d:null;}
+  return null;
+}
+function waLink(phone,text,cc){
+  const digits=waPhone(phone,cc);
   if(!digits)return null;
   return `https://wa.me/${digits}?text=${encodeURIComponent(text)}`;
+}
+// Campo compuesto: selector de país + número
+function telSelectHTML(id,ccVal,extra=''){
+  const cur=(ccVal||'').replace(/[^0-9]/g,'');
+  return `<select id="${id}" class="tel-cc" ${extra}><option value="">Pa\u00eds\u2026</option>`+
+    DS_PAISES.map(p=>`<option value="${p.c}"${cur===p.c&&(cur!=='1'||(ccVal||'').includes(p.n)||p.n==='Estados Unidos')?' selected':''}>${p.f} +${p.c} \u00b7 ${p.n}</option>`).join('')+`</select>`;
 }
 // ── Catálogo de widgets del dashboard: cada uno sabe construirse a sí mismo.
 // El usuario elige cuáles ver y en qué orden (botón ⚙ del dashboard).
@@ -6024,7 +6271,7 @@ function dashInactivosHTML(size){
   return `<div class="dash-card dash-card-rail">
     <p class="dash-label">Sin visita hace +6 meses${list.length?' · '+list.length:''}</p>
     ${list.length?list.slice(0,lim).map(x=>{
-      const wa=waLink(x.pt.telefono||x.pt.telefono2,`Hola ${(titleCase(x.pt.nombre)||'').split(' ')[0]}, le escribo de su consultorio dental. ¡Hace tiempo no le vemos! ¿Le gustaría agendar un control?`);
+      const wa=waLink(x.pt.telefono||x.pt.telefono2,`Hola ${(titleCase(x.pt.nombre)||'').split(' ')[0]}, le escribo de su consultorio dental. ¡Hace tiempo no le vemos! ¿Le gustaría agendar un control?`,x.pt.telefono?(x.pt.telefono_cc||''):(x.pt.telefono2_cc||''));
       return `<div class="admin-dash-item">
         <span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer" onclick="seleccionar('${x.pt.id}')">${e(titleCase(x.pt.nombre))}</span>
         <span style="display:flex;align-items:center;gap:8px;flex-shrink:0">
@@ -6064,7 +6311,7 @@ const DASH_CATALOG={
       ? `<div class="dash-card dc-today">
           <div class="ct">Consultas de hoy · ${todayConsultas.length}</div>
           ${_shown.map(c=>{
-            const wa=isPro?waLink(c.patientPhone,`Hola ${(c.patientName||'').split(' ')[0]}, te escribo de tu consultorio dental para confirmar tu cita de hoy a las ${c.hora||''}.`):null;
+            const wa=isPro?waLink(c.patientPhone,`Hola ${(c.patientName||'').split(' ')[0]}, te escribo de tu consultorio dental para confirmar tu cita de hoy a las ${c.hora||''}.`,c.patientCC||''):null;
             return `<div class="today-row">
               <div onclick="abrirPacienteConsultas('${c.patientId}')" style="display:flex;align-items:center;gap:14px;flex:1;min-width:0;cursor:pointer">
                 <div class="today-time">${e(c.hora||'--:--')}</div>
@@ -6800,7 +7047,13 @@ function renderAdmin(){
                 : `<span style="color:var(--text3)">Desconectado${discAgo?' · '+discAgo:''}</span>`}
             </div>`;
           })()}
-          ${(u.especialidades&&u.especialidades.length)?`<div class="admin-user-esp">${u.especialidades.map(s=>e(s)).join(' · ')}</div>`:''}
+          ${(u.especialidades&&u.especialidades.length)
+            ? `<div class="admin-user-esp" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:4px 0">
+                <span style="font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text3)">Esp.</span>
+                ${u.especialidades.map(s=>`<span style="font-size:11px;padding:2px 8px;border-radius:980px;background:var(--mist);color:var(--forest);font-weight:500;border:0.5px solid var(--accent-border)">${e(s)}</span>`).join('')}
+                ${SPECIALTY_DEFAULT_TABS[u.especialidades[0]]?`<span style="font-size:10px;color:var(--text3)">(${SPECIALTY_DEFAULT_TABS[u.especialidades[0]].length} tabs default)</span>`:''}
+              </div>`
+            : `<div style="font-size:11px;color:var(--text3);margin:4px 0">Sin especialidad registrada</div>`}
           <div class="admin-devices-row"><button class="admin-devices-toggle" onclick="adminToggleDevices('${u.uid}')"><span id="devchev-${u.uid}">▸</span> Dispositivos</button></div>
           <div class="admin-devices-panel" id="devpanel-${u.uid}" style="display:none"></div>
         </div>
@@ -6818,6 +7071,7 @@ function renderAdmin(){
       </div>
       <div class="admin-user-actions">
         <button class="ba admin-impersonate-btn" onclick="impersonateUser('${u.uid}')" title="Ver como este usuario">Ver como</button>
+        <button class="ba" onclick="adminResetTabsToDefault('${u.uid}')" title="Restaurar pestañas a los defaults de la especialidad del usuario">↺ Defaults esp.</button>
         <button class="bc" onclick="adminSetStatus('${u.uid}','${status==='inactive'?'active':'inactive'}')">${status==='inactive'?'Activar':'Desactivar'}</button>
         <button class="ba" onclick="adminExportUserPatients('${u.uid}','${e(titleCase(u.name)||u.email||uid)}')" title="Exportar datos de este usuario">↓ Datos</button>
         <button class="bd" onclick="adminRemoveUser('${u.uid}')" title="Quitar de la lista">Quitar</button>
@@ -7316,310 +7570,265 @@ window.enviarSoporte=async function(){
 };
 // ===== v7.2 PDF export of current view (#2) =====
 function _loadScript(src){return new Promise((res,rej)=>{if([...document.scripts].some(s=>s.src===src)){res();return;}const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=()=>rej(new Error('load '+src));document.head.appendChild(s);});}
-async function _loadPdfLibs(){ if(!window.html2canvas) await _loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js'); if(!(window.jspdf&&window.jspdf.jsPDF)) await _loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'); }
-async function exportarPDF(){
-  // Always generate PDF — routing logic is handled by window.exportar()
-  const p=(typeof gp==='function'&&gp())||null;
-  const nombre=p&&p.nombre?p.nombre:'DocuSalud';
-  const ci=p&&p.ci?p.ci:'';
-  const fecha=new Date().toLocaleDateString('es-VE',{day:'2-digit',month:'2-digit',year:'numeric'});
-  const fname=(nombre.replace(/[^a-z0-9]+/gi,'_'))+'_'+new Date().toISOString().slice(0,10)+'.pdf';
+async function _loadPdfLibs(){ if(!(window.jspdf&&window.jspdf.jsPDF)) await _loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'); }
+// v13.2 · Generador estructurado del PDF de la historia — construye el documento
+// desde los DATOS del paciente (no captura el DOM). Mismo camino en desktop y móvil.
+function _buildHistoriaPDF(jsPDF, p, H){
+  const doc=new jsPDF('p','mm','letter');
+  const PW=doc.internal.pageSize.getWidth(), PH=doc.internal.pageSize.getHeight();
+  const M=16, W=PW-M*2, BOT=PH-18;
+  const FOREST=[31,58,42], BRASS=[210,179,133], INK=[26,26,23], GRAY=[92,92,86], LGRAY=[150,150,142], LINE=[224,221,212];
+  let y=0;
 
-  // ── MOBILE: html2canvas + jsPDF → real file download / Web Share ──────
-  if(isMobile()){
-    const panel=document.getElementById('panel')||document.getElementById('mainArea');
-    if(!panel){toast('No hay nada para exportar');return;}
-    toast('Generando PDF…');
-    try{
-      await _loadPdfLibs();
-
-      // ── 1. Force white/light theme via injected CSS (safer than removing attribute,
-      //       because html2canvas resolves computed styles — we need a repaint first)
-      const forceStyleId='ds-pdf-force-'+Date.now();
-      const forceStyle=document.createElement('style');
-      forceStyle.id=forceStyleId;
-      forceStyle.textContent=`
-        #ds-pdf-capture, #ds-pdf-capture * {
-          background: white !important;
-          background-color: white !important;
-          color: #1A1A17 !important;
-          border-color: #C9CFC0 !important;
-          -webkit-print-color-adjust: exact !important;
-        }
-        /* CRITICAL: do NOT force fill on SVG graphics — that paints every tooth black.
-           Keep their presentation-attribute fills (already var-resolved on the clone). */
-        #ds-pdf-capture svg, #ds-pdf-capture svg * {
-          background: transparent !important; background-color: transparent !important;
-        }
-        #ds-pdf-capture svg text { fill: #1A1A17 !important; }
-        #ds-pdf-capture .card { background: #FAF9F6 !important; border: 0.5px solid #C9CFC0 !important; }
-        #ds-pdf-capture .tooth { background: #F4F0E2 !important; border: 1px solid #B6BBA8 !important; }
-        #ds-pdf-capture .tooth.caries { background: #FBE8E4 !important; border-color:#B8553E !important; }
-        #ds-pdf-capture .tooth.tratado { background: #E3E7DA !important; border-color:#1F3A2A !important; }
-        #ds-pdf-capture .tooth.ausente { background: #ECEAE0 !important; border-color:#888 !important; }
-        #ds-pdf-capture .tooth.corona { background: #E5EDF0 !important; border-color:#4A6B7C !important; }
-        #ds-pdf-capture .tooth.endodoncia { background: #F7F1E0 !important; border-color:#B89641 !important; }
-        #ds-pdf-capture .tooth.protesis { background: #F0EBF7 !important; border-color:#7850A0 !important; }
-        #ds-pdf-capture .mes-ev, #ds-pdf-capture .cc, #ds-pdf-capture .leg { border: 0.7px solid #B6BBA8 !important; }
-        #ds-pdf-capture textarea, #ds-pdf-capture input, #ds-pdf-capture select {
-          background: #F5F3EE !important; color: #1A1A17 !important; border: 0.5px solid #B6BBA8 !important;
-        }
-      `;
-      document.head.appendChild(forceStyle);
-
-      // ── 2. Expand containers so html2canvas captures FULL scrollable content
-      const layout=document.querySelector('.layout');
-      const main=document.getElementById('mainArea');
-      const prevLayoutS=layout?layout.style.cssText:'';
-      const prevMainS=main?main.style.cssText:'';
-      const prevPanelS=panel.style.cssText;
-      if(layout)layout.style.cssText='overflow:visible;height:auto;display:block';
-      if(main)main.style.cssText='overflow:visible;height:auto;display:block';
-      panel.style.cssText='overflow:visible;height:auto;max-height:none;padding:12px;background:white;';
-
-      // ── 3. Wrap panel in a capture div so forceStyle scopes correctly
-      const captureWrap=document.createElement('div');
-      captureWrap.id='ds-pdf-capture';
-      captureWrap.style.cssText='position:absolute;left:-9999px;top:0;width:800px;background:white;';
-      const panelClone=panel.cloneNode(true);
-      // Remove buttons and UI chrome from clone
-      panelClone.querySelectorAll('button,.save-status,.impersonation-banner,.admin-devices-row,.admin-devices-panel,.resize-handle,.tabbar').forEach(el=>el.remove());
-      // html2canvas cannot resolve CSS custom properties in SVG presentation attributes
-      // e.g. fill="var(--surface)" becomes black. Fix: replace var() refs with hex values.
-      // Static var->hex map (light values, so SVG fills/strokes resolve to real colors,
-      // never the html2canvas "unresolved var() => black" smudge).
-      const _lv={
-        'var(--surface)':'#FAF9F6','var(--surface2)':'#EDE9DF',
-        'var(--bg)':'#F2EFE6','var(--bone)':'#FAF9F6','var(--cream)':'#F2EFE6',
-        'var(--text)':'#1A1A17','var(--text2)':'#5C5C56','var(--text3)':'#7A8A6E',
-        'var(--charcoal)':'#1A1A17','var(--slate)':'#5C5C56','var(--olive)':'#7A8A6E',
-        'var(--border)':'#C9CFC0','var(--border2)':'#AEB6A4',
-        'var(--accent-border)':'#8FA088','var(--rl)':'#C9CFC0',
-        'var(--forest)':'#1F3A2A','var(--sage)':'#2F5D3A','var(--mist)':'#E3E7DA',
-        'var(--accent-light)':'#E3E7DA',
-        'var(--danger-light)':'#FBE8E4','var(--terra)':'#B8553E',
-        'var(--warn-light)':'#F7F1E0','var(--brass)':'#D2B385',
-        'var(--info-light)':'#E5EDF0','var(--petrol)':'#4A6B7C',
-      };
-      // Resolve any var() against the live :root so even names missing from the map
-      // get a real computed color rather than defaulting to black/white.
-      const _rootCS=getComputedStyle(document.documentElement);
-      const _resolveVar=(v)=>{
-        if(!v||!v.includes('var('))return v;
-        if(_lv[v])return _lv[v];
-        const m=v.match(/var\((--[a-z0-9-]+)\)/i);
-        if(m){const cv=_rootCS.getPropertyValue(m[1]).trim();if(cv)return cv;}
-        return v;
-      };
-      panelClone.querySelectorAll('*').forEach(el=>{
-        ['fill','stroke','stop-color'].forEach(attr=>{
-          const v=el.getAttribute(attr);
-          if(v&&v.includes('var(')){
-            const r=_resolveVar(v);
-            // Never let a fill/stroke stay unresolved (black smudge) — fall back to a visible value.
-            el.setAttribute(attr, (r&&!r.includes('var('))?r : (attr==='stroke'?'#9C9C90':'#FAF9F6'));
-          }
-        });
-        if(el.style&&el.style.cssText&&el.style.cssText.includes('var(')){
-          let css=el.style.cssText;
-          for(const[k,v] of Object.entries(_lv))css=css.replaceAll(k,v);
-          // mop up any remaining var(--x) in inline styles via computed lookup
-          css=css.replace(/var\((--[a-z0-9-]+)\)/gi,(mm,name)=>{const cv=_rootCS.getPropertyValue(name).trim();return cv||'#1A1A17';});
-          el.style.cssText=css;
-        }
-      });
-      // SVG hardening: ensure every tooth path/polygon/rect has a visible stroke so
-      // the odontogram reads correctly (and B&W-friendly) in the captured image.
-      panelClone.querySelectorAll('svg path, svg polygon, svg rect, svg line, svg circle').forEach(el=>{
-        const st=el.getAttribute('stroke');
-        if(!st||st==='none'||st==='transparent'){
-          // give surface/tooth shapes a hairline so they don't merge into one black blob
-          if(el.classList&&(el.classList.contains('viz-surf')||el.classList.contains('viz-surf-large'))){
-            el.setAttribute('stroke','#7A8A6E');el.setAttribute('stroke-width', el.getAttribute('stroke-width')||'1');
-          }
-        }
-        const fl=el.getAttribute('fill');
-        if(fl&&fl.includes('var(')){el.setAttribute('fill', _resolveVar(fl)||'#FAF9F6');}
-      });
-      captureWrap.appendChild(panelClone);
-      document.body.appendChild(captureWrap);
-
-      // ── 4. Wait for layout+paint
-      await new Promise(r=>setTimeout(r,300));
-
-      const canvas=await html2canvas(captureWrap,{
-        scale:2,
-        backgroundColor:'#ffffff',
-        useCORS:true,
-        logging:false,
-        scrollX:0,
-        scrollY:0
-      });
-
-      // ── 5. Restore everything
-      captureWrap.remove();
-      document.getElementById(forceStyleId)?.remove();
-      if(layout)layout.style.cssText=prevLayoutS;
-      if(main)main.style.cssText=prevMainS;
-      panel.style.cssText=prevPanelS;
-
-      // ── 6. Build PDF — single image, auto-paginate without empty pages
-      const jsPDF=window.jspdf.jsPDF;
-      const pdf=new jsPDF('p','mm','letter');
-      const pw=pdf.internal.pageSize.getWidth();
-      const ph=pdf.internal.pageSize.getHeight();
-      const margin=10;
-      const hdrH=22;
-      const usableW=pw-margin*2;
-      const usableH=ph-margin*2;
-
-      // Header on first page
-      pdf.setFont('helvetica','bold');pdf.setFontSize(13);pdf.setTextColor(31,58,42);
-      pdf.text('DocuSalud',margin,11);
-      pdf.setFont('helvetica','normal');pdf.setFontSize(9);pdf.setTextColor(80,80,80);
-      pdf.text(nombre,pw-margin,9,{align:'right'});
-      if(ci)pdf.text('C.I.: '+ci,pw-margin,14,{align:'right'});
-      pdf.text(fecha,pw-margin,19,{align:'right'});
-      pdf.setDrawColor(200,200,200);pdf.line(margin,hdrH,pw-margin,hdrH);
-
-      // Image dimensions
-      const imgRatio=canvas.width/canvas.height;
-      const imgWmm=usableW;
-      const imgHmm=imgWmm/imgRatio;
-
-      // Pixels per mm of usable page height
-      const pxPerMm=canvas.height/imgHmm;
-
-      // First page usable height is smaller (header takes space)
-      const firstPageH=usableH-(hdrH-margin);
-      const otherPageH=usableH;
-
-      let yPx=0; // current pixel position in source canvas
-      let isFirst=true;
-
-      while(yPx<canvas.height-1){
-        const availH=isFirst?firstPageH:otherPageH;
-        const slicePx=Math.min(Math.floor(availH*pxPerMm), canvas.height-yPx);
-        if(slicePx<=0)break;
-
-        const sc=document.createElement('canvas');
-        sc.width=canvas.width;
-        sc.height=slicePx;
-        sc.getContext('2d').drawImage(canvas,0,yPx,canvas.width,slicePx,0,0,canvas.width,slicePx);
-
-        const sliceHmm=slicePx/pxPerMm;
-        const yMm=isFirst?(hdrH+2):margin;
-        pdf.addImage(sc.toDataURL('image/jpeg',0.92),'JPEG',margin,yMm,imgWmm,sliceHmm);
-
-        yPx+=slicePx;
-        isFirst=false;
-        if(yPx<canvas.height-1)pdf.addPage();
-      }
-
-      // ── 7. Share or download
-      try{
-        const blob=pdf.output('blob');
-        const file=new File([blob],fname,{type:'application/pdf'});
-        if(navigator.canShare&&navigator.canShare({files:[file]})){
-          await navigator.share({files:[file],title:nombre});
-          return;
-        }
-      }catch(e){}
-      pdf.save(fname);
-
-    }catch(err){
-      toast('Error PDF: '+err.message);
+  const setF=(sz,st,col)=>{doc.setFont('helvetica',st||'normal');doc.setFontSize(sz);const c=col||INK;doc.setTextColor(c[0],c[1],c[2]);};
+  const pageHeader=(first)=>{
+    y=first?16:14;
+    setF(first?15:11,'bold',FOREST); doc.text('docusalud',M,y);
+    if(first){
+      setF(6.5,'normal',LGRAY); doc.text('H I S T O R I A S   C L Í N I C A S   ·   D O C U S A L U D . O R G',M,y+4);
+      setF(11,'bold',INK); doc.text(H.titleCase(p.nombre)||'Paciente',PW-M,y-2,{align:'right'});
+      setF(8,'normal',GRAY);
+      let ry=y+3;
+      if(p.ci){doc.text('C.I.: '+p.ci,PW-M,ry,{align:'right'});ry+=4;}
+      doc.text(H.hoyLabel,PW-M,ry,{align:'right'});
+      y+=9;
+    }else{
+      setF(7.5,'normal',LGRAY); doc.text(H.titleCase(p.nombre)||'',PW-M,y,{align:'right'});
+      y+=3;
     }
-    return;
+    doc.setDrawColor(BRASS[0],BRASS[1],BRASS[2]); doc.setLineWidth(0.7);
+    doc.line(M,y,PW-M,y); y+=8;
+  };
+  const ensure=(h)=>{ if(y+h>BOT){ doc.addPage(); pageHeader(false);} };
+  const section=(t)=>{
+    ensure(14);
+    doc.setFillColor(BRASS[0],BRASS[1],BRASS[2]); doc.rect(M,y-3.4,1.1,4.6,'F');
+    setF(11,'bold',FOREST); doc.text(t,M+3.4,y); y+=7;
+  };
+  const label=(t,x)=>{ setF(6.8,'bold',LGRAY); doc.text((t||'').toUpperCase(),x??M,y); };
+  const wrapText=(t,x,w,sz)=>{
+    setF(sz||9.3,'normal',INK);
+    const lines=doc.splitTextToSize(String(t),w||W);
+    for(const ln of lines){ ensure(4.6); doc.text(ln,x??M,y); y+=4.4; }
+  };
+  const kvGrid=(pairs)=>{ // 2 columnas etiqueta/valor
+    const colW=W/2, xL=M, xR=M+colW+4;
+    for(let i=0;i<pairs.length;i+=2){
+      ensure(9.5);
+      const row=[pairs[i],pairs[i+1]];
+      row.forEach((pr,k)=>{ if(!pr)return; const x=k===0?xL:xR;
+        label(pr[0],x);
+        setF(9.3,'normal',INK);
+        const val=doc.splitTextToSize(String(pr[1]||'—'),colW-6)[0]||'—';
+        doc.text(val,x,y+4);
+      });
+      y+=9.5;
+    }
+  };
+  const fieldBlock=(lbl,val)=>{
+    if(val===undefined||val===null||String(val).trim()==='')return;
+    ensure(10); label(lbl); y+=4.2; wrapText(val); y+=2.4;
+  };
+
+  // ── Página 1
+  pageHeader(true);
+
+  // ── Datos personales
+  section('Datos personales');
+  const tel1=p.telefono?(H.telDisplay(p.telefono_cc,p.telefono)||p.telefono):'—';
+  const tel2=p.telefono2?(H.telDisplay(p.telefono2_cc,p.telefono2)||p.telefono2):'';
+  kvGrid([
+    ['Nombre completo',H.titleCase(p.nombre)||'—'],['Cédula',p.ci||'—'],
+    ['Fecha de nacimiento',H.ff(p.nacimiento)||'—'],['Edad',H.edad(p.nacimiento)||'—'],
+    ['Sexo',p.sexo==='F'?'Femenino':(p.sexo==='M'?'Masculino':(p.sexo||'—'))],['Teléfono',tel1+(tel2?('  ·  '+tel2):'')],
+    ['Email',p.email||'—'],['Especialidad',p.especialidad||'—']
+  ]);
+  y+=1;
+
+  // ── Historia clínica (solo campos con contenido)
+  const hist=[['Motivo de consulta',p.motivo],['Antecedentes',p.antecedentes],['Patologías',p.patologias],
+    ['Alérgicos',p.alergicos],['Oclusión',p.oclusion],['Diagnóstico',p.diagnostico]];
+  if(hist.some(x=>x[1]&&String(x[1]).trim())){
+    section('Historia clínica');
+    hist.forEach(x=>fieldBlock(x[0],x[1]));
   }
 
-  // ── DESKTOP: window.print() with clean CSS ────────────────────────────
-  const layout=document.querySelector('.layout');
-  const main=document.getElementById('mainArea');
-  const panel=document.getElementById('panel');
-  const prevLayout=layout?layout.style.cssText:'';
-  const prevMain=main?main.style.cssText:'';
-  const prevPanel=panel?panel.style.cssText:'';
-  if(layout)layout.style.cssText='overflow:visible;height:auto;display:block';
-  if(main)main.style.cssText='overflow:visible;height:auto;display:block';
-  if(panel)panel.style.cssText='overflow:visible;height:auto;padding:8px 0';
+  // ── Odontograma (dibujado desde los datos)
+  section('Odontograma');
+  const PAL={sano:{f:[244,240,226],b:[182,187,168]},caries:{f:[251,232,228],b:[184,85,62]},
+    tratado:{f:[227,231,218],b:[31,58,42]},ausente:{f:[236,234,224],b:[136,136,136]},
+    corona:{f:[229,237,240],b:[74,107,124]},endodoncia:{f:[247,241,224],b:[184,150,65]},
+    protesis:{f:[240,235,247],b:[120,80,160]}};
+  const SYM={caries:'C',tratado:'T',ausente:'X',corona:'Co',endodoncia:'E',protesis:'P'};
+  const cw=(W-6)/16, ch=11.5;
+  const drawArch=(nums)=>{
+    ensure(ch+6);
+    nums.forEach((n,i)=>{
+      const x=M+i*cw+(i>=8?6:0);
+      const st=H.toothState(p,n); const pal=PAL[st]||PAL.sano;
+      doc.setFillColor(pal.f[0],pal.f[1],pal.f[2]);
+      doc.setDrawColor(pal.b[0],pal.b[1],pal.b[2]);
+      doc.setLineWidth(st==='sano'?0.25:0.55);
+      doc.roundedRect(x,y,cw-1.4,ch,1.6,1.6,'FD');
+      setF(5.6,'normal',GRAY); doc.text(String(n),x+(cw-1.4)/2,y+3.4,{align:'center'});
+      if(st!=='sano'){ setF(7.5,'bold',pal.b); doc.text(SYM[st]||'',x+(cw-1.4)/2,y+8.4,{align:'center'}); }
+    });
+    y+=ch+2.5;
+  };
+  setF(6.6,'bold',LGRAY); doc.text('SUPERIOR',M,y); y+=2.8;
+  drawArch(H.UPPER);
+  drawArch(H.LOWER);
+  setF(6.6,'bold',LGRAY); doc.text('INFERIOR',M,y); y+=4;
+  // leyenda
+  ensure(6);
+  let lx=M;
+  [['Caries','caries'],['Tratado','tratado'],['Ausente','ausente'],['Corona','corona'],['Endodoncia','endodoncia'],['Prótesis','protesis']].forEach(([lbl,k])=>{
+    const pal=PAL[k];
+    doc.setFillColor(pal.f[0],pal.f[1],pal.f[2]); doc.setDrawColor(pal.b[0],pal.b[1],pal.b[2]); doc.setLineWidth(0.3);
+    doc.circle(lx+1.5,y-1,1.5,'FD');
+    setF(7.2,'normal',GRAY); doc.text(lbl,lx+4.2,y);
+    lx+=doc.getTextWidth(lbl)+11;
+  });
+  y+=5;
+  if(p.teeth_obs&&String(p.teeth_obs).trim()){ fieldBlock('Observaciones del odontograma',p.teeth_obs); }
 
-  const printId='ds-ph-'+Date.now();
-  const styleId='ds-ps-'+Date.now();
-  const header=document.createElement('div');
-  header.id=printId;
-  header.innerHTML=`
-    <div style="display:flex;align-items:center;justify-content:space-between;padding-bottom:10px;border-bottom:1.5px solid #ccc;margin-bottom:14px;font-family:'DM Sans',sans-serif">
-      <div>
-        <div style="font-size:18px;font-weight:700;color:#1F3A2A">docusalud</div>
-        <div style="font-size:9px;color:#888;letter-spacing:.05em;margin-top:2px">HISTORIAS CLÍNICAS · docusalud.org</div>
-      </div>
-      <div style="text-align:right;font-size:11px;color:#444">
-        <div style="font-weight:600;font-size:13px;color:#1F3A2A">${nombre}</div>
-        ${ci?`<div style="margin-top:2px">C.I.: ${ci}</div>`:''}
-        <div style="color:#999;margin-top:2px">${fecha}</div>
-      </div>
-    </div>`;
-  header.style.cssText='display:none;padding:14px 20px 0;background:white;';
-  document.body.appendChild(header);
+  // ── Consultas (más reciente primero)
+  const consultas=[...(p.consultas||[])].sort((a,b)=>((b.fecha||'')+(b.hora||'')).localeCompare((a.fecha||'')+(a.hora||'')));
+  if(consultas.length){
+    section('Consultas  ·  '+consultas.length);
+    consultas.forEach(c=>{
+      ensure(16);
+      doc.setDrawColor(LINE[0],LINE[1],LINE[2]); doc.setLineWidth(0.3);
+      doc.line(M,y-1.5,PW-M,y-1.5); y+=2.5;
+      setF(9.6,'bold',FOREST);
+      doc.text((H.ff(c.fecha)||'Sin fecha')+(c.hora?('  ·  '+c.hora):''),M,y);
+      if(c.costo){ setF(9.6,'bold',INK); doc.text('$'+(parseFloat(c.costo)||0).toLocaleString(),PW-M,y,{align:'right'}); }
+      y+=5;
+      const bits=[];
+      if(c.motivo&&c.motivo.trim())bits.push(['Motivo',c.motivo]);
+      if(c.tratamiento&&c.tratamiento.trim())bits.push(['Tratamiento',c.tratamiento]);
+      if(c.dientes)bits.push(['Dientes',c.dientes]);
+      if(c.diagnostico&&String(c.diagnostico).trim())bits.push(['Diagnóstico',c.diagnostico]);
+      bits.forEach(b=>fieldBlock(b[0],b[1]));
 
-  const style=document.createElement('style');
-  style.id=styleId;
-  style.textContent=`
-    @media print{
-      #${printId}{ display:block !important; }
-      html,html[data-theme="dark"]{--surface:#FAF9F6;--surface2:#EDE9DF;--text:#1A1A17;--text2:#5C5C56;--text3:#7A8A6E;--border:rgba(31,58,42,0.12);--accent-light:#E3E7DA;--bg:#F2EFE6;--bone:#FAF9F6;--warn-light:#F7F1E0;--danger-light:#FBE8E4;--info-light:#E5EDF0;}
-      *{ background:white !important; color:#1A1A17 !important;
-         -webkit-print-color-adjust:exact; print-color-adjust:exact; border-color:#E0DDD4 !important; }
-      .tooth{background:#EDE9DF !important; border:1px solid #4a4a44 !important;}
-      .tooth.caries{background:#FBE8E4 !important; border:1.6px solid #000 !important;}
-      .tooth.tratado{background:#E3E7DA !important; border:1.6px dashed #000 !important;}
-      .tooth.ausente{border:1.4px dotted #000 !important;}
-      .tooth.corona{border:1.6px double #000 !important;}
-      .tooth.endodoncia{border:1.6px solid #000 !important;}
-      .tooth.protesis{border:1.6px groove #000 !important;}
-      .tooth .ts{color:#000 !important; font-weight:700 !important;}
-      svg .viz-surf,svg .viz-surf-large,svg path,svg polygon,svg rect{stroke:#3a3a34 !important;}
-      svg text{fill:#000 !important;}
-      .tleg,.leg{display:flex !important;} .leg{border:0.8px solid #888 !important;} .leg.sel{border:1.4px solid #000 !important;}
-      .mes-grid,.mes-weekrow{display:grid !important;} .mes-cell{border:0.8px solid #999 !important;} .mes-cell.hoy{border:1.6px solid #000 !important;}
-      .mes-ev{display:flex !important; border:0.7px solid #888 !important;} .mes-ev-bar{display:none !important;} .mes-ev.past{opacity:0.7 !important;}
-      .mes-badge{border:0.8px solid #000 !important; color:#000 !important;}
-      .cal-row{border:0.7px solid #999 !important; border-left:3px solid #000 !important;} .cal-lbl{border:0.5px solid #999 !important; color:#000 !important;}
-      .hist-card,.hist-field,.cc{border:0.8px solid #bbb !important;}
-      .rec-tag,.viz-state-pill{border:0.8px solid #000 !important; color:#000 !important;}
+      // Plan de tratamiento + firmas de ESTA consulta
+      const f=c.firmas||{};
+      const hasPlan=(c.plan&&String(c.plan).trim())||(c.restauracion&&String(c.restauracion).trim())||f.paciente||f.odontologo;
+      if(hasPlan){
+        ensure(10);
+        setF(8.4,'bold',FOREST); doc.text('Plan de tratamiento',M,y); y+=4.6;
+        if(c.plan&&String(c.plan).trim())fieldBlock('Plan',c.plan);
+        if(c.plan_aceptado)fieldBlock('Aceptación del plan',c.plan_aceptado);
+        if(c.restauracion&&String(c.restauracion).trim())fieldBlock('Restauración / prótesis',c.restauracion);
+        if(c.material)fieldBlock('Material',c.material);
+        if(c.laboratorio)fieldBlock('Laboratorio / técnico',c.laboratorio);
+        if(c.indicaciones_tecnico)fieldBlock('Indicaciones al técnico',c.indicaciones_tecnico);
+        if(c.obs_importantes)fieldBlock('Observaciones importantes',c.obs_importantes);
+        if((c.especialistas||[]).length)fieldBlock('Especialistas',(c.especialistas||[]).map(s=>typeof s==='string'?s:(s.nombre||'')).filter(Boolean).join(', '));
 
-      .topbar,.sidebar,.tabbar,.bottom-nav,.side-menu,.side-menu-overlay,
-      .dark-toggle,.profile-btn,.sync-wrap,.ba,.bd,.bc,.bnew,.tbtn,
-      .plist-filterbar,.filter-panel,.resize-handle,.save-status,
-      .admin-devices-row,.admin-devices-panel,.impersonation-banner
-      { display:none !important; }
-      body,html{ overflow:visible !important; height:auto !important; background:white !important; }
-      .layout,.main{ overflow:visible !important; height:auto !important; display:block !important; }
-      .panel{ overflow:visible !important; height:auto !important; min-height:0 !important; padding:8px 0 !important; }
-      .phdr{ position:static !important; box-shadow:none !important; }
-      .card{ break-inside:avoid; }
-      textarea,input,select{ border:none !important; background:transparent !important; padding:0 !important; resize:none !important; }
-      @page{ size:letter portrait; margin:14mm 16mm 18mm; }
-    }`;
-  document.head.appendChild(style);
-
-  toast('Generando PDF…');
-  await new Promise(r=>setTimeout(r,150));
-
-  function _restorePrint(){
-    window.removeEventListener('afterprint',_restorePrint);
-    if(layout)layout.style.cssText=prevLayout;
-    if(main)main.style.cssText=prevMain;
-    if(panel)panel.style.cssText=prevPanel;
-    const h=document.getElementById(printId);
-    const s=document.getElementById(styleId);
-    if(h)h.remove(); if(s)s.remove();
+        // Firmas: SIEMPRE en bloque completo (jamás cortadas por un salto de página)
+        const sigH=34; ensure(sigH+8);
+        const half=(W-8)/2;
+        const sig=(x,dataUrl,who)=>{
+          doc.setDrawColor(LINE[0],LINE[1],LINE[2]); doc.setLineWidth(0.35);
+          doc.roundedRect(x,y,half,sigH-8,2,2,'S');
+          if(dataUrl){
+            try{ doc.addImage(dataUrl,'PNG',x+half*0.12,y+2.4,half*0.76,sigH-13,undefined,'FAST'); }
+            catch(e1){ try{ doc.addImage(dataUrl,'JPEG',x+half*0.12,y+2.4,half*0.76,sigH-13,undefined,'FAST'); }
+              catch(e2){ setF(8,'italic',LGRAY); doc.text('Firma no disponible',x+half/2,y+(sigH-8)/2,{align:'center'}); } }
+          }else{
+            setF(8.4,'italic',LGRAY); doc.text('Firma pendiente',x+half/2,y+(sigH-8)/2+1.2,{align:'center'});
+          }
+          setF(6.8,'bold',LGRAY); doc.text(who.toUpperCase(),x,y+sigH-3.4);
+        };
+        sig(M,f.paciente,'Firma del paciente');
+        sig(M+half+8,f.odontologo,'Firma del odontólogo');
+        y+=sigH;
+        if(f.fecha){ setF(7.4,'normal',GRAY); doc.text('Firmado: '+H.ff(String(f.fecha).slice(0,10)),M,y); y+=4.5; }
+        y+=1.5;
+      }
+      y+=2;
+    });
   }
-  window.addEventListener('afterprint',_restorePrint);
-  setTimeout(()=>_restorePrint(),8000);
-  window.print();
+
+  // ── Operatorias
+  const ops=(p.operatorias||[]).filter(o=>o&&(o.fecha||o.ud||o.fibra||o.color||o.marca));
+  if(ops.length){
+    section('Operatorias');
+    const cols=[['Fecha',26],['U/D',22],['Fibra',46],['Color',40],['Marca',50]];
+    ensure(7);
+    let cx=M; setF(6.8,'bold',LGRAY);
+    cols.forEach(([t,w])=>{doc.text(t.toUpperCase(),cx,y);cx+=w;});
+    y+=1.6; doc.setDrawColor(LINE[0],LINE[1],LINE[2]); doc.setLineWidth(0.3); doc.line(M,y,PW-M,y); y+=4.2;
+    ops.forEach(o=>{
+      ensure(5.4); cx=M; setF(8.6,'normal',INK);
+      [(H.ff(o.fecha)||o.fecha||'—'),o.ud||'—',o.fibra||'—',o.color||'—',o.marca||'—'].forEach((v,i)=>{
+        doc.text(doc.splitTextToSize(String(v),cols[i][1]-4)[0]||'—',cx,y); cx+=cols[i][1];
+      });
+      y+=5.2;
+    });
+    y+=2;
+  }
+
+  // ── Pie de página en todas las páginas
+  const nPages=doc.getNumberOfPages();
+  for(let i=1;i<=nPages;i++){
+    doc.setPage(i);
+    setF(6.8,'normal',LGRAY);
+    doc.text('Generado por DocuSalud · docusalud.org · '+H.hoyLabel,M,PH-8);
+    doc.text('Página '+i+' de '+nPages,PW-M,PH-8,{align:'right'});
+  }
+  return doc;
 }
+
+// v13.2 · Un solo camino para Exportar e Imprimir: el documento se construye
+// desde los datos persistidos (nunca más captura del DOM ni firmas cortadas).
+async function _generarHistoriaDoc(){
+  const p=(typeof gp==='function'&&gp())||null;
+  if(!p){toast('Abre un paciente primero');return null;}
+  await _loadPdfLibs();
+  const H={
+    titleCase, ff, edad,
+    telDisplay:(cc,n)=>telDisplay(cc,n),
+    hoyLabel:new Date().toLocaleDateString('es-VE',{day:'2-digit',month:'2-digit',year:'numeric'}),
+    UPPER, LOWER,
+    toothState:(pp,n)=>{try{const{dominant}=getToothState(pp,n);return dominant||'sano';}catch(e){return 'sano';}}
+  };
+  return {doc:_buildHistoriaPDF(window.jspdf.jsPDF,p,H), p};
+}
+async function exportarPDF(){
+  toast('Generando PDF…');
+  try{
+    const r=await _generarHistoriaDoc(); if(!r)return;
+    const fname=((r.p.nombre||'DocuSalud').replace(/[^a-z0-9]+/gi,'_'))+'_'+new Date().toISOString().slice(0,10)+'.pdf';
+    const blob=r.doc.output('blob');
+    if(isMobile()&&navigator.canShare){
+      try{
+        const file=new File([blob],fname,{type:'application/pdf'});
+        if(navigator.canShare({files:[file]})){ await navigator.share({files:[file],title:r.p.nombre||'Historia clínica'}); return; }
+      }catch(shareErr){ if(shareErr&&shareErr.name==='AbortError')return; }
+    }
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob); a.download=fname; a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href),30000);
+  }catch(err){
+    console.error('exportarPDF:',err);
+    toast('No fue posible generar el PDF completo. Verifica tu conexión e inténtalo nuevamente.');
+  }
+}
+// Imprimir = el MISMO PDF, abierto en una pestaña para imprimir desde el visor
+window.imprimirPDF=async function(){
+  toast('Generando PDF…');
+  try{
+    const r=await _generarHistoriaDoc(); if(!r)return;
+    const url=r.doc.output('bloburl');
+    const w=window.open(url,'_blank');
+    if(!w)toast('Permite las ventanas emergentes para imprimir');
+  }catch(err){
+    console.error('imprimirPDF:',err);
+    toast('No fue posible generar el PDF completo. Verifica tu conexión e inténtalo nuevamente.');
+  }
+};
 window.exportarPDF=exportarPDF;
 // ===== v7.2 presence + devices via Realtime DB (#9-12) =====
 let _presenceSet=false, presenceMap={}, presenceUnsub=null;
@@ -7743,8 +7952,6 @@ window.adminToggleTab=async function(uid,tabKey,nowChecked){
     toast('Error al guardar: '+err.message);
   }
 }
-<<<<<<< HEAD
-=======
 // Ir a paciente desde el dashboard de admin (impersona si hace falta, luego navega)
 window.adminGotoPaciente=async function(ownerUid,patientId){
   if(!ownerUid||!patientId)return;
@@ -7772,7 +7979,6 @@ window.adminResetTabsToDefault=async function(uid){
     toast('Error: '+err.message);
   }
 };
->>>>>>> ec7942927b100fb31bbb994cdb271d79d5df76a0
 function renderCalendar(){
   if(calendarView==='dia')renderCalendarDia();
   else renderCalendarMes();
@@ -8035,15 +8241,18 @@ function renderPaciente(){
       <div class="pav">${ini}</div>
       <div style="flex:1;min-width:0">
         <div class="phn">${e(titleCase(p.nombre))}</div>
-        <div class="phm">${edad(p.nacimiento)}${edad(p.nacimiento)&&p.ci?' · ':''}${e(p.ci||'')}${p.telefono?' · '+e(p.telefono):''}</div>
+        <div class="phm">${edad(p.nacimiento)}${edad(p.nacimiento)&&p.ci?' · ':''}${e(p.ci||'')}${p.telefono?' · '+e(telDisplay(p.telefono_cc,p.telefono)||p.telefono):''}</div>
       </div>
       ${(()=>{
         const _impW=viewAsUid?allUsersList.find(u=>u.uid===viewAsUid):null;
         const _epW=effectivePlanFor(_impW);
         if(!(_epW==='admin'||_epW==='pro'||_epW==='clinica'))return '';
-        const _wa=waLink(p.telefono||p.telefono2,`Hola ${ (titleCase(p.nombre)||'').split(' ')[0] }, le escribo de su consultorio dental.`);
+        const _num=p.telefono||p.telefono2;
+        const _ncc=p.telefono?(p.telefono_cc||''):(p.telefono2_cc||'');
+        const _wa=waLink(_num,`Hola ${ (titleCase(p.nombre)||'').split(' ')[0] }, le escribo de su consultorio dental.`,_ncc);
+        const _waMsg=_num?MSG_WA_SIN_CC:'Este paciente no tiene número de teléfono registrado';
         return _wa?`<a class="ba phdr-wa" href="${_wa}" target="_blank" rel="noopener" title="Enviar WhatsApp al paciente">${icon('chat',13)} WhatsApp</a>`
-                  :`<button class="ba phdr-wa phdr-wa-off" type="button" onclick="toast('Este paciente no tiene número de teléfono registrado')" title="Sin número registrado">${icon('chat',13)} WhatsApp</button>`;
+                  :`<button class="ba phdr-wa phdr-wa-off" type="button" onclick="toast('${_waMsg.replace(/'/g,"\\'")}')" title="${_num?'Falta código de país':'Sin número registrado'}">${icon('chat',13)} WhatsApp</button>`;
       })()}
       ${isAdmin&&!viewAsUid?`<button class="ba" style="font-size:11px;padding:5px 10px" onclick="exportarPacienteJSON()" title="Exportar datos del paciente">↓ Datos</button>`:''}
       <button class="ba" onclick="volverInicio()" title="Volver al inicio">← Inicio</button>
@@ -8230,6 +8439,7 @@ function imgConsultaLabel(p,consultaId){
 function imgFiltered(p){
   let list=[...(p.imagenes||[])];
   const f=_imgFilters;
+  if(f.q){const q=f.q.toLowerCase();list=list.filter(im=>(im.nombre||'').toLowerCase().includes(q)||(im.subidoPorNombre||'').toLowerCase().includes(q));}
   if(f.cat)  list=list.filter(im=>im.categoria===f.cat);
   if(f.user) list=list.filter(im=>im.subidoPorUid===f.user);
   if(f.cons){
@@ -8285,7 +8495,7 @@ function renderImagenes(){
 
   const hasFilters=!!(_imgFilters.cat||_imgFilters.user||_imgFilters.cons||_imgFilters.fecha);
 
-  // grid de resultados
+  // grid de resultados (v13.1 — factorizado para búsqueda en vivo)
   let grid='';
   if(filtered.length===0){
     grid=all.length===0
@@ -8296,41 +8506,25 @@ function renderImagenes(){
           <button type="button" class="ba" onclick="document.getElementById('archFileInput').click()">${icon('plus',13)} Subir la primera imagen</button>
         </div>`
       :`<div class="card arch-empty" style="padding:22px 0">
-          <p class="arch-empty-t" style="margin:0">Ninguna imagen coincide con los filtros.</p>
+          <p class="arch-empty-t" style="margin:0">Ning\u00fan archivo coincide con los filtros.</p>
         </div>`;
   }else{
-    const cards=filtered.map(im=>{
-      const rel=timeAgo(im.fecha);
-      const abs=imgFechaAbs(im.fecha);
-      const delBtn=imgCanDelete(im)?`<button type="button" class="img-thumb-del" title="Eliminar" onclick="event.stopPropagation();imgDelete('${e(im.id)}')">✕</button>`:'';
-      return `<figure class="img-thumb" title="${e(abs)}" onclick="imgOpen('${e(im.id)}')">
-        <img src="${im.dataUrl||im.downloadURL||''}" alt="${e(im.nombre||'')}">
-        ${delBtn}
-        <div class="img-thumb-meta">
-          <span class="img-thumb-cat cat-${e(im.categoria||'otros')}">${e(imgCatLabel(im.categoria))}</span>
-          <div class="img-thumb-name">${e(im.nombre||'Imagen')}</div>
-          <div class="img-thumb-sub" title="${e(abs)}">${e(rel)} · ${e(im.subidoPorNombre||'')}</div>
-        </div>
-      </figure>`;
-    }).join('');
-    grid=`<div class="img-grid">${cards}</div>`;
+    grid=_imgGridHTML(p);
   }
 
   const html=`
     ${archHeaderHTML('img')}
-    ${all.length>0?`<div class="card">
-      <div class="img-filters">
-        <div class="img-filter"><label>Categoría</label><select onchange="imgSetFilter('cat',this.value)">${catOpts}</select></div>
-        <div class="img-filter"><label>Odontólogo / usuario</label><select onchange="imgSetFilter('user',this.value)">${userOpts}</select></div>
+    ${all.length>0?`<div class="card arch-filtercard">
+      <div class="arch-filters">
+        <div class="arch-search">${icon('search',14)}<input type="text" placeholder="Buscar archivos..." value="${e(_imgFilters.q||'')}" oninput="imgSearchInput(this.value)"></div>
+        <div class="img-filter"><label>Categor\u00eda</label><select onchange="imgSetFilter('cat',this.value)">${catOpts}</select></div>
+        <div class="img-filter"><label>Odont\u00f3logo / Usuario</label><select onchange="imgSetFilter('user',this.value)">${userOpts}</select></div>
         <div class="img-filter"><label>Consulta</label><select onchange="imgSetFilter('cons',this.value)">${consOpts}</select></div>
         <div class="img-filter"><label>Fecha</label><select onchange="imgSetFilter('fecha',this.value)">${fechaOpts}</select></div>
-      </div>
-      <div class="img-result-row">
-        <span class="img-result-count"><strong>${filtered.length}</strong> de ${all.length} imagen${all.length===1?'':'es'}</span>
-        ${hasFilters?`<button type="button" class="img-clear-filters" onclick="imgClearFilters()">Limpiar filtros</button>`:''}
+        <button type="button" class="arch-clear" onclick="imgClearFilters()">${icon('restore',13)} Limpiar filtros</button>
       </div>
     </div>`:''}
-    ${grid}`;
+    <div id="archGrid">${grid}</div>`;
   document.getElementById('panel').innerHTML=html;
   // re-render lightbox si estaba abierto
   if(_imgLightboxId){ imgRenderLightbox(); }
@@ -8338,13 +8532,57 @@ function renderImagenes(){
 
 window.imgSetCat=function(k){ _imgActiveCat=k; renderImagenes(); };
 window.imgSetFilter=function(key,val){ _imgFilters[key]=val; renderImagenes(); };
-window.imgClearFilters=function(){ _imgFilters={cat:'',user:'',cons:'',fecha:''}; renderImagenes(); };
+// v13.1 · tarjeta de archivo estilo galería: imagen arriba (chip de categoría +
+// menú ⋯ superpuestos) y cuerpo con nombre, fecha·hora y quién lo subió.
+function _imgGridHTML(p){
+  const filtered=imgFiltered(p);
+  if(!filtered.length)return `<div class="card arch-empty" style="padding:22px 0"><p class="arch-empty-t" style="margin:0">Ning\u00fan archivo coincide con los filtros.</p></div>`;
+  const fdt=iso=>{try{const d=new Date(iso);const dd=String(d.getDate()).padStart(2,'0'),mm=String(d.getMonth()+1).padStart(2,'0'),yy=String(d.getFullYear()).slice(2);const hh=String(d.getHours()).padStart(2,'0'),mi=String(d.getMinutes()).padStart(2,'0');return dd+'/'+mm+'/'+yy+' \u00b7 '+hh+':'+mi;}catch(e){return '';}};
+  const uSvg='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a7 7 0 0 1 16 0v1"/></svg>';
+  const cards=filtered.map(im=>{
+    const abs=imgFechaAbs(im.fecha);
+    return `<figure class="arch-card" title="${e(abs)}">
+      <div class="arch-card-img" onclick="imgOpen('${e(im.id)}')">
+        <img src="${im.thumb||im.dataUrl||im.downloadURL||''}" alt="${e(im.nombre||'')}" loading="lazy">
+        <span class="arch-cat-chip cat-${e(im.categoria||'otros')}">${e(imgCatLabel(im.categoria))}</span>
+        <button type="button" class="arch-card-menu" aria-label="Opciones" onclick="archCardMenu(event,'${e(im.id)}')">\u22ef</button>
+      </div>
+      <div class="arch-card-body">
+        <div class="arch-card-name">${icon('image',13)}<span>${e(im.nombre||'Imagen')}</span></div>
+        <div class="arch-card-meta"><span>${icon('calendar',12)} ${e(fdt(im.fecha))}</span><span>${uSvg} ${e(im.subidoPorNombre||'')}</span></div>
+      </div>
+    </figure>`;
+  }).join('');
+  return `<div class="arch-grid">${cards}</div>`;
+}
+window.imgClearFilters=function(){ _imgFilters={cat:'',user:'',cons:'',fecha:'',q:''}; renderImagenes(); };
+// v13.1 · búsqueda en vivo: solo re-renderiza la grilla (no pierde el foco del input)
+window.imgSearchInput=function(v){ _imgFilters.q=v||''; const g=document.getElementById('archGrid'); const p=gp(); if(g&&p)g.innerHTML=_imgGridHTML(p); };
+// v13.1 · menú ⋯ de la tarjeta
+window.archCardMenu=function(ev,id){
+  ev.stopPropagation();
+  document.getElementById('archCardPop')?.remove();
+  const p=gp(); if(!p)return;
+  const im=(p.imagenes||[]).find(x=>x.id===id); if(!im)return;
+  const btn=ev.currentTarget;
+  const r=btn.getBoundingClientRect();
+  const pop=document.createElement('div');
+  pop.id='archCardPop'; pop.className='arch-card-pop';
+  pop.style.cssText='position:fixed;top:'+(r.bottom+6)+'px;left:'+Math.max(8,r.right-160)+'px;z-index:1400';
+  const dl=im.downloadURL||im.dataUrl||'';
+  pop.innerHTML=
+    '<button type="button" onclick="document.getElementById(\'archCardPop\').remove();imgOpen(\''+id+'\')">'+icon('eye',13)+' Ver</button>'+
+    (dl?'<a href="'+e(dl)+'" target="_blank" rel="noopener" download onclick="document.getElementById(\'archCardPop\').remove()">'+icon('download',13)+' Descargar</a>':'')+
+    (imgCanDelete(im)?'<button type="button" class="pop-danger" onclick="document.getElementById(\'archCardPop\').remove();imgDelete(\''+id+'\')">'+icon('trash',13)+' Eliminar</button>':'');
+  document.body.appendChild(pop);
+  setTimeout(()=>{const close=e2=>{if(!pop.contains(e2.target)){pop.remove();document.removeEventListener('click',close,true);}};document.addEventListener('click',close,true);},0);
+};
 
 // ── Manejo de archivos seleccionados: procesa, comprime y abre el modal ────
 window.imgOnFiles=function(files){
   if(!files||!files.length)return;
-  const arr=Array.from(files).filter(f=>f.type.startsWith('image/'));
-  if(!arr.length){ if(typeof toast==='function')toast('Selecciona archivos de imagen.'); return; }
+  const arr=Array.from(files).filter(f=>(f.type||'').startsWith('image/')||clasificarArchivo(f).clase==='img');
+  if(!arr.length){ if(typeof toast==='function')toast('Selecciona una imagen o documento.'); return; }
   let pending=arr.length;
   let fallosCompresion=0;
   const prepared=[];
@@ -8355,7 +8593,7 @@ window.imgOnFiles=function(files){
   };
   arr.forEach(f=>{
     imgCompress(f)
-      .then(dataUrl=>{ prepared.push({name:f.name, dataUrl}); })
+      .then(res=>{ prepared.push({name:f.name, dataUrl:res.dataUrl, thumb:res.thumb}); })
       .catch(()=>{ fallosCompresion++; })
       .finally(()=>{ pending--; checkDone(); });
   });
@@ -8367,25 +8605,40 @@ window.imgOnFiles=function(files){
 // mantener el documento por debajo del límite de ~1MB. Cuando Storage exista,
 // esta compresión deja de ser obligatoria (se sube el File original).
 function imgCompress(file){
+  // v13 — devuelve {dataUrl, thumb}. PNG solo se conserva si tiene transparencia
+  // real (antes una radiografía PNG podía CRECER al "comprimirla"). Nunca se
+  // produce un resultado más pesado que el original. Miniatura 320px aparte
+  // para que la grilla cargue al instante sin bajar la imagen completa.
   return new Promise((resolve,reject)=>{
     const reader=new FileReader();
     reader.onload=ev=>{
       const img=new Image();
       img.onload=()=>{
         try{
-          const MAX=1280;
+          const MAX=1600;
           let {width:w,height:h}=img;
           if(w>MAX||h>MAX){ const s=Math.min(MAX/w,MAX/h); w=Math.round(w*s); h=Math.round(h*s); }
           const canvas=document.createElement('canvas');
           canvas.width=w; canvas.height=h;
-          canvas.getContext('2d').drawImage(img,0,0,w,h);
-          // PNG/transparentes → conservar PNG; resto → JPEG comprimido
-          const isPng=(file.type==='image/png');
-          const out=isPng?canvas.toDataURL('image/png'):canvas.toDataURL('image/jpeg',0.82);
-          resolve(out);
-        }catch(e){ resolve(ev.target.result); }
+          const ctx=canvas.getContext('2d');
+          ctx.drawImage(img,0,0,w,h);
+          let hasAlpha=false;
+          if(file.type==='image/png'){
+            try{const dd=ctx.getImageData(0,0,w,h).data;
+              for(let i=3;i<dd.length;i+=389){if(dd[i]<250){hasAlpha=true;break;}}}catch(_e){hasAlpha=true;}
+          }
+          let out=hasAlpha?canvas.toDataURL('image/png'):canvas.toDataURL('image/jpeg',0.85);
+          if(out.length*0.75>file.size)out=ev.target.result; // no agrandar nunca
+          const T=320, ts=Math.min(T/w,T/h,1);
+          const tc=document.createElement('canvas');
+          tc.width=Math.max(1,Math.round(w*ts)); tc.height=Math.max(1,Math.round(h*ts));
+          tc.getContext('2d').drawImage(img,0,0,tc.width,tc.height);
+          let thumb=null;
+          try{thumb=tc.toDataURL('image/jpeg',0.72);}catch(_e){}
+          resolve({dataUrl:out,thumb});
+        }catch(e){ resolve({dataUrl:ev.target.result,thumb:null}); }
       };
-      img.onerror=()=>resolve(ev.target.result);
+      img.onerror=()=>resolve({dataUrl:ev.target.result,thumb:null});
       img.src=ev.target.result;
     };
     reader.onerror=reject;
@@ -8434,61 +8687,77 @@ function imgUpload(prepared){
     const now=new Date().toISOString();
     const cur=gp();
     if(!cur){ cerrarModal(); return; }
-    const imgs=(cur.imagenes||[]).slice();
-    let fallos=0;
     const progWrap=document.getElementById('imgUploadProgress');
     const progFill=document.getElementById('imgUploadFill');
     const progLabel=document.getElementById('imgUploadLabel');
     if(progWrap)progWrap.style.display='block';
-    for(let idx=0;idx<prepared.length;idx++){
-      if(progLabel)progLabel.textContent=`Subiendo imagen ${idx+1} de ${prepared.length}…`;
-      if(progFill)progFill.style.width=Math.round((idx/prepared.length)*100)+'%';
-      const pr=prepared[idx];
+    const pendientes=prepared.filter(pr=>!pr._done);
+    const total=pendientes.length;
+    if(!total){ cerrarModal(); return; }
+    // ── v13 · Sin conexión: guardado local honesto, marcado pendiente (6.7)
+    const offline=!navigator.onLine||!storage;
+    let done=0, fallos=0;
+    const nuevas=[];
+    const setProg=()=>{
+      if(progFill)progFill.style.width=Math.round((done/total)*100)+'%';
+      if(progLabel)progLabel.textContent=done<total?`Subiendo archivo\u2026 ${Math.round((done/total)*100)} %`:'Confirmando almacenamiento\u2026';
+    };
+    setProg();
+    // ── v13 · Subida EN PARALELO (antes: secuencial con await encadenado)
+    await Promise.all(pendientes.map(async pr=>{
+      const idx=prepared.indexOf(pr);
       const id='img-'+Date.now().toString(36)+'-'+idx+'-'+Math.random().toString(36).slice(2,7);
       const entry={
         id, nombre:pr.name||'Imagen', categoria:cat, fecha:now,
         subidoPorUid:who.uid, subidoPorNombre:who.nombre, consultaId:consultaId||null,
-        dataUrl:null, storagePath:null, downloadURL:null
+        dataUrl:null, thumb:pr.thumb||null, storagePath:null, downloadURL:null
       };
-      // Sube a Firebase Storage (plan Blaze). Si no está disponible, falla, o
-      // tarda demasiado (p.ej. probando en local sin conexión real al proyecto),
-      // cae a guardar la imagen inline — para que la subida nunca se quede pegada.
-      if(storage){
-        try{
-          const path=`pacientes/${cur.id}/imagenes/${id}.jpg`;
-          const blob=dataUrlToBlob(pr.dataUrl);
-          const sref=stRef(storage,path);
-          await Promise.race([
-            uploadBytes(sref,blob),
-            new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),30000))
-          ]);
-          entry.storagePath=path;
-          entry.downloadURL=await getDownloadURL(sref);
-        }catch(err){
-          console.warn('Storage upload falló, guardando localmente:',err.message);
-          entry.dataUrl=pr.dataUrl;
-          fallos++;
-        }
-      }else{
-        entry.dataUrl=pr.dataUrl;
+      if(offline){
+        entry.dataUrl=pr.dataUrl; entry.pendienteSync=true;
+        nuevas.push(entry); pr._done=true; done++; setProg(); return;
       }
-      imgs.push(entry);
+      try{
+        const path=`pacientes/${cur.id}/imagenes/${id}.jpg`;
+        const blob=dataUrlToBlob(pr.dataUrl);
+        const sref=stRef(storage,path);
+        await Promise.race([
+          uploadBytes(sref,blob),
+          new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),30000))
+        ]);
+        entry.storagePath=path;
+        entry.downloadURL=await getDownloadURL(sref);
+        nuevas.push(entry); pr._done=true;
+      }catch(err){
+        console.warn('Storage upload falló:',err&&err.message);
+        fallos++;
+      }finally{ done++; setProg(); }
+    }));
+    // Persistir SOLO lo confirmado (el modal no se cierra hasta confirmación real)
+    if(nuevas.length){
+      cur.imagenes=[...(cur.imagenes||[]),...nuevas];
+      await guardar(cur);
     }
-    if(progFill)progFill.style.width='100%';
-    cur.imagenes=imgs;
-    await guardar(cur);
+    if(fallos>0){
+      // ── v13 · El error mantiene el modal abierto y permite reintentar (4.2)
+      if(progLabel){progLabel.textContent=navigator.onLine
+        ?`No fue posible cargar ${fallos} archivo${fallos===1?'':'s'}. Int\u00e9ntalo nuevamente.`
+        :'Se perdi\u00f3 la conexi\u00f3n durante la carga. Revisa tu conexi\u00f3n e int\u00e9ntalo nuevamente.';}
+      if(progFill)progFill.style.width='0%';
+      if(nuevas.length)renderImagenes();
+      _playError&&_playError();
+      return; // modal abierto; el botón Guardar reintenta solo los pendientes
+    }
     cerrarModal();
     if(typeof toast==='function'){
-      if(fallos>0||!storage) toast('Archivo guardado localmente. Pendiente de sincronización — se subirá al reconectar.');
-      else toast(prepared.length===1?'Imagen subida a la nube':`${prepared.length} imágenes subidas a la nube`);
+      if(offline) toast('Archivo guardado localmente. Pendiente de sincronización.');
+      else toast('Archivo cargado correctamente.');
     }
     renderImagenes();
    }catch(err){
-     // Red de seguridad: si algo inesperado falla, el modal nunca se queda
-     // pegado en "Guardando..." sin explicación.
      console.error('imgUpload falló:',err);
-     cerrarModal();
-     if(typeof toast==='function')toast('No se pudieron guardar las imágenes. Intenta de nuevo.');
+     const progLabel=document.getElementById('imgUploadLabel');
+     if(progLabel)progLabel.textContent='No fue posible cargar el archivo. Int\u00e9ntalo nuevamente.';
+     else{ cerrarModal(); if(typeof toast==='function')toast('No fue posible cargar el archivo. Inténtalo nuevamente.'); }
    }
   });
 };
@@ -8580,6 +8849,7 @@ window.imgDelete=async function(id){
   if(!im)return;
   if(!imgCanDelete(im)){ if(typeof toast==='function')toast('Solo quien la subió (o un admin) puede eliminarla.'); return; }
   if(!confirm(`¿Eliminar la imagen "${im.nombre||'Imagen'}"?\n\nEsta acción no se puede deshacer.`))return;
+  _playDelete();
   if(storage&&im.storagePath){
     try{ await deleteObject(stRef(storage,im.storagePath)); }
     catch(err){ console.warn('No se pudo borrar el archivo en Storage:',err.message); }
@@ -8686,39 +8956,65 @@ function docUpload(files){
     const progFill=document.getElementById('docUploadFill');
     const progLabel=document.getElementById('docUploadLabel');
     if(progWrap)progWrap.style.display='block';
-    for(let idx=0;idx<files.length;idx++){
-      const f=files[idx];
-      if(progLabel)progLabel.textContent=`Subiendo documento ${idx+1} de ${files.length}…`;
-      if(progFill)progFill.style.width=Math.round((idx/files.length)*100)+'%';
+    // ── v13 · Sin conexión: no fingir subida; mantener modal y avisar (6.7)
+    if(!navigator.onLine){
+      if(progLabel)progLabel.textContent='No hay conexi\u00f3n. Mant\u00e9n esta ventana abierta o vuelve a intentarlo cuando recuperes internet.';
+      if(progWrap)progWrap.style.display='block';
+      return;
+    }
+    // MIME de respaldo por extensión (algunos navegadores no reportan f.type)
+    const _ctDe=f=>{const x=((f.name||'').split('.').pop()||'').toLowerCase();
+      return f.type||({pdf:'application/pdf',doc:'application/msword',docx:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'})[x]||undefined;};
+    const pendientes=files.filter(f=>!f._done);
+    const total=pendientes.length;
+    let done=0;
+    const setProg=()=>{
+      if(progFill)progFill.style.width=Math.round((done/total)*100)+'%';
+      if(progLabel)progLabel.textContent=done<total?`Subiendo archivo\u2026 ${Math.round((done/total)*100)} %`:'Confirmando almacenamiento\u2026';
+    };
+    setProg();
+    // v13 · paralelo + 2 intentos por archivo
+    await Promise.all(pendientes.map(async f=>{
+      const idx=files.indexOf(f);
       const tipo=docTipoDe(f);
       const id='doc-'+Date.now().toString(36)+'-'+idx+'-'+Math.random().toString(36).slice(2,7);
       const safe=(f.name||'documento').replace(/[^a-zA-Z0-9_.\-]/g,'_').slice(-80);
-      try{
-        const path=`pacientes/${cur.id}/documentos/${id}_${safe}`;
-        const sref=stRef(storage,path);
-        await Promise.race([
-          uploadBytes(sref,f,{contentType:f.type||undefined}),
-          new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),45000))
-        ]);
-        const url=await getDownloadURL(sref);
-        docs.push({id, nombre:f.name||'Documento', tipo, size:f.size||0, fecha:now,
-          subidoPorUid:who.uid, subidoPorNombre:who.nombre, consultaId:consultaId||null,
-          storagePath:path, downloadURL:url});
-      }catch(err){
-        console.warn('Subida de documento falló:',err.message);
-        fallos++;
+      const path=`pacientes/${cur.id}/documentos/${id}_${safe}`;
+      const sref=stRef(storage,path);
+      for(let intento=1;intento<=2;intento++){
+        try{
+          await Promise.race([
+            uploadBytes(sref,f,{contentType:_ctDe(f)}),
+            new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),45000))
+          ]);
+          const url=await getDownloadURL(sref);
+          docs.push({id, nombre:f.name||'Documento', tipo, size:f.size||0, fecha:now,
+            subidoPorUid:who.uid, subidoPorNombre:who.nombre, consultaId:consultaId||null,
+            storagePath:path, downloadURL:url});
+          f._done=true;
+          break;
+        }catch(err){
+          console.warn('Subida de documento falló (intento '+intento+'):',err&&err.message);
+          if(intento===2)fallos++;
+        }
       }
-    }
-    if(progFill)progFill.style.width='100%';
+      done++; setProg();
+    }));
+    // Persistir SOLO lo confirmado por el backend
     if(docs.length>(cur.documentos||[]).length){
       cur.documentos=docs;
       await guardar(cur);
     }
+    if(fallos>0){
+      // ── v13 · Error mantiene el modal abierto y permite reintentar (4.2)
+      if(progLabel)progLabel.textContent=`No fue posible cargar ${fallos} archivo${fallos===1?'':'s'}. Int\u00e9ntalo nuevamente. Si el problema contin\u00faa, comun\u00edcate con soporte.`;
+      if(progFill)progFill.style.width='0%';
+      renderDocumentos();
+      _playError&&_playError();
+      return;
+    }
     cerrarModal();
-    const subidos=files.length-fallos;
-    if(subidos>0&&fallos===0)toast(subidos===1?'Documento subido a la nube':`${subidos} documentos subidos a la nube`);
-    else if(subidos>0)toast(`${subidos} subido${subidos===1?'':'s'} · ${fallos} fallaron — revisa tu conexión`);
-    else toast('No fue posible cargar el archivo. Inténtalo nuevamente. Si el problema continúa, comunícate con soporte.');
+    toast('Archivo cargado correctamente.');
     renderDocumentos();
    }catch(err){
      console.error('docUpload falló:',err);
@@ -8784,12 +9080,17 @@ function archHeaderHTML(active){
       nPdf?'<button type="button" class="arch-chip ac-pdf" onclick="archChip(\'pdf\')">'+nPdf+' PDF</button>':'',
       nWord?'<button type="button" class="arch-chip ac-word" onclick="archChip(\'word\')">'+nWord+' Word</button>':''
     ].filter(Boolean).join('');
-    heroHTML=uploadInput+'<div class="arch-mini-bar"><div class="ct" style="margin:0;flex-shrink:0">Archivos</div><button type="button" class="ba arch-mini-upload-btn" onclick="document.getElementById(\'archFileInput\').click()" ondragover="event.preventDefault();this.classList.add(\'drag\')" ondragleave="this.classList.remove(\'drag\')" ondrop="event.preventDefault();this.classList.remove(\'drag\');archOnFiles(event.dataTransfer.files)">'+icon('plus',13)+' Subir archivos</button>'+(chips?'<div class="arch-chips-inline">'+chips+'</div>':'')+'</div>';
+    const nTot=nImg+nDoc;
+    heroHTML=uploadInput+'<div class="arch-head">'+
+      '<div class="arch-head-l"><div class="arch-title">Archivos</div>'+
+      '<div class="arch-sub">'+nTot+' archivo'+(nTot===1?'':'s')+' asociado'+(nTot===1?'':'s')+' a este paciente</div></div>'+
+      '<button type="button" class="bs arch-upload-main" onclick="document.getElementById(\'archFileInput\').click()" ondragover="event.preventDefault();this.classList.add(\'drag\')" ondragleave="this.classList.remove(\'drag\')" ondrop="event.preventDefault();this.classList.remove(\'drag\');archOnFiles(event.dataTransfer.files)">'+icon('plus',14)+' Subir archivo</button>'+
+      '</div>';
   }else{
     heroHTML=uploadInput+'<div class="arch-hero" onclick="document.getElementById(\'archFileInput\').click()" ondragover="event.preventDefault();this.classList.add(\'drag\')" ondragleave="this.classList.remove(\'drag\')" ondrop="event.preventDefault();this.classList.remove(\'drag\');archOnFiles(event.dataTransfer.files)"><div class="arch-hero-art" aria-hidden="true"><span class="aha aha-1">'+icon('image',22)+'</span><span class="aha aha-2">'+icon('filetext',22)+'</span><span class="aha aha-3">'+icon('plus',16)+'</span></div><div class="arch-hero-body"><div class="arch-hero-t">Empieza la historia visual de '+e((titleCase(pt.nombre)||'este paciente').split(' ')[0])+'</div><div class="arch-hero-s">Radiografías, fotos, consentimientos — todo junto al paciente, en la nube.</div></div><button type="button" class="bs arch-hero-btn" onclick="event.stopPropagation();document.getElementById(\'archFileInput\').click()">'+icon('plus',14)+' Subir archivos</button></div>';
   }
-  const segBtn=(k,lbl,n,ico)=>'<button type="button" class="'+(active===k?'on':'')+'" onclick="archVista(\''+k+'\')">'+ico+' '+lbl+(n?' · '+n:'')+' </button>';
-  return (storage?'':'<div class="img-cloud-notice"><span class="ico">'+icon('cloud',16)+'</span><span>Sin nube — imágenes locales.</span></div>')+heroHTML+'<div class="arch-seg">'+segBtn('img','Imágenes',nImg,icon('image',13))+(docOk?segBtn('doc','Documentos',nDoc,icon('filetext',13)):'')+' </div>';
+  const tabBtn=(k,lbl,n,ico)=>'<button type="button" class="arch-tab'+(active===k?' on':'')+'" onclick="archVista(\''+k+'\')">'+ico+'<span>'+lbl+'</span><span class="arch-tab-n">'+n+'</span></button>';
+  return (storage?'':'<div class="img-cloud-notice"><span class="ico">'+icon('cloud',16)+'</span><span>Sin nube — imágenes locales.</span></div>')+heroHTML+(hasFiles?'<div class="arch-tabs">'+tabBtn('img','Imágenes',nImg,icon('image',15))+(docOk?tabBtn('doc','Documentos',nDoc,icon('filetext',15)):'')+'</div>':'');
 }
 window.archVista=function(k){ flushAutosaves(); _archVista=(k==='doc'?'doc':'img'); renderTab(); };
 // Chip de resumen → salta directo al tipo con el filtro puesto
@@ -8798,15 +9099,43 @@ window.archChip=function(kind){
   else{ _archVista='img'; _imgFilters.cat=kind; }
   renderTab();
 };
+// v13 · Clasificación por extensión + MIME cruzados. Si no coinciden, se
+// rechaza con error claro (nunca adivinar). PNG/JPG jamás pueden ser Documento.
+const IMG_EXTS=['png','jpg','jpeg','webp','gif','heic','heif','tif','tiff'];
+const DOC_EXTS=['pdf','doc','docx'];
+function clasificarArchivo(f){
+  const ext=((f.name||'').split('.').pop()||'').toLowerCase();
+  const mime=(f.type||'').toLowerCase();
+  const extImg=IMG_EXTS.includes(ext), extDoc=DOC_EXTS.includes(ext);
+  const mimeImg=mime.startsWith('image/');
+  const mimeDoc=mime==='application/pdf'||mime.includes('msword')||mime.includes('officedocument.wordprocessingml');
+  if((extImg&&mimeDoc)||(extDoc&&mimeImg)){
+    console.warn('[archivos] extensión y MIME no coinciden:',f.name,mime);
+    return {clase:null,motivo:'inconsistente'};
+  }
+  if(mimeImg&&(extImg||!ext))return {clase:'img'};
+  if(mimeDoc&&(extDoc||!ext))return {clase:'doc'};
+  if(!mime&&extImg)return {clase:'img'};   // navegadores que no reportan MIME (HEIC/TIFF)
+  if(!mime&&extDoc)return {clase:'doc'};
+  if(extImg||extDoc){console.warn('[archivos] MIME inesperado:',f.name,mime);return {clase:null,motivo:'inconsistente'};}
+  return {clase:null,motivo:'desconocido'};
+}
 window.archOnFiles=function(files){
   if(!files||!files.length)return;
   const arr=Array.from(files);
-  const imgs=arr.filter(f=>(f.type||'').startsWith('image/'));
-  const docs=arr.filter(f=>!(f.type||'').startsWith('image/')&&docTipoDe(f));
+  const clasif=arr.map(f=>({f,c:clasificarArchivo(f)}));
+  const malos=clasif.filter(x=>!x.c.clase);
+  if(malos.length){
+    toast(malos.some(x=>x.c.motivo==='inconsistente')
+      ?'El formato del archivo no pudo verificarse. Selecciona un archivo válido e inténtalo nuevamente.'
+      :'Este formato de archivo no es compatible.');
+    return;
+  }
+  const imgs=clasif.filter(x=>x.c.clase==='img').map(x=>x.f);
+  const docs=clasif.filter(x=>x.c.clase==='doc').map(x=>x.f);
   if(imgs.length&&docs.length){ toast('Sube imágenes y documentos en tandas separadas, por favor.'); return; }
   if(imgs.length){ _archVista='img'; imgOnFiles(imgs); return; }
   if(docs.length){ _archVista='doc'; docOnFiles(docs); return; }
-  toast('Formato no soportado. Se aceptan imágenes, PDF y Word.');
 };
 function renderDocumentosLocked(){
   const panel=document.getElementById('panel');
@@ -8922,9 +9251,6 @@ function renderTab(){
   else if(t==='est')renderEst();
   else if(t==='rec')renderRec();
   else if(t==='cons')renderCons();
-<<<<<<< HEAD
-  else if(t==='img'){ if(_archVista==='doc')renderDocumentos(); else renderImagenes(); }
-=======
   else if(t==='img'){
     // Mostrar contenido inmediatamente: si el paciente no tiene imágenes pero sí
     // documentos, cambiar a vista doc automáticamente; si tiene imágenes, mostrar img.
@@ -8940,7 +9266,6 @@ function renderTab(){
     if(_archPanel)_archPanel.scrollTop=0;
     if(_archVista==='doc')renderDocumentos(); else renderImagenes();
   }
->>>>>>> ec7942927b100fb31bbb994cdb271d79d5df76a0
   else if(t==='doc')renderDocumentos();
 }
 
@@ -9014,8 +9339,8 @@ function renderDatos(){
         </select></div>
       </div>
       <div class="fg">
-        <div class="f"><label>Teléfono</label><input ${phoneInputAttrs('d_t1',p.telefono||'')} ${ro}></div>
-        <div class="f"><label>Teléfono 2</label><input ${phoneInputAttrs('d_t2',p.telefono2||'')} ${ro}></div>
+        <div class="f"><label>Teléfono</label><div class="tel-row">${telSelectHTML('d_t1_cc',p.telefono_cc||'',ro)}<input ${phoneInputAttrs('d_t1',p.telefono||'')} ${ro}></div>${p.telefono&&!p.telefono_cc?'<p class="tel-warn">Confirma el pa\u00eds de este n\u00famero para habilitar WhatsApp.</p>':''}</div>
+        <div class="f"><label>Teléfono 2</label><div class="tel-row">${telSelectHTML('d_t2_cc',p.telefono2_cc||'',ro)}<input ${phoneInputAttrs('d_t2',p.telefono2||'')} ${ro}></div></div>
       </div>
       <div class="fg"><div class="f full"><label>Correo electrónico</label><input id="d_em" value="${e(p.email||'')}" ${ro}></div></div>
       <div class="fg">
@@ -9050,6 +9375,10 @@ window.autosaveDatos=async function(){
     p.sexo=g('d_sx');
     p.telefono=g('d_t1');
     p.telefono2=g('d_t2');
+    // v13 aditivo: código de país + E.164 (no toca los campos legados)
+    const _cc1=g('d_t1_cc'), _cc2=g('d_t2_cc');
+    if(_cc1){p.telefono_cc='+'+_cc1; p.telefonoE164=telE164(_cc1,p.telefono)||'';}
+    if(_cc2){p.telefono2_cc='+'+_cc2; p.telefono2E164=telE164(_cc2,p.telefono2)||'';}
     p.email=g('d_em');
     p.ocupacion=g('d_oc');
     p.direccion=g('d_dir');
@@ -9667,8 +9996,8 @@ function renderToothVizPanel(p,mode){
     </div>
     <div class="viz-canvas viz-canvas-oclusal">${renderToothVizSVG(p,n)}</div>
     <div style="padding:10px 14px;border-top:0.5px solid rgba(31,58,42,0.08)">
-      <div class="viz-hint" style="margin:0 0 10px">${estadoDiente==='seleccionar'?'Clic para ver · clic der. para restablecer':'<strong style="color:var(--forest)">${estadoDiente}</strong> activo · clic aplica · clic der. restablece'}</div>
-      <div class="viz-picker">${vizToothPicker(p,mode)}</div>
+      <div class="viz-hint" style="margin:0 0 10px">${isMobile()?'Toca un diente del odontograma para verlo aqu\u00ed':(estadoDiente==='seleccionar'?'Clic para ver · clic der. para restablecer':'<strong style="color:var(--forest)">${estadoDiente}</strong> activo · clic aplica · clic der. restablece')}</div>
+      ${isMobile()?'':`<details class="viz-picker-details"><summary>Ir a otro diente</summary><div class="viz-picker">${vizToothPicker(p,mode)}</div></details>`}
     </div>
   </div>`;
 }
@@ -9843,6 +10172,13 @@ function _odontoFitMobile(){
   }catch(e){}
 }
 window.addEventListener('resize',()=>{ if(tabActual==='odonto'&&viewActual==='paciente')setTimeout(_odontoFitMobile,80); });
+// v13 — al cruzar el breakpoint móvil/desktop el panel del diente cambia de
+// estructura (con/sin picker): re-render limpio, sin duplicar listeners.
+try{
+  const _mqOd=window.matchMedia('(max-width:768px)');
+  const _mqOdF=()=>{ if(tabActual==='odonto'&&viewActual==='paciente')renderOdonto(); };
+  if(_mqOd.addEventListener)_mqOd.addEventListener('change',_mqOdF); else if(_mqOd.addListener)_mqOd.addListener(_mqOdF);
+}catch(e){}
 // v12.1 — el ajuste reacciona al TAMAÑO DEL CONTENEDOR (sidebar, ventana angosta,
 // paneles laterales del navegador), no solo al resize de la ventana.
 let _odontoRO=null;
@@ -11010,6 +11346,7 @@ window.delCons=async function(cid){
   const c=(p.consultas||[]).find(c=>c.id===cid);if(!c)return;
   p.consultas=(p.consultas||[]).filter(x=>x.id!==cid);
   if(consultaView===cid)consultaView=null;
+  _playDelete();
   await guardar(p);renderLista();renderCons();
   undoToast('Consulta eliminada',async()=>{
     const now=gp();if(!now)return;
@@ -11050,7 +11387,7 @@ window.modalNuevo=function(){
   abrirModal('Nuevo paciente',
     `<div class="mf"><label>Nombre completo *</label><input id="m_no" placeholder="Nombre y apellidos" required></div>
      <div class="mf"><label>Cédula *</label>${ciInputHTML('m_ci','')}</div>
-     <div class="mf"><label>Teléfono *</label><input ${phoneInputAttrs('m_te','')} required></div>
+     <div class="mf"><label>Teléfono *</label><div class="tel-row">${telSelectHTML('m_te_cc','58')}<input ${phoneInputAttrs('m_te','')} required></div></div>
      <div class="modal-grid-2">
        <div class="mf"><label>Fecha de nacimiento *</label>${dsDateField('m_na','','')}</div>
        <div class="mf"><label>Sexo *</label><select id="m_sx" required><option value="">—</option><option value="F">Femenino</option><option value="M">Masculino</option><option value="O">Otro</option></select></div>
@@ -11078,12 +11415,16 @@ window.modalNuevo=function(){
       }
       // Format checks
       if(telefono.length<7){errDiv.textContent='El teléfono debe tener al menos 7 dígitos.';return;}
+      const telCC=g('m_te_cc');
+      if(!telCC){errDiv.textContent='Selecciona el pa\u00eds del tel\u00e9fono.';return;}
+      if(!telValida(telCC,telefono)){errDiv.textContent='El n\u00famero no tiene una longitud v\u00e1lida para el pa\u00eds seleccionado.';return;}
       if(ci){
         const dup=await ciExists(ci);
         if(dup){errDiv.textContent=`Ya existe un paciente con la cédula ${ci}: ${dup.nombre}`;return;}
       }
       const data={
         nombre,ci,telefono,nacimiento,sexo,
+        telefono_cc:'+'+telCC, telefonoE164:telE164(telCC,telefono)||'',
         telefono2:'',email:'',motivo:'',antecedentes:'',patologias:'',oclusion:'',diagnostico:'',
         plan:'',plan_aceptado:'',restauracion:'',material:'',color_dental:'',color_deseado:'',laboratorio:'',indicaciones_tecnico:'',obs_importantes:'',
         teeth:{},teeth_obs:'',operatorias:[],procs:{},especialistas:[],records:[],consultas:[],firmas:{}
@@ -11254,7 +11595,7 @@ let _audioCtx=null;
 function _playClick(freq){
   try{
     if(!_audioCtx)_audioCtx=new (window.AudioContext||window.webkitAudioContext)();
-    if(_audioCtx.state==='suspended')_audioCtx.resume();
+    if(_audioCtx.state==='suspended'){_audioCtx.resume().then(()=>_playClick(freq)).catch(()=>{});return;}
     const t=_audioCtx.currentTime;
     const osc=_audioCtx.createOscillator();
     const gain=_audioCtx.createGain();
@@ -11266,20 +11607,30 @@ function _playClick(freq){
     osc.start(t); osc.stop(t+0.05);
   }catch(e){}
 }
+// Tono de éxito: dos notas ascendentes (guardar exitoso)
+function _playSuccess(){ /* v13.2 — el único sonido es el clic (listener unificado) */ }
+// Tono de error: nota grave sostenida (validación fallida)
+function _playError(){ /* v13.2 — sin tonos extra: un clic = un sonido */ }
+function _playDelete(){ /* v13.2 — sin tonos extra */ }
 let _soundsOn=true;
 try{ _soundsOn=localStorage.getItem('ds_sounds')!=='0'; }catch(e){}
 window.toggleSounds=function(val){
   _soundsOn=(val!==undefined)?!!val:!_soundsOn;
   try{localStorage.setItem('ds_sounds',_soundsOn?'1':'0');}catch(e){}
+  // v13 — un solo origen de verdad: sincronizar TODOS los controles visibles
+  const aj=document.getElementById('ajSounds');
+  if(aj){aj.setAttribute('aria-checked',_soundsOn?'true':'false');aj.classList.toggle('on',_soundsOn);}
+  const pr=document.getElementById('prof_sounds');
+  if(pr)pr.checked=_soundsOn;
   toast(_soundsOn?'Sonidos activados':'Sonidos desactivados');
+  // al ACTIVAR: el listener de clic corrió antes del toggle (aún apagado),
+  // así que la confirmación audible va aquí — y sigue siendo UN solo tono.
+  if(_soundsOn)_playClick(720);
 };
+// Listener unificado: sonidos de clic + ripple en botones primarios
 document.addEventListener('click',function(ev){
-  if(!_soundsOn)return;
-  const t=ev.target.closest('button, .tab, .dash-qbtn, .pview-seg button, .filter-toggle-btn, .invites-toggle');
+  const t=ev.target.closest('button, a, .tab, .leg, .tooth, .viz-pill, summary, select, input[type="checkbox"], input[type="radio"], .dash-qbtn, .pview-seg button, .filter-toggle-btn, .invites-toggle, .arch-tab, .aj-switch, .ds-switch');
   if(!t||t.disabled)return;
-<<<<<<< HEAD
-  _playClick(t.classList.contains('tab')?620:t.classList.contains('bs')?820:740);
-=======
   // Ripple en botones .bs (independiente de sonidos)
   if(t.classList.contains('bs')){
     const r=document.createElement('span'); r.className='ripple';
@@ -11288,10 +11639,67 @@ document.addEventListener('click',function(ev){
     r.style.cssText=`width:${size}px;height:${size}px;left:${ev.clientX-rect.left-size/2}px;top:${ev.clientY-rect.top-size/2}px`;
     t.appendChild(r); setTimeout(()=>r.remove(),450);
   }
-  // Sonidos por clic: desactivados — el feedback sonoro queda reservado para
-  // guardar con éxito (_playSuccess) y eliminar (_playDelete), como en el listado.
->>>>>>> ec7942927b100fb31bbb994cdb271d79d5df76a0
+  // v13.2 · Regla simple y determinista: CADA clic en un elemento interactivo
+  // reproduce UN tono sutil. Única fuente de sonido de toda la aplicación.
+  if(_soundsOn)_playClick(720);
 },true);
+
+// ── v13 · SERVICE WORKER: app shell disponible sin conexión ────────────────
+// El SW vive en /sw.js (archivo separado — requisito del navegador). Con él,
+// recargar sin internet abre la app desde el caché y Firestore restaura los
+// datos y la cola de cambios pendientes desde IndexedDB.
+if('serviceWorker' in navigator && (location.protocol==='https:'||location.hostname==='localhost')){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('sw.js').then(reg=>{
+      reg.addEventListener('updatefound',()=>{
+        const nw=reg.installing;
+        if(nw)nw.addEventListener('statechange',()=>{
+          if(nw.state==='installed'&&navigator.serviceWorker.controller){
+            try{toast('Hay una versión nueva de DocuSalud · recarga cuando quieras para actualizar');}catch(e){}
+          }
+        });
+      });
+    }).catch(err=>console.warn('SW no registrado:',err&&err.message));
+  });
+}
+
+// ── v13 · Auditoría de clasificación de archivos existentes (solo lectura).
+// Uso desde consola: auditarArchivos()  → lista qué se reclasificaría.
+//                    auditarArchivos(true) → aplica (reversible: guarda tipoAnterior).
+window.auditarArchivos=async function(aplicar=false){
+  const IMGX=['png','jpg','jpeg','webp','gif','heic','heif','tif','tiff'];
+  const DOCX=['pdf','doc','docx'];
+  const informe=[];
+  for(const pt of pacientes){
+    for(const d of (pt.documentos||[])){
+      const ext=((d.nombre||'').split('.').pop()||'').toLowerCase();
+      if(IMGX.includes(ext))informe.push({paciente:pt.nombre,pid:pt.id,archivo:d.nombre,esta:'Documentos',deberia:'Imágenes',id:d.id});
+    }
+    for(const im of (pt.imagenes||[])){
+      const ext=((im.nombre||'').split('.').pop()||'').toLowerCase();
+      if(DOCX.includes(ext))informe.push({paciente:pt.nombre,pid:pt.id,archivo:im.nombre,esta:'Imágenes',deberia:'Documentos',id:im.id});
+    }
+  }
+  console.table(informe);
+  if(!aplicar||!informe.length){console.log(informe.length+' archivo(s) mal clasificados. Ejecuta auditarArchivos(true) para corregir (reversible).');return informe;}
+  if(!isAdmin){console.warn('Solo un administrador puede aplicar la reclasificación.');return informe;}
+  for(const item of informe){
+    const pt=pacientes.find(x=>x.id===item.pid); if(!pt)continue;
+    if(item.deberia==='Imágenes'){
+      const i=(pt.documentos||[]).findIndex(x=>x.id===item.id); if(i<0)continue;
+      const d=pt.documentos.splice(i,1)[0];
+      pt.imagenes=[...(pt.imagenes||[]),{id:d.id,nombre:d.nombre,categoria:'otros',fecha:d.fecha,subidoPorUid:d.subidoPorUid,subidoPorNombre:d.subidoPorNombre,consultaId:d.consultaId||null,dataUrl:null,thumb:null,storagePath:d.storagePath||null,downloadURL:d.downloadURL||null,tipoAnterior:'documento',reclasificadoEn:new Date().toISOString()}];
+    }else{
+      const i=(pt.imagenes||[]).findIndex(x=>x.id===item.id); if(i<0)continue;
+      const im=pt.imagenes.splice(i,1)[0];
+      const ext=((im.nombre||'').split('.').pop()||'').toLowerCase();
+      pt.documentos=[...(pt.documentos||[]),{id:im.id,nombre:im.nombre,tipo:ext==='pdf'?'pdf':'word',size:0,fecha:im.fecha,subidoPorUid:im.subidoPorUid,subidoPorNombre:im.subidoPorNombre,consultaId:im.consultaId||null,storagePath:im.storagePath||null,downloadURL:im.downloadURL||im.dataUrl||null,tipoAnterior:'imagen',reclasificadoEn:new Date().toISOString()}];
+    }
+    await guardar(pt);
+  }
+  console.log('Reclasificación aplicada a '+informe.length+' archivo(s). Campo tipoAnterior conserva el estado previo.');
+  return informe;
+};
 
 // ─── INIT ─────────────────────────────────────────────────────────────────
 // build-marker: v3-cal-mes
