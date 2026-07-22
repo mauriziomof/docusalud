@@ -990,16 +990,13 @@ html[data-theme="dark"] .tooth.protesis { background:#584A72; border-color:#D7C5
   }
   .card { padding: 14px 14px; }
   .mbox { padding: 18px; }
-  .tooth { width: auto; min-width: 0; height: clamp(36px, 10.5vw, 46px); }
+  .tooth { width: 32px; height: 40px; }
   .tooth .tn { font-size: 7px; }
   .tooth .ts { font-size: 10px; }
-  /* v13 · Odontograma móvil: TODAS las piezas visibles sin scroll horizontal.
-     Cada arcada envuelve en 2 filas de 8 (una por cuadrante). */
+  /* v14.1 · Odontograma móvil = MISMO diseño que la web, escalado por zoom (fit). */
   .odonto-chart-wrap { overflow-x: hidden; padding-bottom: 4px; }
-  .ow { width: 100%; min-width: 0; }
-  .tr { display: grid; grid-template-columns: repeat(8, minmax(0,1fr)); gap: 4px; width: 100%; }
-  .tr .ml { display: none; }
-  .tr-decidua { display: grid; grid-template-columns: repeat(10, minmax(0,1fr)); gap: 4px; width: 100%; }
+  .ow { width: max-content; margin: 0 auto; }
+  .ml { height: 28px; }
   /* Bottom nav: subtle top elevation */
   .bottom-nav { display: flex; box-shadow: 0 -1px 0 rgba(31,58,42,0.06), 0 -4px 12px rgba(31,58,42,0.05); }
   #menuBtn { display: block !important; }
@@ -2021,13 +2018,11 @@ body:has(.dot.ing) .topbar .brand svg { animation: logoBreathe 1.5s var(--ease) 
 @media (max-width: 768px) {
   .odonto-layout { grid-template-columns: 1fr; gap: 12px; }
   .odonto-chart-wrap { display: block; overflow-x: hidden; padding-bottom: 6px; }
-  .ow { width: 100%; min-width: 0; }
-  .tr { display: grid; grid-template-columns: repeat(8, minmax(0,1fr)); gap: 4px; width: 100%; }
-  .tr .ml { display: none; }
-  .tr-decidua { display: grid; grid-template-columns: repeat(10, minmax(0,1fr)); gap: 4px; width: 100%; }
-  .tooth { width: auto; min-width: 0; height: clamp(40px, 11.5vw, 52px); }
-  .tooth .ts { font-size: clamp(10px, 3vw, 12px); }
-  .tooth .tn { font-size: clamp(8px, 2.3vw, 9.5px); }
+  .ow { width: max-content; margin: 0 auto; }
+  .tooth { width: 34px; height: 42px; }
+  .tooth .ts { font-size: 11px; }
+  .tooth .tn { font-size: 8.5px; }
+  .ml { height: 40px; margin: 0 4px; }
   .odonto-hint { font-size: 10px; }
   .viz-panel { position: static; padding: 0; border-radius: var(--r); }
   .viz-svg { max-width: 280px; }
@@ -4134,6 +4129,15 @@ const auth = getAuth(app);
     // Si no está disponible, storage queda null y la subida cae a modo local
     // (dataUrl inline) sin romper la app — ver imgUpload().
     let storage=null; try{ storage=getStorage(app); }catch(e){ console.warn("Storage no disponible:",e.message); }
+    // v14 · El bucket puede NO existir (Storage sin aprovisionar en Firebase Console):
+    // uploadBytes se cuelga/reintenta sin dar error claro. Se sondea una vez y las
+    // subidas usan el resultado para avisar honesto en vez de colgarse 30s.
+    window._storageOk=null;
+    (async()=>{try{
+      const r=await fetch('https://firebasestorage.googleapis.com/v0/b/'+firebaseConfig.storageBucket+'/o?maxResults=1');
+      window._storageOk=(r.status!==404);
+      if(r.status===404)console.warn('[archivos] El bucket de Storage NO existe — activar Storage en Firebase Console (Build → Storage → Comenzar).');
+    }catch(e){/* red caída: se decide por navigator.onLine */}})();
 
 // ─── CONSTANTS ────────────────────────────────────────────────────────────
 const UPPER=[18,17,16,15,14,13,12,11,21,22,23,24,25,26,27,28];
@@ -4559,7 +4563,10 @@ let _odontoSaving=false; // guard: evita doble-save en tap rápido
 function logChange(accion,seccion,patientArg,preSnap){
   try{
     const p=patientArg||gp(); if(!p)return;
-    if(isAdmin)return; // los cambios del admin no ensucian el récord del dueño
+    // v14 · ANTES: if(isAdmin)return — cualquier edición hecha desde una sesión
+    // admin (p. ej. el teléfono del dueño con bypass) desaparecía del Récord.
+    // La auditoría clínica exige registrar a TODO el que escribe; el campo
+    // "user" ya identifica quién fue.
     if(!p.records)p.records=[];
     const detalle = seccion ? `${accion} · ${seccion}` : accion;
     // Anti-spam: evita duplicar el mismo cambio en una ráfaga de autosave (mismo detalle < 8s).
@@ -4963,6 +4970,13 @@ function bootstrapUserPerms(user){
       pacientesListenerUid=currentUserUid;
       setupPacientesListener();
     }
+    // v14 · el candado de plan se decidía ANTES de que llegara el doc de permisos
+    // (todo usuario era "free" durante la carga) y nada re-renderizaba después.
+    try{
+      const _pk=[currentUserPerms&&currentUserPerms.plan,currentUserPerms&&currentUserPerms.imagenesDisabled,currentUserPerms&&currentUserPerms.documentosDisabled].join('|');
+      if(window._lastPlanKey!==undefined&&window._lastPlanKey!==_pk&&viewActual==='paciente'&&idActual){renderPaciente();}
+      window._lastPlanKey=_pk;
+    }catch(e){}
   });
 }
 
@@ -5030,7 +5044,7 @@ document.addEventListener('keydown',ev=>{
 });
 
 // ─── v9 · AJUSTES ───────────────────────────────────────────────────────────
-window.openAjustes=function(){
+window.openAjustes=function(){ setTimeout(()=>{try{window._offlineReadyCheck();}catch(e){}},250);
   flushAutosaves();
   viewActual='ajustes';
   renderAjustes();
@@ -5038,6 +5052,19 @@ window.openAjustes=function(){
 function ajSwitch(id,on,onchange){
   return `<button type="button" role="switch" aria-checked="${on?'true':'false'}" class="aj-switch${on?' on':''}" id="${id}" onclick="${onchange}"><span class="aj-knob"></span></button>`;
 }
+// v14 · Diagnóstico visible del modo offline: SW activo + index en caché.
+window._offlineReadyCheck=async function(){
+  const el=document.getElementById('ajOffReady'); if(!el)return;
+  try{
+    if(!('serviceWorker' in navigator)){el.textContent='No disponible en este navegador.';return;}
+    const regs=await navigator.serviceWorker.getRegistrations();
+    const activo=regs.some(r=>r.active);
+    let shell=false;
+    try{const ks=await caches.keys();for(const k of ks){const c=await caches.open(k);if(await c.match('/index.html')||await c.match('/')){shell=true;break;}}}catch(e){}
+    el.textContent=(activo&&shell)?'Listo: la aplicación abre y funciona sin internet en este dispositivo.':(activo?'Preparando el caché… recarga una vez con internet.':'Aún no activo — recarga la página con internet.');
+    el.style.color=(activo&&shell)?'var(--sage)':'var(--text2)';
+  }catch(e){el.textContent='No se pudo comprobar.';}
+};
 function renderAjustes(){
   const isDark=document.documentElement.getAttribute('data-theme')==='dark';
   const isAccess=document.documentElement.getAttribute('data-access')==='1';
@@ -5066,6 +5093,12 @@ function renderAjustes(){
             <div class="aj-desc">Un tono sutil con cada clic en la interfaz.</div>
           </div>
           ${ajSwitch('ajSounds',(function(){try{return localStorage.getItem('ds_sounds')!=='0';}catch(e){return true;}})(),'toggleSounds()')}
+        </div>
+        <div class="aj-row">
+          <div class="aj-info">
+            <div class="aj-name">Modo sin conexión</div>
+            <div class="aj-desc" id="ajOffReady">Comprobando…</div>
+          </div>
         </div>
         <div class="aj-row">
           <div class="aj-info">
@@ -5371,7 +5404,7 @@ checkMobile();
 function ss(state,label){const d=document.getElementById('syncDot');const l=document.getElementById('syncLabel');if(d)d.className='dot '+state;if(l)l.textContent=label}
 // Returns sync indicator to resting state "Sincronizado" so transient "Guardado" doesn't stick around.
 let _ssRestTimer=null;
-function ssRest(){if(_ssRestTimer)clearTimeout(_ssRestTimer);_ssRestTimer=setTimeout(()=>ss('ok','Sincronizado'),2500);}
+function ssRest(){if(_ssRestTimer)clearTimeout(_ssRestTimer);_ssRestTimer=setTimeout(()=>{if(navigator.onLine)ss('ok','Sincronizado');else ss('off','Sin conexión · los cambios se guardan localmente');},2500);}
 // ── v7.1 auto-resize free-text fields (#11) ───────────────────────────────
 function autoGrow(t){ if(!t)return; t.style.height='auto'; t.style.height=Math.min(t.scrollHeight,600)+'px'; }
 function initAutoGrow(root){ (root||document).querySelectorAll('textarea').forEach(t=>{ if(t.dataset._ag)return; t.dataset._ag='1'; t.classList.add('auto-grow'); const h=()=>autoGrow(t); t.addEventListener('input',h); requestAnimationFrame(h); }); }
@@ -5531,7 +5564,7 @@ function setupPacientesListener(){
     return;
   }
   ss('ing','Conectando...');
-  pacientesUnsub = onSnapshot(q, snap=>{
+  pacientesUnsub = onSnapshot(q, {includeMetadataChanges:true}, snap=>{
     const _all=snap.docs.map(d=>({id:d.id,...d.data()}));
     // v9 — papelera (soft-delete): los eliminados no aparecen en la app; viven
     // 30 días en Ajustes → Papelera y luego se purgan definitivamente.
@@ -5549,10 +5582,20 @@ function setupPacientesListener(){
     // v13 · conflicto: el paciente abierto cambió desde OTRO dispositivo mientras
     // aquí hay edición sin guardar → nunca sobrescribir en silencio.
     if(!_selfSave && idActual && Object.keys(_autosaveRun).length){ _conflictoAviso(); }
-    if(!_selfSave || viewActual==='calendario' || viewActual==='admin'){
+    if((!_selfSave || viewActual==='calendario' || viewActual==='admin') && !snap.metadata.hasPendingWrites){
       rerenderCurrent();
     }
-    ss('ok','Sincronizado');
+    // v14 · Estado HONESTO según metadata oficial de Firestore
+    // (docs: firebase.google.com/docs/firestore/query-data/listen — fromCache /
+    //  hasPendingWrites con includeMetadataChanges). Nunca "Sincronizado" desde caché.
+    if(snap.metadata.fromCache){
+      if(!navigator.onLine) ss('off','Sin conexión · los cambios se guardan localmente');
+      else ss('ing','Conectando…');
+    } else if(snap.metadata.hasPendingWrites){
+      ss('ing','Sincronizando cambios pendientes…');
+    } else {
+      ss('ok','Sincronizado');
+    }
   },err=>{
     console.warn('Pacientes listener error:',err.message);
     ss('err','Sin conexión');
@@ -7626,8 +7669,12 @@ function _buildHistoriaPDF(jsPDF, p, H){
     }
   };
   const fieldBlock=(lbl,val)=>{
-    if(val===undefined||val===null||String(val).trim()==='')return;
-    ensure(10); label(lbl); y+=4.2; wrapText(val); y+=2.4;
+    if(val===undefined||val===null)return;
+    // v14.1 · los campos de notas acumulan entradas fechadas con líneas "-" y
+    // vacías: se filtran para que el PDF no imprima basura ni huecos.
+    const lines=String(val).split(/\n+/).map(s=>s.trim()).filter(s=>s&&s!=='-'&&s!=='—'&&s!=='·');
+    if(!lines.length)return;
+    ensure(10); label(lbl); y+=4.2; wrapText(lines.join('\n')); y+=2.4;
   };
 
   // ── Página 1
@@ -7689,17 +7736,18 @@ function _buildHistoriaPDF(jsPDF, p, H){
     setF(7.2,'normal',GRAY); doc.text(lbl,lx+4.2,y);
     lx+=doc.getTextWidth(lbl)+11;
   });
-  y+=5;
+  y+=8;
   if(p.teeth_obs&&String(p.teeth_obs).trim()){ fieldBlock('Observaciones del odontograma',p.teeth_obs); }
 
   // ── Consultas (más reciente primero)
   const consultas=[...(p.consultas||[])].sort((a,b)=>((b.fecha||'')+(b.hora||'')).localeCompare((a.fecha||'')+(a.hora||'')));
   if(consultas.length){
     section('Consultas  ·  '+consultas.length);
-    consultas.forEach(c=>{
-      ensure(16);
-      doc.setDrawColor(LINE[0],LINE[1],LINE[2]); doc.setLineWidth(0.3);
-      doc.line(M,y-1.5,PW-M,y-1.5); y+=2.5;
+    consultas.forEach((c,ci)=>{
+      ensure(18);
+      if(ci>0){doc.setDrawColor(LINE[0],LINE[1],LINE[2]); doc.setLineWidth(0.3);
+        doc.line(M,y-1.5,PW-M,y-1.5);}
+      y+=2.5;
       setF(9.6,'bold',FOREST);
       doc.text((H.ff(c.fecha)||'Sin fecha')+(c.hora?('  ·  '+c.hora):''),M,y);
       if(c.costo){ setF(9.6,'bold',INK); doc.text('$'+(parseFloat(c.costo)||0).toLocaleString(),PW-M,y,{align:'right'}); }
@@ -7713,9 +7761,11 @@ function _buildHistoriaPDF(jsPDF, p, H){
 
       // Plan de tratamiento + firmas de ESTA consulta
       const f=c.firmas||{};
-      const hasPlan=(c.plan&&String(c.plan).trim())||(c.restauracion&&String(c.restauracion).trim())||f.paciente||f.odontologo;
+      const _txtPlan=(c.plan&&String(c.plan).trim())||(c.restauracion&&String(c.restauracion).trim());
+      const hasPlan=_txtPlan||f.paciente||f.odontologo;
       if(hasPlan){
-        ensure(10);
+        // v14.1 · anti-huérfano: el subtítulo viaja con su contenido
+        ensure(_txtPlan?22:56);
         setF(8.4,'bold',FOREST); doc.text('Plan de tratamiento',M,y); y+=4.6;
         if(c.plan&&String(c.plan).trim())fieldBlock('Plan',c.plan);
         if(c.plan_aceptado)fieldBlock('Aceptación del plan',c.plan_aceptado);
@@ -7727,7 +7777,7 @@ function _buildHistoriaPDF(jsPDF, p, H){
         if((c.especialistas||[]).length)fieldBlock('Especialistas',(c.especialistas||[]).map(s=>typeof s==='string'?s:(s.nombre||'')).filter(Boolean).join(', '));
 
         // Firmas: SIEMPRE en bloque completo (jamás cortadas por un salto de página)
-        const sigH=34; ensure(sigH+8);
+        const sigH=34; ensure(sigH+14);
         const half=(W-8)/2;
         const sig=(x,dataUrl,who)=>{
           doc.setDrawColor(LINE[0],LINE[1],LINE[2]); doc.setLineWidth(0.35);
@@ -8695,7 +8745,8 @@ function imgUpload(prepared){
     const total=pendientes.length;
     if(!total){ cerrarModal(); return; }
     // ── v13 · Sin conexión: guardado local honesto, marcado pendiente (6.7)
-    const offline=!navigator.onLine||!storage;
+    const offline=!navigator.onLine||!storage||window._storageOk===false;
+    if(window._storageOk===false&&navigator.onLine)console.warn('[archivos] Guardado inline: el bucket de Storage no está aprovisionado.');
     let done=0, fallos=0;
     const nuevas=[];
     const setProg=()=>{
@@ -8925,7 +8976,7 @@ window.docOnFiles=function(files){
 function docUpload(files){
   const pt=gp();
   if(!pt){ toast('Abre un paciente primero.'); return; }
-  if(!storage){ toast('La nube de archivos no está disponible en este momento. Intenta más tarde.'); return; }
+  if(!storage||window._storageOk===false){ toast(window._storageOk===false?'La nube de archivos no está configurada en el proyecto. Avisa a soporte para activarla.':'La nube de archivos no está disponible en este momento. Intenta más tarde.'); return; }
   const consSorted=[...(pt.consultas||[])].sort((a,b)=>((b.fecha||'')+(b.hora||'')).localeCompare((a.fecha||'')+(a.hora||'')));
   const consOpts=`<option value="">Sin consulta</option>`+consSorted.map(c=>{
     const motivo=(c.motivo&&c.motivo.trim())||(c.tratamiento&&c.tratamiento.trim())||'Consulta';
@@ -9090,7 +9141,8 @@ function archHeaderHTML(active){
     heroHTML=uploadInput+'<div class="arch-hero" onclick="document.getElementById(\'archFileInput\').click()" ondragover="event.preventDefault();this.classList.add(\'drag\')" ondragleave="this.classList.remove(\'drag\')" ondrop="event.preventDefault();this.classList.remove(\'drag\');archOnFiles(event.dataTransfer.files)"><div class="arch-hero-art" aria-hidden="true"><span class="aha aha-1">'+icon('image',22)+'</span><span class="aha aha-2">'+icon('filetext',22)+'</span><span class="aha aha-3">'+icon('plus',16)+'</span></div><div class="arch-hero-body"><div class="arch-hero-t">Empieza la historia visual de '+e((titleCase(pt.nombre)||'este paciente').split(' ')[0])+'</div><div class="arch-hero-s">Radiografías, fotos, consentimientos — todo junto al paciente, en la nube.</div></div><button type="button" class="bs arch-hero-btn" onclick="event.stopPropagation();document.getElementById(\'archFileInput\').click()">'+icon('plus',14)+' Subir archivos</button></div>';
   }
   const tabBtn=(k,lbl,n,ico)=>'<button type="button" class="arch-tab'+(active===k?' on':'')+'" onclick="archVista(\''+k+'\')">'+ico+'<span>'+lbl+'</span><span class="arch-tab-n">'+n+'</span></button>';
-  return (storage?'':'<div class="img-cloud-notice"><span class="ico">'+icon('cloud',16)+'</span><span>Sin nube — imágenes locales.</span></div>')+heroHTML+(hasFiles?'<div class="arch-tabs">'+tabBtn('img','Imágenes',nImg,icon('image',15))+(docOk?tabBtn('doc','Documentos',nDoc,icon('filetext',15)):'')+'</div>':'');
+  const _cloudWarn=(!storage||window._storageOk===false)?'<div class="img-cloud-notice"><span class="ico">'+icon('cloud',16)+'</span><span>'+(window._storageOk===false?'La nube de archivos no está activada — los archivos se guardan dentro de la ficha (límite reducido). Avisa a soporte.':'Sin nube — imágenes locales.')+'</span></div>':'';
+  return _cloudWarn+heroHTML+(hasFiles?'<div class="arch-tabs">'+tabBtn('img','Imágenes',nImg,icon('image',15))+(docOk?tabBtn('doc','Documentos',nDoc,icon('filetext',15)):'')+'</div>':'');
 }
 window.archVista=function(k){ flushAutosaves(); _archVista=(k==='doc'?'doc':'img'); renderTab(); };
 // Chip de resumen → salta directo al tipo con el filtro puesto
@@ -9232,6 +9284,10 @@ function renderTab(){
   if(t==='img'){
     const _imp = viewAsUid ? allUsersList.find(u=>u.uid===viewAsUid) : null;
     const _ep = effectivePlanFor(_imp);
+    if(!isAdmin&&!_imp&&currentUserPerms===null){
+      const _pn=document.getElementById('panel'); if(_pn)_pn.innerHTML='<div class="card" style="padding:36px;text-align:center;color:var(--text2)">Cargando tu plan\u2026</div>';
+      return;
+    }
     if(!(_ep==='admin'||_ep==='pro'||_ep==='clinica')||imagenesDisabledFor(_imp)){
       return renderImagenesLocked();
     }
@@ -10163,12 +10219,12 @@ function _odontoFitMobile(){
     // es 12% más grande de lo que reporta clientWidth en px CSS.
     // Dividimos el espacio disponible entre 1.12 para compensar y
     // evitar que los dientes desborden al costado en modo accesibilidad.
-    // v12 — en móvil (≤768) NO se comprime con zoom: dientes a tamaño táctil
-    // con scroll horizontal controlado (la máscara indica que hay más).
-    if(window.innerWidth<=768){ wrap.style.zoom=''; return; }
+    // v14.1 — CONSISTENCIA: el móvil usa EXACTAMENTE el mismo diseño que la web,
+    // ajustado por zoom proporcional al ancho (sin scroll horizontal, sin rediseños).
     const accessZoom=document.documentElement.getAttribute('data-access')==='1'?1.12:1;
-    const effective=Math.floor((have-32)/accessZoom);
-    if(need>effective&&effective>100){ wrap.style.zoom=String(Math.max(0.55,effective/need)); }
+    const effective=Math.floor((have-(window.innerWidth<=768?12:32))/accessZoom);
+    const minZ=window.innerWidth<=768?0.4:0.55;
+    if(need>effective&&effective>100){ wrap.style.zoom=String(Math.max(minZ,effective/need)); }
   }catch(e){}
 }
 window.addEventListener('resize',()=>{ if(tabActual==='odonto'&&viewActual==='paciente')setTimeout(_odontoFitMobile,80); });
@@ -11650,7 +11706,8 @@ document.addEventListener('click',function(ev){
 // datos y la cola de cambios pendientes desde IndexedDB.
 if('serviceWorker' in navigator && (location.protocol==='https:'||location.hostname==='localhost')){
   window.addEventListener('load',()=>{
-    navigator.serviceWorker.register('sw.js').then(reg=>{
+    navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(reg=>{
+      try{reg.update();}catch(e){}
       reg.addEventListener('updatefound',()=>{
         const nw=reg.installing;
         if(nw)nw.addEventListener('statechange',()=>{
