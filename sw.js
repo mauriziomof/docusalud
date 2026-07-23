@@ -7,7 +7,7 @@
 // DESPLIEGUE: subir este archivo a la RAÍZ del sitio, junto a index.html.
 // Al publicar una nueva versión del index, incrementar CACHE_V aquí.
 
-const CACHE_V = 'docusalud-v14-1';
+const CACHE_V = 'docusalud-v15-1';
 const SHELL = ['/', '/index.html'];
 // Módulos del SDK que el index importa: se precachean en el install para que
 // el offline funcione desde la PRIMERA visita (en la primera carga, los imports

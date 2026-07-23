@@ -950,7 +950,7 @@ html[data-theme="dark"] .tooth.protesis { background:#584A72; border-color:#D7C5
   .phdr-wa span.lbl { display:none; }
   /* ── BARRA DE PESTAÑAS MÓVIL — scroll horizontal tipo pill bar ── */
   .tabbar {
-    position: sticky; top: 60px; z-index: 3;
+    position: sticky; top: var(--phdrH, 60px); z-index: 3;
     flex-wrap: nowrap;
     overflow-x: auto; overflow-y: visible;
     scroll-snap-type: x proximity;
@@ -1677,7 +1677,10 @@ body:has(.dot.ing) .topbar .brand svg { animation: logoBreathe 1.5s var(--ease) 
   .profile-hero { padding: 16px 18px; gap: 14px; }
   .profile-avatar-lg { width: 52px; height: 52px; font-size: 20px; }
   .profile-hero-name { font-size: 19px; }
-  .profile-btn { width: 32px; height: 32px; font-size: 11px; }
+  /* v15 · target táctil cómodo y header siempre por encima de overlays */
+  .profile-btn { width: 40px; height: 40px; font-size: 12px; }
+  .topbar { position: relative; z-index: 60; }
+  .dark-toggle { min-width: 38px; min-height: 38px; }
 }
 
 /* ── ADMIN BUTTON IN TOPBAR ─────────────────────────────────────────────── */
@@ -2034,7 +2037,8 @@ body:has(.dot.ing) .topbar .brand svg { animation: logoBreathe 1.5s var(--ease) 
   .viz-quad-pills { width: 100%; overflow-x: auto; flex-wrap: nowrap; padding-bottom: 4px; -webkit-overflow-scrolling: touch; }
   .viz-picker { max-height: none; }
   /* Pin the state legend (tleg) so user can tap states while viewing tooth */
-  .tleg { position: sticky; top: 0; background: var(--surface); z-index: 5; padding: 8px 0; border-bottom: 0.5px solid var(--border); }
+  /* v15 · pila sticky medida en runtime (phdr+tabbar reales): sin espacio muerto ni solapes */
+  .tleg { position: sticky; top: var(--odostick, 128px); background: var(--surface); z-index: 2; padding: 8px 0; border-bottom: 0.5px solid var(--border); }
 }
 
 [data-theme="dark"] .viz-canvas { background: linear-gradient(180deg, var(--surface2) 0%, var(--surface) 100%); }
@@ -2474,7 +2478,24 @@ html[data-access="1"] .f input,html[data-access="1"] .f select,html[data-access=
 html[data-access="1"] .f textarea,html[data-access="1"] .mf textarea{ font-size:14px; }
 html[data-access="1"] .side-menu-item{ padding:16px; font-size:15px; }
 html[data-access="1"] .bn-btn{ font-size:11px; }
-@media (max-width:768px){ html[data-access="1"] body{ zoom:1.08; } }
+/* v15 · En móvil el zoom de body ROMPE la barra superior en iOS Safari
+   (desplaza los sticky/fixed y quedan intocables). Sustituido por escala
+   tipográfica dirigida — mismo beneficio de lectura, cero layout roto. */
+@media (max-width:768px){
+  html[data-access="1"] body{ zoom:1 !important; }
+  html[data-access="1"] .f label{ font-size:13.5px; }
+  html[data-access="1"] .f input, html[data-access="1"] .f select, html[data-access="1"] .f textarea{ font-size:16px; }
+  html[data-access="1"] .pn{ font-size:16px; }
+  html[data-access="1"] .pi-meta, html[data-access="1"] .pm{ font-size:13px; }
+  html[data-access="1"] .ct{ font-size:16.5px; }
+  html[data-access="1"] .tab{ font-size:13px; }
+  html[data-access="1"] .aj-name{ font-size:15.5px; }
+  html[data-access="1"] .aj-desc{ font-size:13.5px; }
+  html[data-access="1"] .cc, html[data-access="1"] .hist-field{ font-size:14px; }
+  html[data-access="1"] .today-name, html[data-access="1"] .dash-label{ font-size:14.5px; }
+  html[data-access="1"] .phm{ font-size:13px; }
+  html[data-access="1"] p, html[data-access="1"] .mf label{ line-height:1.6; }
+}
 
 /* ════════ v9 · DOCUMENTOS + ARCHIVOS (admin) ════════ */
 .doc-list{ display:flex; flex-direction:column; gap:0; padding:8px 10px; }
@@ -3084,6 +3105,12 @@ html[data-theme="dark"] .viz-panel{ box-shadow:none; }
   .arch-filters{ align-items:stretch; } .arch-search{ flex-basis:100%; }
   .arch-grid{ grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:10px; }
   .arch-card-img{ height:120px; }
+}
+/* v15 · Modal de soporte en móvil: márgenes, sin desbordes, teclado amigable */
+@media (max-width:768px){
+  #SPM .mbox{ max-width:calc(100vw - 28px); margin:0 14px; }
+  #SPM textarea{ font-size:16px; } /* evita el auto-zoom de iOS al enfocar */
+  #SPM .mact{ position:sticky; bottom:0; background:var(--surface); padding-top:8px; }
 }
 /* ── v13 · Teléfono internacional: selector de país + número ── */
 .tel-row{ display:flex; gap:6px; align-items:center; }
@@ -4036,6 +4063,10 @@ window.showApp = function(opts){ window._pendingShowApp = opts || {}; };
         <button role="menuitem" onclick="closeProfileMenu();openAjustes()">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
           Ajustes
+        </button>
+        <button role="menuitem" onclick="closeProfileMenu();openSoporte()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+          Atención al cliente
         </button>
         <div class="profile-menu-sep"></div>
         <button role="menuitem" class="pm-danger" onclick="closeProfileMenu();cerrarSesion()">
@@ -7590,7 +7621,7 @@ window.openSoporte=function(){
     <h3 style="margin-bottom:4px">Atención al cliente</h3>
     <p style="font-size:12.5px;color:var(--text2);margin-bottom:14px">Escribe tu mensaje — le llega directo a los administradores.</p>
     <div class="mf"><textarea id="sp_msg" placeholder="¿En qué te podemos ayudar?" style="min-height:110px"></textarea></div>
-    <div class="mact"><button class="bc" onclick="document.getElementById('SPM').remove()">Cancelar</button><button class="bs" onclick="enviarSoporte()">Enviar</button></div>
+    <div class="mact"><button class="bc" onclick="document.getElementById('SPM').remove()">Cancelar</button><button class="bs" id="sp_send" onclick="enviarSoporte()">Enviar</button></div>
   </div>`;
   document.body.appendChild(div);
   setTimeout(()=>document.getElementById('sp_msg')?.focus(),50);
@@ -7598,6 +7629,9 @@ window.openSoporte=function(){
 window.enviarSoporte=async function(){
   const msg=(document.getElementById('sp_msg').value||'').trim();
   if(!msg){toast('Escribe un mensaje antes de enviar');return;}
+  // v15 · estado de carga + anti-doble envío
+  const _b=document.getElementById('sp_send');
+  if(_b){ if(_b.disabled)return; _b.disabled=true; _b.textContent='Enviando…'; }
   try{
     await addDoc(collection(db,'soporte_mensajes'),{
       uid:currentUserUid||null,
@@ -7609,7 +7643,10 @@ window.enviarSoporte=async function(){
     });
     document.getElementById('SPM')?.remove();
     toast('Mensaje enviado — te responderán pronto');
-  }catch(err){ console.error(err); toast('No se pudo enviar el mensaje'); }
+  }catch(err){
+    console.error(err); toast('No se pudo enviar el mensaje — revisa tu conexión e inténtalo de nuevo');
+    const _b2=document.getElementById('sp_send'); if(_b2){_b2.disabled=false;_b2.textContent='Enviar';}
+  }
 };
 // ===== v7.2 PDF export of current view (#2) =====
 function _loadScript(src){return new Promise((res,rej)=>{if([...document.scripts].some(s=>s.src===src)){res();return;}const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=()=>rej(new Error('load '+src));document.head.appendChild(s);});}
@@ -8934,11 +8971,12 @@ function renderImagenesLocked(){
 // del paciente; no toca ningún campo existente.
 let _docFilters = { tipo:'', user:'', cons:'', fecha:'' };
 let _archVista = 'img'; // v9.2 — sub-vista de la tab Archivos: 'img' | 'doc'
-const DOC_TIPOS={pdf:'PDF', word:'Word'};
+const DOC_TIPOS={pdf:'PDF', word:'Word', excel:'Excel'};
 function docTipoDe(file){
   const n=(file.name||'').toLowerCase();
   if(file.type==='application/pdf'||n.endsWith('.pdf'))return 'pdf';
   if(n.endsWith('.doc')||n.endsWith('.docx')||(file.type||'').includes('msword')||(file.type||'').includes('officedocument.wordprocessingml'))return 'word';
+  if(n.endsWith('.xls')||n.endsWith('.xlsx')||(file.type||'').includes('ms-excel')||(file.type||'').includes('spreadsheetml'))return 'excel';
   return null;
 }
 function docSizeLabel(b){ if(!b&&b!==0)return ''; if(b<1024)return b+' B'; if(b<1048576)return (b/1024).toFixed(0)+' KB'; return (b/1048576).toFixed(1)+' MB'; }
@@ -9015,7 +9053,7 @@ function docUpload(files){
     }
     // MIME de respaldo por extensión (algunos navegadores no reportan f.type)
     const _ctDe=f=>{const x=((f.name||'').split('.').pop()||'').toLowerCase();
-      return f.type||({pdf:'application/pdf',doc:'application/msword',docx:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'})[x]||undefined;};
+      return f.type||({pdf:'application/pdf',doc:'application/msword',docx:'application/vnd.openxmlformats-officedocument.wordprocessingml.document',xls:'application/vnd.ms-excel',xlsx:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'})[x]||undefined;};
     const pendientes=files.filter(f=>!f._done);
     const total=pendientes.length;
     let done=0;
@@ -9117,7 +9155,7 @@ function archHeaderHTML(active){
   const hasFiles=nImg+nDoc>0;
   const _imp=viewAsUid?allUsersList.find(u=>u.uid===viewAsUid):null;
   const docOk=!documentosDisabledFor(_imp);
-  const uploadInput='<input type="file" id="archFileInput" accept="image/*,.pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" multiple style="display:none" onchange="archOnFiles(this.files)">';
+  const uploadInput='<input type="file" id="archFileInput" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" multiple style="display:none" onchange="archOnFiles(this.files)">';
   let heroHTML='';
   if(hasFiles){
     const c={rad:0,intra:0,doc:0,otros:0};
@@ -9154,13 +9192,13 @@ window.archChip=function(kind){
 // v13 · Clasificación por extensión + MIME cruzados. Si no coinciden, se
 // rechaza con error claro (nunca adivinar). PNG/JPG jamás pueden ser Documento.
 const IMG_EXTS=['png','jpg','jpeg','webp','gif','heic','heif','tif','tiff'];
-const DOC_EXTS=['pdf','doc','docx'];
+const DOC_EXTS=['pdf','doc','docx','xls','xlsx'];
 function clasificarArchivo(f){
   const ext=((f.name||'').split('.').pop()||'').toLowerCase();
   const mime=(f.type||'').toLowerCase();
   const extImg=IMG_EXTS.includes(ext), extDoc=DOC_EXTS.includes(ext);
   const mimeImg=mime.startsWith('image/');
-  const mimeDoc=mime==='application/pdf'||mime.includes('msword')||mime.includes('officedocument.wordprocessingml');
+  const mimeDoc=mime==='application/pdf'||mime.includes('msword')||mime.includes('officedocument.wordprocessingml')||mime.includes('ms-excel')||mime.includes('spreadsheetml');
   if((extImg&&mimeDoc)||(extDoc&&mimeImg)){
     console.warn('[archivos] extensión y MIME no coinciden:',f.name,mime);
     return {clase:null,motivo:'inconsistente'};
@@ -9314,8 +9352,9 @@ function renderTab(){
     if(_tabP){
       const _hasImgs=(_tabP.imagenes||[]).length>0;
       const _hasDocs=(_tabP.documentos||[]).length>0;
-      if(!_hasImgs&&_hasDocs)_archVista='doc';
-      else _archVista='img';
+      // v15 FIX: forzaba _archVista='img' en cada render, pisando el clic en
+      // "Documentos". Solo auto-cambia hacia docs cuando no hay imágenes.
+      if(!_hasImgs&&_hasDocs&&_archVista==='img')_archVista='doc';
     }
     // Scroll al tope para que las imágenes sean visibles sin scrollear
     const _archPanel=document.getElementById('panel');
@@ -10209,6 +10248,15 @@ window.setOdontoMode=function(m){odontoMode=m||null;renderOdontoKeepScroll();}
 // pantalla (sin scroll lateral); en desktop no interviene.
 function _odontoFitMobile(){
   try{
+    // v15 · alturas reales de la pila sticky móvil (el phdr varía con el nombre)
+    if(window.innerWidth<=768){
+      const _ph=document.querySelector('.phdr'), _tb=document.querySelector('.tabbar');
+      const _phH=_ph?_ph.offsetHeight:0, _tbH=_tb?_tb.offsetHeight:0;
+      document.documentElement.style.setProperty('--phdrH',_phH+'px');
+      document.documentElement.style.setProperty('--odostick',(_phH+_tbH)+'px');
+    }
+  }catch(e){}
+  try{
     const wrap=document.querySelector('#panel .odonto-chart-wrap');
     if(!wrap)return;
     wrap.style.zoom='';
@@ -10221,13 +10269,13 @@ function _odontoFitMobile(){
     // evitar que los dientes desborden al costado en modo accesibilidad.
     // v14.1 — CONSISTENCIA: el móvil usa EXACTAMENTE el mismo diseño que la web,
     // ajustado por zoom proporcional al ancho (sin scroll horizontal, sin rediseños).
-    const accessZoom=document.documentElement.getAttribute('data-access')==='1'?1.12:1;
+    const accessZoom=(window.innerWidth<=768)?1:(document.documentElement.getAttribute('data-access')==='1'?1.12:1);
     const effective=Math.floor((have-(window.innerWidth<=768?12:32))/accessZoom);
     const minZ=window.innerWidth<=768?0.4:0.55;
     if(need>effective&&effective>100){ wrap.style.zoom=String(Math.max(minZ,effective/need)); }
   }catch(e){}
 }
-window.addEventListener('resize',()=>{ if(tabActual==='odonto'&&viewActual==='paciente')setTimeout(_odontoFitMobile,80); });
+window.addEventListener('resize',()=>{ if(viewActual==='paciente')setTimeout(_odontoFitMobile,80); });
 // v13 — al cruzar el breakpoint móvil/desktop el panel del diente cambia de
 // estructura (con/sin picker): re-render limpio, sin duplicar listeners.
 try{
